@@ -479,12 +479,17 @@
       lasers(ctx, t, on);
       const [ox, oy] = artH(NX, NY, NS);
       glint(ctx, ox, oy, 220, on * (0.35 + 0.65 * kick), { spin: 0.8 });
-      const band = ctx.createLinearGradient(0, 220, 0, 960);
-      band.addColorStop(0, 'rgba(5,3,3,0.55)');
-      band.addColorStop(0.75, 'rgba(5,3,3,0.45)');
-      band.addColorStop(1, 'rgba(5,3,3,0)');
-      ctx.fillStyle = band;
-      ctx.fillRect(0, 220, W, 740);
+      // soft oval shade behind the type so it reads over the beams (no hard edges)
+      ctx.save();
+      ctx.translate(W / 2, 560);
+      ctx.scale(1, 0.62);
+      const shade = ctx.createRadialGradient(0, 0, 60, 0, 0, 620);
+      shade.addColorStop(0, 'rgba(5,3,3,0.62)');
+      shade.addColorStop(0.55, 'rgba(5,3,3,0.42)');
+      shade.addColorStop(1, 'rgba(5,3,3,0)');
+      ctx.fillStyle = shade;
+      ctx.fillRect(-W, -1200, W * 2, 2400);
+      ctx.restore();
       revealText(ctx, c.head, W / 2, 510, fit(ctx, c.head, 130, 960), t, 0.35, 'neon', { seed: 2, step: 0.05 });
       kicker(ctx, c.kicker, 360, neonA(t, 0.9), { size: 34 });
       // genres flicker on with the beat, two beats each
@@ -657,7 +662,7 @@
     duration: 12,
     cues: [
       ...COSTUMES.map((p) => neonCue(p.t0, 0.5)),
-      burnCue(1.1, 'BEST GROUP'), burnCue(1.6, 'COSTUME'), neonCue(2.2, 0.6), airCue(2.8), neonCue(3.3, 0.4),
+      burnCue(1.1, 'BEST GROUP'), burnCue(1.6, 'COSTUME'), neonCue(2.2, 0.6), airCue(2.8),
       ...COSTUMES.map((p, i) => ({ t: 4.5 + i * 0.35, type: 'glint', gain: 0.45 })),
       ...COSTUMES.map((p, i) => ({ t: 8.5 + i * 0.35, type: 'glint', gain: 0.4 })),
     ],
@@ -684,22 +689,6 @@
       revealText(ctx, c.l2, W / 2, 620 + sz * 1.02, sz, t, 1.6, 'burn');
       neonLabel(ctx, c.l3, 620 + sz * 1.02 + 118, t, 2.2, { size: 104, tracking: 26, dur: 0.6 });
       kicker(ctx, c.prize, 620 + sz * 1.02 + 190, fadeA(t, 2.8), { color: BONE, glow: 0, size: 34, tracking: 8 });
-      const pa = neonA(t, 3.3, 0.4);
-      if (pa > 0) {
-        const pulse = 1 + 0.025 * Math.sin(t * 5);
-        ctx.save();
-        camera(ctx, pulse, W / 2, 1515);
-        ctx.globalAlpha = pa;
-        ctx.strokeStyle = '#FF8A4C';
-        ctx.lineWidth = 4;
-        ctx.shadowColor = 'rgba(255,90,30,1)';
-        ctx.shadowBlur = 24;
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - 250, 1475, 500, 84, 42);
-        ctx.stroke();
-        ctx.restore();
-        label(ctx, c.cta, W / 2, 1531, 40, { tracking: 10, alpha: pa, glow: 16, color: BONE });
-      }
       ctx.restore();
     },
   });

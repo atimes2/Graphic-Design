@@ -32,7 +32,7 @@
   },
   "first100": { "kicker": "THE FIRST", "num": "100", "line": "GUESTS", "sub": "GET A FREE DRINK TICKET" },
   "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COSTUMES ENCOURAGED", "contest": "BEST GROUP COSTUME WINS DRINKS" },
-  "contest": { "l1": "BEST GROUP", "l2": "COSTUME", "l3": "CONTEST", "prize": "WINNERS GET DRINK PRIZES", "cta": "TAG YOUR CREW" },
+  "contest": { "l1": "BEST GROUP", "l2": "COSTUME", "l3": "CONTEST", "prize": "WINNERS GET DRINK PRIZES" },
   "question": { "l1": "WHAT ARE YOU", "l2": "GOING AS?", "sub": "DROP YOUR COSTUME BELOW" },
   "lastCall": { "l1": "LAST CALL", "l2": "FOR TICKETS", "sub": "GET YOURS BEFORE THEY'RE GONE" },
   "tonight": {

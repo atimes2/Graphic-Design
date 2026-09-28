@@ -242,7 +242,7 @@
     if (intensity <= 0.002 || size <= 1) return;
     const I = Math.min(intensity, 1.4);
     const t = o.t ?? NOW;
-    const rot = (o.rot ?? -0.12) + (o.spin ?? 0.35) * Math.sin(t * 0.9 + x * 0.01);
+    const rot = (o.rot ?? -0.12) + Math.min(o.spin ?? 0.12, 0.15) * Math.sin(t * 0.9 + x * 0.01);
     const tw = (i) => 1 + 0.16 * Math.sin(t * 17 + i * 1.9) + 0.08 * Math.sin(t * 41 + i * 3.1);
     ctx.save();
     ctx.translate(x, y);
@@ -256,8 +256,9 @@
     ctx.beginPath(); ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2); ctx.fill();
     // anamorphic horizontal streak
     ctx.globalAlpha = clamp(I * 0.5);
-    ray(ctx, 0, size * 1.5, 0.5);
-    ray(ctx, Math.PI, size * 1.5, 0.5);
+    // (locked to the star's horizontal arm so it always reads as one sparkle)
+    ray(ctx, rot, size * 1.5, 0.5);
+    ray(ctx, rot + Math.PI, size * 1.5, 0.5);
     // main cross (vertical long, like the poster), twinkling
     ctx.globalAlpha = clamp(I);
     ray(ctx, rot - Math.PI / 2, size * 1.05 * tw(0), 1);
