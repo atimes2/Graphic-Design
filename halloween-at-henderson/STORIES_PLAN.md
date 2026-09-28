@@ -164,30 +164,39 @@ Now build CARD [N]: [paste beat sheet]
 
 ---
 
-## Status: v3 rendered (fast cuts, sound effects, no music)
+## Status: v4 rendered
 
-This round's feedback: use the updated layer pack (pumpkin and knife now separate), make the sparkle premium, keep the lasers, make everything faster, apply the "Tonight" treatment everywhere (slams, flashes, shake, glow, slash cuts), add 31, 21 and 14 day countdowns, add ticket-status cards, and include sound effects but no music.
+This round's feedback: the hard hits work for the knife but are too aggressive for text; replace the cut-out "HENDERSON" with a matching font; make each story 10–15s with the key animation up front so the final frame lingers; and show the ticket-link boxes from the first frame.
 
-Every story lands its first hit within 0.4s and runs 5–8s.
+**Motion language (v4)**
+- **Knife only** gets hard hits: stabs, slash cuts and the Sold Out stamp (shake + flash).
+- **Text arrives gently**, and the style varies per card:
+  - *ember burn*: letters warm up left to right, outline first, then fill
+  - *neon*: letters flicker on in scrambled order, like a sign warming up
+  - *fade*: soft blur to sharp while the letter-spacing eases in
+  - *sweep*: a sparkle runs along the line and reveals it
+- **Timing:** the key animation lands in the first 2–4s; the final frame then holds with candle flicker, a slow camera drift and an occasional sparkle.
+- **Sticker slots** (ticket links / question sticker) are visible from frame 0.
+- **"HENDERSON BREWING CO."** is set in **Rammetto One**, the closest free match to the poster's title face.
 
-| # | File | Length | Post when |
-|---|---|---|---|
-| 01 | `01-the-return`: the knife stabs in, the pumpkin ignites, the title slams in line by line | 7s | Announcement |
-| 02 | `02-more-room`: sold out at Paros → more room → Henderson Brewing Co., then the carved H match-cuts into the brewery logo | 8s | Announcement |
-| 03 | `03-the-details`: the five details hit on beat, then a slash cut to the summary with the logo | 8s | Announcement |
-| 04 | `04-early-bird-on-sale`: EARLY BIRD / TICKETS / NOW AVAILABLE, with a link-sticker slot | 6s | When early bird opens |
-| 05 | `05-countdown-31/21/14/07/03/01`: carved numbers, DAYS TO GO | 5s each | Those days out |
-| 06 | `06-the-night`: beat-synced lasers from the H, DJS ALL NIGHT, genres | 7s | Any time |
-| 07 | `07-first-100`: free drink ticket for the first 100 | 6s | Last week |
-| 08 | `08-dress-to-kill`: costumes encouraged, the group contest line | 6s | Any time |
-| 09 | `09-costume-contest`: three pumpkins ignite, BEST GROUP COSTUME CONTEST, TAG YOUR CREW | 7s | ~2 weeks out |
-| 10 | `10-early-bird-sold-out`: the offer gets slashed, SOLD OUT! stamps down, REGULAR TICKETS ON SALE NOW | 6s | When early bird sells out |
-| 11 | `11-tickets-on-sale`: TICKETS NOW AVAILABLE / GET YOUR TICKETS TODAY, with a link slot | 6s | Any time |
-| 12 | `12-what-are-you-going-as`: slot for a question sticker (engagement) | 6s | ~10 days out |
-| 13 | `13-last-call`: LAST CALL FOR TICKETS, with a link slot | 6s | Final days |
-| 14 | `14-tonight`: TONIGHT. DOORS 10PM, the logo, then a slash to the poster ("See you on the dance floor.") | 6s | Oct 31 |
+| # | File | Length |
+|---|---|---|
+| 01 | `01-the-return` | 12s |
+| 02 | `02-more-room` | 14s |
+| 03 | `03-the-details` | 14s |
+| 04 | `04-early-bird-on-sale` (link slot) | 12s |
+| 05 | `05-countdown-31/21/14/07/03/01` | 10s each |
+| 06 | `06-the-night` | 12s |
+| 07 | `07-first-100` | 10s |
+| 08 | `08-dress-to-kill` | 10s |
+| 09 | `09-costume-contest` | 12s |
+| 10 | `10-early-bird-sold-out` (link slot) | 12s |
+| 11 | `11-tickets-on-sale` (link slot) | 10s |
+| 12 | `12-what-are-you-going-as` (question slot) | 10s |
+| 13 | `13-last-call` (link slot) | 10s |
+| 14 | `14-tonight` | 12s |
 
-**Sound:** synthesized SFX only (stabs, slams, slashes, neon buzz, laser zaps, stamp, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
+**Sound:** synthesized SFX only (stab, slash, stamp, neon buzz, ember sizzle, soft air swells, laser zaps, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
 
 **Copy to check before posting:** "REGULAR TICKETS ON SALE NOW" (10) and "GET YOURS BEFORE THEY'RE GONE" (13) are placeholders; edit them in `motion/content.json`.
 

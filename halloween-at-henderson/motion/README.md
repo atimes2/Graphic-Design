@@ -26,7 +26,7 @@ node render.mjs --sheet           # contact sheets of rendered videos -> review/
 npm run preview                   # open http://localhost:8080 to scrub cards live
 ```
 
-Output: 1080×1920, 30fps, H.264 High, yuv420p, AAC 48kHz SFX track, faststart, 5–8s each.
+Output: 1080×1920, 30fps, H.264 High, yuv420p, AAC 48kHz SFX track, faststart, 10–14s each.
 All text sits between y=250 and y=1580 so Instagram's UI never covers it.
 
 To change the countdown numbers, edit `"countdown": [31, 21, 14, 7, 3, 1]` in `content.json`.

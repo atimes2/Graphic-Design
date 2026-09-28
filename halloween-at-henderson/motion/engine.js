@@ -87,6 +87,7 @@
       document.fonts.load('700 100px "Figtree"'),
       document.fonts.load('800 100px "Figtree"'),
       document.fonts.load('100px "Lobster"'),
+      document.fonts.load('100px "Rammetto One"'),
     ]);
     buildGrain();
     buildSparkle();
@@ -348,11 +349,12 @@
     const a = o.alpha ?? 1;
     if (a <= 0.001) return;
     ctx.save();
+    const ga = ctx.globalAlpha;   // respect any alpha the caller already set
     setFont(ctx, o.family || 'Bowlby One', size, o.weight);
     ctx.textAlign = o.align || 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
-    ctx.globalAlpha = clamp((o.glow ?? 1) * a);
+    ctx.globalAlpha = clamp((o.glow ?? 1) * a) * ga;
     ctx.shadowColor = o.glowColor || 'rgba(224,48,30,0.95)';
     ctx.shadowBlur = size * 0.32;
     ctx.strokeStyle = o.stroke || '#E0301E';
@@ -362,7 +364,7 @@
     ctx.shadowBlur = size * 0.1;
     ctx.strokeText(str, x, y);
     ctx.shadowBlur = 0;
-    ctx.globalAlpha = clamp(a * (o.fill ?? 1));
+    ctx.globalAlpha = clamp(a * (o.fill ?? 1)) * ga;
     ctx.fillStyle = o.color || COLOR.bone;
     ctx.fillText(str, x, y);
     ctx.restore();
@@ -389,10 +391,11 @@
     const a = o.alpha ?? 1;
     if (a <= 0.001) return;
     ctx.save();
+    const ga = ctx.globalAlpha;
     setFont(ctx, o.family || 'Figtree', size, o.weight || '800');
     ctx.textAlign = o.align || 'center';
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
-    ctx.globalAlpha = clamp(a);
+    ctx.globalAlpha = clamp(a) * ga;
     if (o.glow) {
       ctx.shadowColor = o.glowColor || 'rgba(224,48,30,0.8)';
       ctx.shadowBlur = o.glow;
@@ -419,6 +422,61 @@
     camera(ctx, s, x, y - size * 0.35);
     emberText(ctx, str, x, y, size, { ...o, glow: glow + 0.6 * Math.exp(-(t - t0) * 9), alpha: o.alpha ?? 1 });
     ctx.restore();
+  }
+
+  /* Gentle, varied text reveals (no slams):
+   *  'burn'  letters warm up left→right: ember outline first, then bone fill
+   *  'neon'  letters flicker on in scrambled order, like a sign warming up
+   *  'fade'  soft blur-to-sharp with the tracking easing in
+   *  'sweep' a sparkle travels along the line, revealing it behind
+   * After the reveal the glow keeps a slow candle flicker. */
+  function revealText(ctx, str, x, y, size, t, t0, style = 'burn', o = {}) {
+    if (t < t0) return;
+    const idle = 0.9 + 0.1 * flicker(t, o.seed ?? 8);
+    const family = o.family || 'Bowlby One';
+    if (style === 'burn' || style === 'neon') {
+      const step = o.step ?? (style === 'burn' ? 0.055 : 0.06);
+      const n = str.length;
+      const order = [...Array(n).keys()].sort((a, b) => hash(a * 7.3 + (o.seed ?? 1)) - hash(b * 7.3 + (o.seed ?? 1)));
+      const rank = {};
+      order.forEach((k, r) => { rank[k] = r; });
+      emberTextLetters(ctx, str, x, y, size, (i) => {
+        if (style === 'burn') {
+          const st = t0 + i * step;
+          return { ember: neon(prog(t, st, st + 0.45)) * idle, fill: ease.out2(prog(t, st + 0.3, st + 0.8)) };
+        }
+        const st = t0 + rank[i] * step;
+        const a = neon(prog(t, st, st + 0.5));
+        return { ember: a * idle, fill: a };
+      }, { ...o, family });
+      return;
+    }
+    if (style === 'fade') {
+      const a = ease.out3(prog(t, t0, t0 + (o.dur ?? 0.9)));
+      ctx.save();
+      if (a < 1) ctx.filter = `blur(${(1 - a) * 16}px)`;
+      emberText(ctx, str, x, y, size, { ...o, family, alpha: a * (o.alpha ?? 1), glow: idle, tracking: (o.tracking ?? 0) + (1 - a) * size * 0.22 });
+      ctx.restore();
+      return;
+    }
+    if (style === 'sweep') {
+      ctx.save();
+      setFont(ctx, family, size, o.weight);
+      ctx.letterSpacing = `${o.tracking ?? 0}px`;
+      const w = ctx.measureText(str).width;
+      ctx.restore();
+      const align = o.align || 'center';
+      const x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+      const p = ease.inOut2(prog(t, t0, t0 + (o.dur ?? 0.8)));
+      const edge = lerp(x0 - 40, x0 + w + 40, p);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, y - size * 1.6, edge, size * 2.4);
+      ctx.clip();
+      emberText(ctx, str, x, y, size, { ...o, family, glow: idle + 0.5 * (1 - prog(t, t0 + 0.6, t0 + 1.4)) });
+      ctx.restore();
+      if (p > 0 && p < 1) glint(ctx, edge, y - size * 0.35, size * 2.2, 1, { spin: 0.2 });
+    }
   }
 
   // neon tube caps that flicker on
@@ -452,7 +510,7 @@
     else if (d < bw + bh) { px = bx + bw; py = y + (d - bw); }
     else if (d < 2 * bw + bh) { px = bx + bw - (d - bw - bh); py = y + bh; }
     else { px = bx; py = y + bh - (d - 2 * bw - bh); }
-    glint(ctx, px, py, 110, 0.8 * a, { spin: 1.2 });
+    glint(ctx, px, py, 90, 0.6 * a, { spin: 1.2 });
   }
 
   // ------------------------------------------------------ poster building blocks
@@ -682,7 +740,7 @@
   window.HH = {
     W, H, FPS, COLOR, clamp, lerp, prog, ease, hash, vnoise, flicker, pflicker, neon, flare,
     A, load, canvas, blurred, drawImg, bloom, camera, glint, sparkle, shakeAt, flash, slamScale, edgeLight,
-    setFont, fit, emberText, emberTextLetters, label, kicker, slamText, neonLabel, stickerSlot,
+    setFont, fit, emberText, emberTextLetters, label, kicker, slamText, revealText, neonLabel, stickerSlot,
     LOCK, art, artTip, artH, bladeDir, logo, logoByH, title, scene, slashWipe, register, CARDS, renderFrame,
   };
 })();

@@ -185,6 +185,14 @@ def laser(i=0):
     return bp(y, 200, 6000) * 0.16
 
 
+def air():
+    """soft breathy swell under a fade-in"""
+    d = 1.2
+    t = t_axis(d)
+    e = np.where(t < 0.35, (t / 0.35) ** 2, np.exp(-(t - 0.35) * 4))
+    return bp(noise(d), 500, 2600) * e * 0.12
+
+
 def stamp():
     d = 1.6
     t = t_axis(d)
@@ -226,7 +234,7 @@ def riser(dur=0.9):
 
 def carve(dur=1.2):
     n = noise(dur + 0.2)
-    rough = np.repeat(rng.uniform(0.2, 1, int((dur + 0.2) * 60)), SR // 60)[: len(n)]
+    rough = np.repeat(rng.uniform(0.2, 1, int(np.ceil(len(n) / (SR // 60))) + 1), SR // 60)[: len(n)]
     y = bp(n, 1400, 3600) * rough
     t = t_axis(dur + 0.2)
     y *= np.clip(t / 0.05, 0, 1) * np.clip((dur + 0.2 - t) / 0.3, 0, 1)
@@ -246,6 +254,7 @@ SFX = {
     "buzz": lambda c: buzz(c.get("dur", 0.35)),
     "laser": lambda c: laser(c.get("i", 0)),
     "stamp": lambda c: stamp(),
+    "air": lambda c: air(),
     "hit": lambda c: hit(c.get("gain", 1.0)),
     "heart": lambda c: heart(),
     "riser": lambda c: riser(c.get("dur", 0.9)),

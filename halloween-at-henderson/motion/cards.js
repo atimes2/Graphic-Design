@@ -1,30 +1,39 @@
-/* Instagram Story cards for Halloween at Henderson (v3: fast cuts, hits, SFX).
+/* Instagram Story cards for Halloween at Henderson (v4).
+ *
+ * Motion language:
+ *  - hard hits (shake + flash) only for the knife: stabs, slash cuts, the stamp
+ *  - text arrives gently and varies card to card: ember burn, neon flicker-on,
+ *    blur fade, sparkle sweep (see revealText in engine.js)
+ *  - the important animation happens in the first ~2-4s, then the final frame
+ *    lingers with candle flicker, slow camera drift and occasional sparkles
+ *  - sticker slots (ticket links / questions) are on screen from frame 0
  * Each card: id, duration (s), cues [{t, type, ...}] for the SFX, draw(ctx, t).
- * Every card lands its first hit inside 0.4s. Copy lives in content.json.
  */
 (function () {
   const {
     W, H, clamp, lerp, prog, ease, flicker, neon, flare,
-    A, canvas, blurred, drawImg, camera, glint, sparkle, shakeAt, flash, slamScale, edgeLight,
-    setFont, fit, emberText, label, kicker, slamText, neonLabel, stickerSlot,
+    A, canvas, blurred, drawImg, camera, glint, sparkle, shakeAt, flash, edgeLight,
+    setFont, fit, emberText, label, kicker, revealText, neonLabel, stickerSlot,
     LOCK, art, artTip, artH, bladeDir, logo, logoByH, title, scene, slashWipe, register,
   } = window.HH;
 
   const BONE = '#FFF1E0';
   const C = () => A.content;
 
-  // shake the whole card for its hits, draw, then flash on top
+  // shake the whole card for knife hits, draw, then flash on top
   function withHits(ctx, t, hits, fn, o = {}) {
-    const [dx, dy] = shakeAt(t, hits.map((h) => (Array.isArray(h) ? h[0] : h)), o.amp ?? 14);
+    const [dx, dy] = shakeAt(t, hits.map((h) => (Array.isArray(h) ? h[0] : h)), o.amp ?? 12);
     ctx.save();
     ctx.translate(dx, dy);
     fn();
     ctx.restore();
     hits.forEach((h) => {
-      const [t0, a] = Array.isArray(h) ? h : [h, o.flash ?? 0.2];
+      const [t0, a] = Array.isArray(h) ? h : [h, 0.18];
       flash(ctx, t, t0, a);
     });
   }
+  // lingering camera drift for the whole card
+  const drift = (ctx, t, dur, cy = 960, amt = 0.035) => camera(ctx, lerp(1.0, 1.0 + amt, ease.inOut2(clamp(t / dur))), W / 2, cy);
 
   // knife stab: offset (art px) that arrives along the blade axis at t1
   const stab = (t, t0, t1, dist = 900) => {
@@ -32,27 +41,24 @@
     const d = (1 - ease.outExpo(prog(t, t0, t1))) * dist;
     return [-bx * d, -by * d];
   };
-  // pumpkin ignition: 0 before t0, burst >1, settles into flicker
-  const ignite = (t, t0, seed = 1) => (t < t0 ? 0 : (1 + 0.45 * Math.exp(-(t - t0) * 6)) * flicker(t, seed));
+  // pumpkin ignition: 0 before t0, a warm burst, then candle flicker
+  const ignite = (t, t0, seed = 1) => (t < t0 ? 0 : ease.out2(prog(t, t0, t0 + 0.25)) * (1 + 0.3 * Math.exp(-(t - t0) * 4)) * flicker(t, seed));
   const titleLit = (t, a = 1) => () => ({ ember: a * (0.92 + 0.08 * flicker(t, 9)), fill: a });
-  const neonA = (t, t0, d = 0.35) => neon(prog(t, t0, t0 + d));
+  const neonA = (t, t0, d = 0.4) => neon(prog(t, t0, t0 + d));
+  const fadeA = (t, t0, d = 0.7) => ease.out2(prog(t, t0, t0 + d));
 
-  // slam one line of the poster title (line 0 or 1) at t0
-  function titleLineSlam(ctx, x, y, s, line, t, t0) {
-    if (t < t0) return;
-    const cy = y + (line === 0 ? 64 : 162) * s;
-    ctx.save();
-    camera(ctx, slamScale(t, t0, 0.24, 0.14), W / 2, cy);
-    title(ctx, x, y, s, (li) => (li === line ? { ember: 0.95 + 0.5 * Math.exp(-(t - t0) * 9), fill: 1 } : { ember: 0, fill: 0 }));
-    ctx.restore();
+  // poster title burning in letter by letter (the v1 reveal)
+  function titleBurn(ctx, x, y, s, t, t0, step = 0.06) {
+    title(ctx, x, y, s, (li, i) => {
+      const st = t0 + (li === 0 ? 0 : 0.35) + i * step;
+      return { ember: neon(prog(t, st, st + 0.45)) * (0.9 + 0.1 * flicker(t, 9)), fill: ease.out2(prog(t, st + 0.3, st + 0.8)) };
+    });
   }
-  // small title at the top of type cards
   const miniTitle = (ctx, t, t0, y = 280, s = 0.62) => {
-    const a = neonA(t, t0, 0.4);
+    const a = neonA(t, t0, 0.5);
     if (a > 0) title(ctx, W / 2 - 433 * s, y, s, titleLit(t, a));
   };
 
-  // full lit lockup (end frames)
   function lockup(ctx, t, o = {}) {
     const L = LOCK;
     art(ctx, L.art.x, L.art.y, L.art.s, { pumpkin: flicker(t, 1), h: flicker(t + 0.4, 3), sweep: o.sweep ?? -1 });
@@ -61,7 +67,6 @@
     else drawImg(ctx, A.img.footer, L.footer.x, L.footer.y, L.footer.s, o.footerAlpha ?? 1);
   }
 
-  // big warm glow behind type (from the H carving)
   function hGlowBack(ctx, t, cx, cy, amt, scale = 3.2) {
     if (amt <= 0.001) return;
     const hb = blurred('hback', A.img.h_glow, 40);
@@ -73,79 +78,79 @@
     ctx.restore();
   }
 
-  // ======================================================= 01 · THE RETURN (7s)
+  // cue helpers for the reveal sounds
+  const burnCue = (t, str, step = 0.055) => ({ t, type: 'burn', dur: str.length * step + 0.3 });
+  const neonCue = (t, dur = 0.5) => ({ t, type: 'buzz', dur });
+  const airCue = (t) => ({ t, type: 'air' });
+
+  // ======================================================= 01 · THE RETURN (12s)
   register({
     id: '01-the-return',
-    duration: 7,
+    duration: 12,
     cues: [
       { t: 0.4, type: 'whoosh', dur: 0.3 }, { t: 0.4, type: 'stab' }, { t: 0.4, type: 'glint', gain: 0.6 },
-      { t: 0.75, type: 'ignite' }, { t: 1.35, type: 'hit' }, { t: 1.6, type: 'hit' },
-      { t: 2.2, type: 'buzz', dur: 0.35 }, { t: 3.5, type: 'glint' }, { t: 5.6, type: 'glint', gain: 0.6 },
+      { t: 0.8, type: 'ignite' }, burnCue(1.3, 'HALLOWEEN AT HENDERSON', 0.03), neonCue(2.9, 0.4),
+      { t: 3.6, type: 'glint' }, { t: 7.5, type: 'glint', gain: 0.5 }, { t: 10.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const L = LOCK;
-      withHits(ctx, t, [[0.4, 0.18], [0.75, 0.3], [1.35, 0.22], [1.6, 0.22]], () => {
+      withHits(ctx, t, [[0.4, 0.18]], () => {
         ctx.save();
-        camera(ctx, lerp(1.0, 1.035, t / 7), W / 2, 900);
+        drift(ctx, t, 12, 900);
         const off = stab(t, 0.12, 0.4);
-        const sweep = lerp(-0.2, 1.05, prog(t, 3.0, 3.5));
+        const sweep = lerp(-0.2, 1.05, prog(t, 3.1, 3.6));
         art(ctx, L.art.x, L.art.y, L.art.s, {
-          pumpkin: ignite(t, 0.75), pumpkinAlpha: ease.out2(prog(t, 0.75, 0.82)),
-          pumpkinScale: slamScale(t, 0.75, 0.1, 0.22), h: ignite(t, 0.75, 3) * 1.1,
-          knifeAlpha: t >= 0.12 ? 1 : 0, knifeOffset: off, sweep: t > 3.0 && t < 3.55 ? sweep : -1,
+          pumpkin: ignite(t, 0.8), h: ignite(t, 0.8, 3) * 1.05,
+          knifeAlpha: t >= 0.12 ? 1 : 0, knifeOffset: off, sweep: t > 3.1 && t < 3.65 ? sweep : -1,
         });
         const [gx, gy] = artTip(L.art.x, L.art.y, L.art.s, off);
         sparkle(ctx, gx, gy, 330, t, 0.4, { hold: 0.22 });
-        sparkle(ctx, gx, gy, 380, t, 3.5, { hold: 0.22 });
-        sparkle(ctx, gx, gy, 320, t, 5.6, { hold: 0.22 });
-        titleLineSlam(ctx, L.title.x, L.title.y, L.title.s, 0, t, 1.35);
-        titleLineSlam(ctx, L.title.x, L.title.y, L.title.s, 1, t, 1.6);
-        drawImg(ctx, A.img.footer, L.footer.x, L.footer.y, L.footer.s, neonA(t, 2.2));
+        [3.6, 7.5, 10.5].forEach((s0) => sparkle(ctx, gx, gy, 360, t, s0, { hold: 0.22 }));
+        titleBurn(ctx, L.title.x, L.title.y, L.title.s, t, 1.3);
+        drawImg(ctx, A.img.footer, L.footer.x, L.footer.y, L.footer.s, neonA(t, 2.9));
         ctx.restore();
       });
     },
   });
 
-  // ======================================================= 02 · MORE ROOM (8s)
-  const MC = { AX: 328, AY: 960, AS: 0.78 };
-  const MC_LOGO = { x: 540, y: 1250, d: 440 };
+  // ======================================================= 02 · MORE ROOM (14s)
+  const MC = { AX: 328, AY: 980, AS: 0.78 };
+  const MC_LOGO = { x: 540, y: 1260, d: 440 };
+  const RAM = 'Rammetto One';
 
   function moreA(ctx, t) {
     const c = C().moreRoom;
-    kicker(ctx, c.k1, 820, neonA(t, 0.05));
-    slamText(ctx, c.big1, W / 2, 975, fit(ctx, c.big1, 150, 940), t, 0.2);
-    kicker(ctx, c.sub1, 1070, neonA(t, 0.75), { color: BONE, glow: 0, size: 36, tracking: 12 });
+    kicker(ctx, c.k1, 820, neonA(t, 0.15));
+    revealText(ctx, c.big1, W / 2, 975, fit(ctx, c.big1, 150, 940), t, 0.4, 'neon', { seed: 3 });
+    kicker(ctx, c.sub1, 1070, fadeA(t, 1.3), { color: BONE, glow: 0, size: 36, tracking: 12 });
   }
   function moreB(ctx, t) {
     const c = C().moreRoom;
-    kicker(ctx, c.k2, 780, neonA(t, 1.9));
+    kicker(ctx, c.k2, 780, neonA(t, 2.9));
     const sz = Math.min(fit(ctx, c.big2a, 170, 940), fit(ctx, c.big2b, 170, 940));
-    slamText(ctx, c.big2a, W / 2, 950, sz, t, 2.0);
-    slamText(ctx, c.big2b, W / 2, 950 + sz * 1.05, sz, t, 2.3);
+    revealText(ctx, c.big2a, W / 2, 950, sz, t, 3.1, 'burn');
+    revealText(ctx, c.big2b, W / 2, 950 + sz * 1.05, sz, t, 3.6, 'burn');
   }
   function moreC(ctx, t) {
     const c = C().moreRoom;
-    // art pops in, then the camera pushes into the carved H...
-    const push = ease.inOut3(prog(t, 5.0, 5.7));
+    const push = ease.inOut3(prog(t, 7.1, 7.8));
     const s = lerp(1, 2.0, push);
     const [hx, hy] = artH(MC.AX, MC.AY, MC.AS);
     const Cx = lerp(hx, MC_LOGO.x, push), Cy = lerp(hy, MC_LOGO.y, push);
-    const cut = ease.inOut2(prog(t, 5.55, 5.8));
-    if (t >= 4.3 && cut < 1) {
+    const cut = ease.inOut2(prog(t, 7.65, 7.95));
+    if (t >= 6.3 && cut < 1) {
       ctx.save();
       ctx.translate(Cx, Cy);
       ctx.scale(s, s);
       ctx.translate(-hx, -hy);
       art(ctx, MC.AX, MC.AY, MC.AS, {
-        pumpkin: ignite(t, 4.3) * (1 - cut), pumpkinScale: slamScale(t, 4.3, 0.12, 0.2),
-        h: (ignite(t, 4.3, 3) + 0.6 * push) * (1 - cut),
-        knifeOffset: stab(t, 4.3, 4.5, 700), knifeAlpha: 1 - cut,
+        pumpkin: ignite(t, 6.55) * (1 - cut), h: (ignite(t, 6.55, 3) + 0.6 * push) * (1 - cut),
+        knifeOffset: stab(t, 6.3, 6.55, 700), knifeAlpha: 1 - cut,
       });
       ctx.restore();
     }
-    // ...and the brewery's H lands on it, pulling back to the full roundel
     if (cut > 0) {
-      const back = ease.inOut3(prog(t, 5.7, 6.5));
+      const back = ease.inOut3(prog(t, 7.8, 8.7));
       const Lm = A.meta.logo;
       const k1 = MC_LOGO.d / (2 * Lm.radius);
       const hH0 = A.meta.h_height * MC.AS * 2.0;
@@ -154,42 +159,38 @@
       const endHx = MC_LOGO.x + (hcx - Lm.center[0]) * k1, endHy = MC_LOGO.y + (hcy - Lm.center[1]) * k1;
       logoByH(ctx, lerp(MC_LOGO.x, endHx, back), lerp(MC_LOGO.y, endHy, back), lerp(hH0, hH1, back), cut, 0.22 + 0.06 * flicker(t, 2));
     }
-    sparkle(ctx, Cx, Cy, 600, t, 5.6);
-    sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.36, MC_LOGO.y - MC_LOGO.d * 0.36, 240, t, 6.9);
-    // type on top
-    kicker(ctx, c.k3, 600, neonA(t, 3.5));
-    const ts = 1.12, tx = W / 2 - 433 * ts, ty = 650 - 113 * ts;
-    if (t >= 3.7) {
-      ctx.save();
-      camera(ctx, slamScale(t, 3.7, 0.24, 0.14), W / 2, 705);
-      ctx.beginPath();
-      ctx.rect(tx + 40 * ts, ty + 112 * ts, 780 * ts, 120 * ts);   // title line 2 only
-      ctx.clip();
-      title(ctx, tx, ty, ts, (li) => (li === 1 ? { ember: 0.95 + 0.5 * Math.exp(-(t - 3.7) * 9), fill: 1 } : { ember: 0, fill: 0 }));
-      ctx.restore();
-    }
-    slamText(ctx, c.venue2, W / 2, 900, fit(ctx, c.venue2, 120, 760), t, 3.95);
+    sparkle(ctx, Cx, Cy, 560, t, 7.7);
+    [9.8, 12.6].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.36, MC_LOGO.y - MC_LOGO.d * 0.36, 240, t, s0));
+    // type (Rammetto One: the closest match to the poster's title face)
+    kicker(ctx, c.k3, 640, neonA(t, 5.2));
+    revealText(ctx, 'HENDERSON', W / 2, 770, fit(ctx, 'HENDERSON', 124, 920, RAM), t, 5.45, 'fade', { family: RAM });
+    revealText(ctx, c.venue2, W / 2, 900, fit(ctx, c.venue2, 96, 760, RAM), t, 5.8, 'sweep', { family: RAM });
   }
 
   register({
     id: '02-more-room',
-    duration: 8,
+    duration: 14,
     cues: [
-      { t: 0.2, type: 'hit' }, { t: 0.75, type: 'buzz', dur: 0.3 }, { t: 1.7, type: 'slash' },
-      { t: 2.0, type: 'hit' }, { t: 2.3, type: 'hit' }, { t: 3.5, type: 'whoosh', dur: 0.4 },
-      { t: 3.7, type: 'hit' }, { t: 3.95, type: 'hit' }, { t: 4.5, type: 'stab' }, { t: 4.3, type: 'ignite' },
-      { t: 5.6, type: 'riser', dur: 0.55 }, { t: 5.6, type: 'hit', gain: 1.1 }, { t: 5.6, type: 'glint' },
-      { t: 6.9, type: 'glint', gain: 0.6 },
+      neonCue(0.15, 0.3), neonCue(0.4, 0.7), airCue(1.3), { t: 2.6, type: 'slash' },
+      neonCue(2.9, 0.3), burnCue(3.1, 'WE NEEDED'), burnCue(3.6, 'MORE ROOM.'),
+      { t: 5.0, type: 'whoosh', dur: 0.5 }, neonCue(5.2, 0.3), airCue(5.45), { t: 5.8, type: 'glint', gain: 0.6 },
+      { t: 6.55, type: 'stab' }, { t: 6.55, type: 'ignite' },
+      { t: 7.7, type: 'riser', dur: 0.6 }, { t: 7.7, type: 'hit', gain: 0.9 }, { t: 7.7, type: 'glint' },
+      { t: 9.8, type: 'glint', gain: 0.5 }, { t: 12.6, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
-      withHits(ctx, t, [0.2, 2.0, 2.3, 3.7, 3.95, [4.4, 0.25], [5.6, 0.45]], () => {
-        if (t < 1.7) return moreA(ctx, t);
-        if (t < 2.3) {
-          return slashWipe(ctx, scene(0, (c) => moreA(c, t)), scene(1, (c) => moreB(c, t)), prog(t, 1.7, 2.3));
+      withHits(ctx, t, [[2.6, 0.15], [6.55, 0.18], [7.7, 0.4]], () => {
+        if (t < 2.6) return moreA(ctx, t);
+        if (t < 3.2) return slashWipe(ctx, scene(0, (c) => moreA(c, t)), scene(1, (c) => moreB(c, t)), prog(t, 2.6, 3.2));
+        if (t < 4.8) return moreB(ctx, t);
+        const p = ease.inOut3(prog(t, 4.8, 5.4));
+        if (p >= 1) {
+          ctx.save();
+          drift(ctx, t - 5.4, 8.6, 1000, 0.025);
+          moreC(ctx, t);
+          ctx.restore();
+          return;
         }
-        if (t < 3.2) return moreB(ctx, t);
-        const p = ease.inOut3(prog(t, 3.2, 3.8));
-        if (p >= 1) return moreC(ctx, t);
         // "more room": the old frame falls away as the new one opens up
         const b = scene(0, (c) => moreB(c, t), true);
         const cc = scene(1, (c) => moreC(c, t), true);
@@ -207,17 +208,14 @@
     },
   });
 
-  // ======================================================= 03 · THE DETAILS (8s)
+  // ======================================================= 03 · THE DETAILS (14s)
   const DET = { x: 380, y: 170, s: 1.5 };
-  const DT0 = 0.45, DSTEP = 0.62, DWIPE = 3.6;
+  const DT0 = 0.6, DSTEP = 0.85, DWIPE = 4.9;
 
   function detailsArt(ctx, t) {
     ctx.save();
-    camera(ctx, lerp(1.0, 1.05, t / 4), 900, 700);
-    art(ctx, DET.x, DET.y, DET.s, {
-      pumpkin: ignite(t, 0.1), pumpkinScale: slamScale(t, 0.1, 0.1, 0.2), h: ignite(t, 0.1, 3),
-      knifeOffset: stab(t, 0.1, 0.32, 800),
-    });
+    camera(ctx, lerp(1.0, 1.05, t / 5), 900, 700);
+    art(ctx, DET.x, DET.y, DET.s, { pumpkin: ignite(t, 0.3), h: ignite(t, 0.3, 3), knifeOffset: stab(t, 0.05, 0.3, 800) });
     ctx.restore();
     const g = ctx.createLinearGradient(0, 0, 640, 0);
     g.addColorStop(0, 'rgba(5,3,3,0.9)');
@@ -232,102 +230,90 @@
   }
   function detailsCredits(ctx, t) {
     const items = C().details;
-    const i = Math.floor((t - DT0) / DSTEP);
-    if (t < DT0 || i >= items.length) return;
-    const t0 = DT0 + i * DSTEP;
-    const it = items[i];
-    kicker(ctx, it.kicker, 1372, 1, { x: 84, align: 'left', size: 30, tracking: 9 });
-    ctx.save();
-    camera(ctx, slamScale(t, t0, 0.14, 0.12), 300, 1440);
-    emberText(ctx, it.value, 84, 1470, fit(ctx, it.value, 84, 912), { align: 'left', glow: 0.95 + 0.5 * Math.exp(-(t - t0) * 9) });
-    ctx.restore();
+    items.forEach((it, i) => {
+      const t0 = DT0 + i * DSTEP;
+      const out = 1 - ease.in2(prog(t, t0 + DSTEP - 0.18, t0 + DSTEP));
+      if (t < t0 || out <= 0) return;
+      kicker(ctx, it.kicker, 1372, neonA(t, t0, 0.3) * out, { x: 84, align: 'left', size: 30, tracking: 9 });
+      revealText(ctx, it.value, 84, 1470, fit(ctx, it.value, 84, 912), t, t0 + 0.05, 'fade', { align: 'left', dur: 0.4, alpha: out });
+    });
   }
   function detailsSummary(ctx, t, t0) {
-    title(ctx, 173, 280, 0.85, titleLit(t));
+    titleBurn(ctx, 173, 280, 0.85, t, t0 + 0.1, 0.02);
     const gl = ctx.createRadialGradient(W / 2, 1750, 50, W / 2, 1750, 900);
     gl.addColorStop(0, `rgba(232,98,28,${0.26 * flicker(t, 2)})`);
     gl.addColorStop(1, 'rgba(232,98,28,0)');
     ctx.fillStyle = gl;
     ctx.fillRect(0, 0, W, H);
     C().details.forEach((it, i) => {
-      const ti = t0 + 0.25 + i * 0.1;
-      if (t < ti) return;
+      const ti = t0 + 0.4 + i * 0.16;
       const y = 585 + i * 165;
-      kicker(ctx, it.kicker, y, 1, { size: 26, tracking: 10, glow: 16 });
-      slamText(ctx, it.value, W / 2, y + 76, fit(ctx, it.value, 64, 900), t, ti, { from: 0.16 });
+      kicker(ctx, it.kicker, y, neonA(t, ti, 0.3), { size: 26, tracking: 10, glow: 16 });
+      revealText(ctx, it.value, W / 2, y + 76, fit(ctx, it.value, 64, 900), t, ti + 0.05, 'burn', { step: 0.025 });
     });
-    if (t >= t0 + 0.9) {
-      ctx.save();
-      camera(ctx, slamScale(t, t0 + 0.9, 0.3, 0.16), W / 2, 1420);
-      logo(ctx, W / 2, 1420, 112, 1, 0.15 + 0.4 * Math.exp(-(t - t0 - 0.9) * 6));
-      ctx.restore();
-    }
-    kicker(ctx, C().detailsFooter, 1545, neonA(t, t0 + 1.1), { color: BONE, glow: 0, size: 26, tracking: 5 });
+    const la = fadeA(t, t0 + 1.4, 0.8);
+    logo(ctx, W / 2, 1420, 112, la, 0.15 + 0.3 * la * Math.exp(-(t - t0 - 1.4) * 2));
+    kicker(ctx, C().detailsFooter, 1545, neonA(t, t0 + 1.7), { color: BONE, glow: 0, size: 26, tracking: 5 });
   }
 
   register({
     id: '03-the-details',
-    duration: 8,
+    duration: 14,
     cues: [
-      { t: 0.32, type: 'stab' }, { t: 0.1, type: 'ignite' },
-      ...[0, 1, 2, 3, 4].map((i) => ({ t: DT0 + i * DSTEP, type: 'tick' })),
-      { t: DWIPE, type: 'slash' },
-      ...[0, 1, 2, 3, 4].map((i) => ({ t: DWIPE + 0.25 + i * 0.1, type: 'tick', gain: 0.5 })),
-      { t: DWIPE + 0.9, type: 'hit', gain: 0.7 }, { t: DWIPE + 1.1, type: 'buzz', dur: 0.3 },
-      { t: 5.5, type: 'glint', gain: 0.6 },
+      { t: 0.3, type: 'stab' }, { t: 0.3, type: 'ignite' },
+      ...[0, 1, 2, 3, 4].map((i) => airCue(DT0 + i * DSTEP)),
+      { t: DWIPE, type: 'slash' }, burnCue(DWIPE + 0.4, 'x'.repeat(40), 0.03),
+      neonCue(DWIPE + 1.7, 0.4), { t: 8.5, type: 'glint', gain: 0.5 }, { t: 11.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
-      const hits = [[0.32, 0.15], ...[0, 1, 2, 3, 4].map((i) => [DT0 + i * DSTEP, 0.1]), [DWIPE + 0.9, 0.15]];
-      withHits(ctx, t, hits, () => {
+      withHits(ctx, t, [[0.3, 0.15], [DWIPE, 0.12]], () => {
         if (t < DWIPE) {
           detailsArt(ctx, t);
           detailsCredits(ctx, t);
           return;
         }
         const a = scene(0, (c) => { detailsArt(c, t); detailsCredits(c, t); });
-        const b = scene(1, (c) => { camera(c, lerp(1.0, 1.03, prog(t, DWIPE, 8)), W / 2, 960); detailsSummary(c, t, DWIPE); });
-        slashWipe(ctx, a, b, prog(t, DWIPE, DWIPE + 0.55));
-        sparkle(ctx, W / 2 + 40, 1385, 200, t, 5.5);
+        const b = scene(1, (c) => { camera(c, lerp(1.0, 1.03, prog(t, DWIPE, 14)), W / 2, 960); detailsSummary(c, t, DWIPE); });
+        slashWipe(ctx, a, b, prog(t, DWIPE, DWIPE + 0.6));
+        [8.5, 11.5].forEach((s0) => sparkle(ctx, W / 2 + 40, 1385, 200, t, s0));
       }, { amp: 8 });
     },
   });
 
-  // ======================================================= 04 · EARLY BIRD ON SALE (6s)
+  // ======================================================= 04 · EARLY BIRD ON SALE (12s)
   const SMALL_ART = { x: 540 - 272 * 0.36, y: 450, s: 0.36 };
-  function earlyBirdBody(ctx, t) {
-    const c = C().earlyBird;
-    edgeLight(ctx, t, 0.6 * ease.out2(prog(t, 0.1, 0.6)));
-    hGlowBack(ctx, t, W / 2, 1000, ease.out2(prog(t, 0.3, 0.8)));
-    miniTitle(ctx, t, 0.15);
-    art(ctx, SMALL_ART.x, SMALL_ART.y, SMALL_ART.s, { pumpkin: ignite(t, 0.3), h: ignite(t, 0.3, 3), knifeOffset: stab(t, 0.15, 0.35, 700) });
-    slamText(ctx, c.l1, W / 2, 870, fit(ctx, c.l1, 140, 900), t, 0.3);
-    slamText(ctx, c.l2, W / 2, 1060, fit(ctx, c.l2, 220, 960), t, 0.55);
-    neonLabel(ctx, c.status, 1150, t, 0.95, { size: 64, tracking: 12 });
-    kicker(ctx, c.sub, 1215, neonA(t, 1.4), { color: BONE, glow: 0, size: 30, tracking: 6 });
-    stickerSlot(ctx, t, 1260, ease.out2(prog(t, 1.6, 1.9)));
-    const [gx, gy] = artTip(SMALL_ART.x, SMALL_ART.y, SMALL_ART.s);
-    sparkle(ctx, gx, gy, 200, t, 2.4);
-  }
   register({
     id: '04-early-bird-on-sale',
-    duration: 6,
+    duration: 12,
     cues: [
-      { t: 0.05, type: 'slash' }, { t: 0.3, type: 'hit' }, { t: 0.55, type: 'hit' },
-      { t: 0.95, type: 'buzz', dur: 0.4 }, { t: 2.4, type: 'glint', gain: 0.6 },
+      { t: 0.35, type: 'stab' }, { t: 0.45, type: 'ignite' }, neonCue(0.3, 0.4),
+      neonCue(0.7, 0.7), burnCue(1.3, 'TICKETS'), neonCue(2.0, 0.5), airCue(2.5),
+      { t: 3.2, type: 'glint', gain: 0.6 }, { t: 7.5, type: 'glint', gain: 0.5 }, { t: 10.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
-      withHits(ctx, t, [0.3, 0.55], () => {
-        if (t < 0.55) {
-          const black = scene(0, () => {});
-          const b = scene(1, (c) => earlyBirdBody(c, t));
-          return slashWipe(ctx, black, b, prog(t, 0.02, 0.5), { angle: -28 });
-        }
-        earlyBirdBody(ctx, t);
+      const c = C().earlyBird;
+      withHits(ctx, t, [[0.35, 0.15]], () => {
+        stickerSlot(ctx, t, 1265, 1);   // ticket link sits here from the first frame
+        ctx.save();
+        drift(ctx, t, 12, 900, 0.025);
+        edgeLight(ctx, t, 0.6 * fadeA(t, 0.2, 0.8));
+        hGlowBack(ctx, t, W / 2, 1000, fadeA(t, 0.6, 1.0));
+        miniTitle(ctx, t, 0.3);
+        const off = stab(t, 0.15, 0.35, 700);
+        art(ctx, SMALL_ART.x, SMALL_ART.y, SMALL_ART.s, { pumpkin: ignite(t, 0.45), h: ignite(t, 0.45, 3), knifeOffset: off, knifeAlpha: t >= 0.15 ? 1 : 0 });
+        revealText(ctx, c.l1, W / 2, 870, fit(ctx, c.l1, 140, 900), t, 0.7, 'neon', { seed: 5 });
+        revealText(ctx, c.l2, W / 2, 1060, fit(ctx, c.l2, 220, 960), t, 1.3, 'burn', { step: 0.07 });
+        neonLabel(ctx, c.status, 1150, t, 2.0, { size: 64, tracking: 12 });
+        kicker(ctx, c.sub, 1215, fadeA(t, 2.5), { color: BONE, glow: 0, size: 30, tracking: 6 });
+        const [gx, gy] = artTip(SMALL_ART.x, SMALL_ART.y, SMALL_ART.s, off);
+        sparkle(ctx, gx, gy, 180, t, 0.35, { hold: 0.2 });
+        [3.2, 7.5, 10.5].forEach((s0) => sparkle(ctx, gx, gy, 220, t, s0, { hold: 0.2 }));
+        ctx.restore();
       });
     },
   });
 
-  // ======================================================= 05 · COUNTDOWN (5s each)
+  // ======================================================= 05 · COUNTDOWN (10s each)
   const numCache = {};
   function numeral(key, str, size, base) {
     if (numCache[key]) return numCache[key];
@@ -357,14 +343,14 @@
     return c;
   }
   const revealBuf = canvas(W, H);
-  /* carve with a travelling sparkle (r0..r1), ignite with a hit at ig */
+  /* carve with a travelling sparkle (r0..r1), then the candle catches at ig */
   function carved(ctx, t, o) {
-    const r0 = o.r0 ?? 0.1, r1 = o.r1 ?? 0.45, ig = o.ig ?? 0.5;
+    const r0 = o.r0 ?? 0.2, r1 = o.r1 ?? 0.95, ig = o.ig ?? 1.0;
     const num = numeral(o.key, o.str, o.size, o.base);
     const cy = o.base - o.size * 0.36;
-    const on = ease.out2(prog(t, ig, ig + 0.15));
+    const on = ease.out2(prog(t, ig, ig + 0.5));
     const fl = flicker(t, o.size);
-    const bright = lerp(0.75, 1, on) * lerp(1, fl, on) + (t >= ig ? 0.5 * Math.exp(-(t - ig) * 7) : 0);
+    const bright = lerp(0.75, 1, on) * lerp(1, fl, on) + (t >= ig ? 0.25 * Math.exp(-(t - ig) * 3) : 0);
     const cg = ctx.createRadialGradient(540, cy, 30, 540, cy, 760);
     cg.addColorStop(0, `rgba(232,98,28,${0.32 * on * fl})`);
     cg.addColorStop(0.5, `rgba(160,40,12,${0.15 * on * fl})`);
@@ -394,7 +380,6 @@
       r.fillRect(0, 0, W, H);
     }
     ctx.save();
-    camera(ctx, slamScale(t, ig, 0.08, 0.2), 540, cy);
     ctx.globalAlpha = clamp(bright);
     ctx.drawImage(revealBuf, 0, 0);
     if (bright > 1) {
@@ -411,7 +396,7 @@
     ctx.globalAlpha = clamp(0.5 * on * fl * bright);
     ctx.drawImage(nb2.c, -nb2.pad, -nb2.pad);
     ctx.restore();
-    if (t >= r0 && t < r1 + 0.1) glint(ctx, fx + uy * 60, fy - ux * 60, 260, 1 - prog(t, r1, r1 + 0.1), { spin: 1.5 });
+    if (t >= r0 && t < r1 + 0.12) glint(ctx, fx + uy * 60, fy - ux * 60, 260, 1 - prog(t, r1, r1 + 0.12), { spin: 1.5 });
   }
 
   function countdownCard(n) {
@@ -419,28 +404,26 @@
     const str = String(n);
     return {
       id: `05-countdown-${String(n).padStart(2, '0')}`,
-      duration: 5,
+      duration: 10,
       cues: [
-        { t: 0.1, type: 'carve', dur: 0.35 }, { t: 0.5, type: 'hit' }, { t: 0.5, type: 'ignite' },
-        { t: 0.85, type: 'hit', gain: 0.8 }, { t: 1.2, type: 'buzz', dur: 0.3 }, { t: 2.6, type: 'glint', gain: 0.6 },
+        { t: 0.2, type: 'carve', dur: 0.75 }, { t: 1.0, type: 'ignite' }, burnCue(1.4, lab, 0.06),
+        neonCue(2.1, 0.4), airCue(2.5), { t: 4.5, type: 'glint', gain: 0.6 }, { t: 8.0, type: 'glint', gain: 0.5 },
       ],
       draw(ctx, t) {
-        withHits(ctx, t, [[0.5, 0.3], 0.85], () => {
-          ctx.save();
-          camera(ctx, lerp(1.03, 1.0, ease.out2(t / 5)), W / 2, 960);
-          const size = Math.min(880, fit(ctx, str, 880, 840, 'Lobster'));
-          carved(ctx, t, { key: `c${n}`, str, size, base: 1250 });
-          slamText(ctx, lab, W / 2, 1452, fit(ctx, lab, 110, 900), t, 0.85);
-          miniTitle(ctx, t, 1.2, 292);
-          kicker(ctx, C().countdownSub, 1535, neonA(t, 1.4), { color: BONE, glow: 0, size: 30, tracking: 8 });
-          sparkle(ctx, 760, 470, 300, t, 2.6);
-          ctx.restore();
-        });
+        ctx.save();
+        camera(ctx, lerp(1.0, 1.03, ease.inOut2(t / 10)), W / 2, 960);
+        const size = Math.min(880, fit(ctx, str, 880, 840, 'Lobster'));
+        carved(ctx, t, { key: `c${n}`, str, size, base: 1250 });
+        revealText(ctx, lab, W / 2, 1452, fit(ctx, lab, 110, 900), t, 1.4, 'burn', { step: 0.06 });
+        miniTitle(ctx, t, 2.1, 292);
+        kicker(ctx, C().countdownSub, 1535, fadeA(t, 2.5), { color: BONE, glow: 0, size: 30, tracking: 8 });
+        [4.5, 8.0].forEach((s0) => sparkle(ctx, 760, 470, 300, t, s0));
+        ctx.restore();
       },
     };
   }
 
-  // ======================================================= 06 · THE NIGHT (7s)
+  // ======================================================= 06 · THE NIGHT (12s)
   const BEAT = 60 / 124;
   const NX = 540 - 272 * 0.85, NY = 1010, NS = 0.85;
   const LT0 = 0.1;
@@ -481,74 +464,74 @@
     ctx.restore();
   }
 
-  const G0 = 0.9;
+  const G0 = 1.3;
   register({
     id: '06-the-night',
-    duration: 7,
+    duration: 12,
     cues: [
-      ...Array.from({ length: Math.floor((7 - LT0) / BEAT) }, (_, i) => ({ t: LT0 + i * BEAT, type: 'laser', i })),
-      { t: 0.25, type: 'hit' },
-      ...[0, 1, 2, 3].map((i) => ({ t: G0 + i * 2 * BEAT, type: 'tick' })),
-      { t: G0 + 8 * BEAT, type: 'buzz', dur: 0.3 },
+      ...Array.from({ length: Math.floor((12 - LT0) / BEAT) }, (_, i) => ({ t: LT0 + i * BEAT, type: 'laser', i })),
+      neonCue(0.35, 0.7), neonCue(0.9, 0.3),
+      ...[0, 1, 2, 3].map((i) => neonCue(G0 + i * 2 * BEAT, 0.25)),
+      airCue(G0 + 8 * BEAT),
     ],
     draw(ctx, t) {
       const c = C().night;
-      const on = ease.out2(prog(t, LT0, LT0 + 0.15));
+      const on = ease.out2(prog(t, LT0, LT0 + 0.3));
       const beat = (t - LT0) / BEAT, inBeat = (((beat % 1) + 1) % 1) * BEAT;
       const kick = t > LT0 ? Math.exp(-inBeat * 7) : 0;
-      withHits(ctx, t, [[LT0, 0.25], 0.25, ...[0, 1, 2, 3].map((i) => [G0 + i * 2 * BEAT, 0.08])], () => {
-        art(ctx, NX, NY, NS, { pumpkin: ignite(t, LT0) * (0.85 + 0.15 * kick), h: ignite(t, LT0, 3) * (0.8 + 0.35 * kick), pumpkinScale: slamScale(t, LT0, 0.1, 0.2) });
-        lasers(ctx, t, on);
-        const [ox, oy] = artH(NX, NY, NS);
-        glint(ctx, ox, oy, 220, on * (0.35 + 0.65 * kick), { spin: 0.8 });
-        const band = ctx.createLinearGradient(0, 220, 0, 960);
-        band.addColorStop(0, 'rgba(5,3,3,0.55)');
-        band.addColorStop(0.75, 'rgba(5,3,3,0.45)');
-        band.addColorStop(1, 'rgba(5,3,3,0)');
-        ctx.fillStyle = band;
-        ctx.fillRect(0, 220, W, 740);
-        kicker(ctx, c.kicker, 360, neonA(t, 0.45), { size: 34 });
-        slamText(ctx, c.head, W / 2, 510, fit(ctx, c.head, 130, 960), t, 0.25);
-        const gi = Math.floor((t - G0) / (2 * BEAT));
-        if (t >= G0 && gi < c.genres.length) {
-          const str = c.genres[gi];
-          slamText(ctx, str, W / 2, 700, fit(ctx, str, 104, 940), t, G0 + gi * 2 * BEAT, { from: 0.16 });
-        }
-        const listT = G0 + c.genres.length * 2 * BEAT;
-        c.lines.forEach((ln, i) => {
-          kicker(ctx, ln, 640 + i * 62, neonA(t, listT + i * 0.12, 0.3),
-            { color: i === 0 ? BONE : '#E8621C', size: 34, tracking: 8, glow: i === 0 ? 0 : 18 });
-        });
-      }, { amp: 10 });
-    },
-  });
-
-  // ======================================================= 07 · FIRST 100 (6s)
-  register({
-    id: '07-first-100',
-    duration: 6,
-    cues: [
-      { t: 0.05, type: 'buzz', dur: 0.25 }, { t: 0.1, type: 'carve', dur: 0.35 }, { t: 0.5, type: 'hit' },
-      { t: 0.5, type: 'ignite' }, { t: 0.85, type: 'hit', gain: 0.8 }, { t: 2.6, type: 'glint', gain: 0.6 },
-    ],
-    draw(ctx, t) {
-      const c = C().first100;
-      withHits(ctx, t, [[0.5, 0.3], 0.85], () => {
-        ctx.save();
-        camera(ctx, lerp(1.03, 1.0, ease.out2(t / 6)), W / 2, 960);
-        const size = fit(ctx, c.num, 700, 760, 'Lobster');
-        carved(ctx, t, { key: `n${c.num}`, str: c.num, size, base: 1150 });
-        miniTitle(ctx, t, 1.2);
-        kicker(ctx, c.kicker, 600, neonA(t, 0.05), { size: 40, tracking: 14 });
-        slamText(ctx, c.line, W / 2, 1330, fit(ctx, c.line, 120, 900), t, 0.85);
-        kicker(ctx, c.sub, 1415, neonA(t, 1.1), { color: BONE, size: 40, tracking: 8, glow: 16 });
-        sparkle(ctx, 760, 458, 300, t, 2.6);
-        ctx.restore();
+      art(ctx, NX, NY, NS, { pumpkin: ignite(t, LT0) * (0.85 + 0.15 * kick), h: ignite(t, LT0, 3) * (0.8 + 0.35 * kick) });
+      lasers(ctx, t, on);
+      const [ox, oy] = artH(NX, NY, NS);
+      glint(ctx, ox, oy, 220, on * (0.35 + 0.65 * kick), { spin: 0.8 });
+      const band = ctx.createLinearGradient(0, 220, 0, 960);
+      band.addColorStop(0, 'rgba(5,3,3,0.55)');
+      band.addColorStop(0.75, 'rgba(5,3,3,0.45)');
+      band.addColorStop(1, 'rgba(5,3,3,0)');
+      ctx.fillStyle = band;
+      ctx.fillRect(0, 220, W, 740);
+      revealText(ctx, c.head, W / 2, 510, fit(ctx, c.head, 130, 960), t, 0.35, 'neon', { seed: 2, step: 0.05 });
+      kicker(ctx, c.kicker, 360, neonA(t, 0.9), { size: 34 });
+      // genres flicker on with the beat, two beats each
+      const gi = Math.floor((t - G0) / (2 * BEAT));
+      if (t >= G0 && gi < c.genres.length) {
+        const str = c.genres[gi];
+        const g0 = G0 + gi * 2 * BEAT;
+        const a = neon(prog(t, g0, g0 + 0.22));
+        emberText(ctx, str, W / 2, 700, fit(ctx, str, 104, 940), { alpha: a, glow: 0.9 + 0.3 * kick });
+      }
+      const listT = G0 + c.genres.length * 2 * BEAT;
+      c.lines.forEach((ln, i) => {
+        kicker(ctx, ln, 640 + i * 62, neonA(t, listT + i * 0.25, 0.4),
+          { color: i === 0 ? BONE : '#E8621C', size: 34, tracking: 8, glow: i === 0 ? 0 : 18 });
       });
     },
   });
 
-  // ======================================================= 08 · DRESS TO KILL (6s)
+  // ======================================================= 07 · FIRST 100 (10s)
+  register({
+    id: '07-first-100',
+    duration: 10,
+    cues: [
+      neonCue(0.15, 0.35), { t: 0.3, type: 'carve', dur: 0.7 }, { t: 1.1, type: 'ignite' },
+      burnCue(1.5, 'GUESTS', 0.07), airCue(2.1), neonCue(2.5, 0.4),
+      { t: 4.5, type: 'glint', gain: 0.6 }, { t: 8.0, type: 'glint', gain: 0.5 },
+    ],
+    draw(ctx, t) {
+      const c = C().first100;
+      ctx.save();
+      camera(ctx, lerp(1.0, 1.03, ease.inOut2(t / 10)), W / 2, 960);
+      const size = fit(ctx, c.num, 700, 760, 'Lobster');
+      carved(ctx, t, { key: `n${c.num}`, str: c.num, size, base: 1150, r0: 0.3, r1: 1.0, ig: 1.1 });
+      miniTitle(ctx, t, 2.5);
+      kicker(ctx, c.kicker, 600, neonA(t, 0.15), { size: 40, tracking: 14 });
+      revealText(ctx, c.line, W / 2, 1330, fit(ctx, c.line, 120, 900), t, 1.5, 'burn', { step: 0.07 });
+      revealText(ctx, c.sub, W / 2, 1415, fit(ctx, c.sub, 40, 900, 'Figtree', 8, '800'), t, 2.1, 'fade', { family: 'Figtree', weight: '800', tracking: 8, glow: 0.4 });
+      [4.5, 8.0].forEach((s0) => sparkle(ctx, 760, 458, 300, t, s0));
+      ctx.restore();
+    },
+  });
+
+  // ======================================================= 08 · DRESS TO KILL (10s)
   const KN = { x: 540 - 200 * 1.9, y: 150, s: 1.9 };
   function knifeHero(ctx, t) {
     const off = stab(t, 0.1, 0.35, 900);
@@ -565,110 +548,120 @@
   const dressSize = (ctx) => Math.min(fit(ctx, C().dress.line1, 250, 920), fit(ctx, C().dress.line2, 250, 920));
   function dressType(ctx, t) {
     const c = C().dress;
-    hGlowBack(ctx, t, W / 2, 940, 1);
+    hGlowBack(ctx, t, W / 2, 940, fadeA(t, 1.0, 0.8));
     edgeLight(ctx, t, 0.5);
     const sz = dressSize(ctx);
-    slamText(ctx, c.line1, W / 2, DRESS_Y, sz, t, 1.1);
-    slamText(ctx, c.line2, W / 2, DRESS_Y + sz * 1.02, sz, t, 1.3);
-    neonLabel(ctx, c.sub, 1255, t, 1.75, { size: 44, tracking: 12, color: BONE });
-    kicker(ctx, c.contest, 1318, neonA(t, 2.05), { size: 34, tracking: 8 });
-    miniTitle(ctx, t, 2.4, 1390, 0.55);
+    revealText(ctx, c.line1, W / 2, DRESS_Y, sz, t, 1.3, 'burn', { step: 0.08 });
+    revealText(ctx, c.line2, W / 2, DRESS_Y + sz * 1.02, sz, t, 1.75, 'burn', { step: 0.08 });
+    neonLabel(ctx, c.sub, 1255, t, 2.6, { size: 44, tracking: 12, color: BONE });
+    kicker(ctx, c.contest, 1318, fadeA(t, 3.0), { size: 34, tracking: 8 });
+    miniTitle(ctx, t, 3.4, 1390, 0.55);
   }
   register({
     id: '08-dress-to-kill',
-    duration: 6,
+    duration: 10,
     cues: [
       { t: 0.35, type: 'whoosh', dur: 0.25 }, { t: 0.35, type: 'stab' }, { t: 0.35, type: 'glint', gain: 0.7 },
-      { t: 0.95, type: 'slash' }, { t: 1.1, type: 'hit' }, { t: 1.3, type: 'hit' },
-      { t: 1.75, type: 'buzz', dur: 0.35 }, { t: 3.4, type: 'glint', gain: 0.6 },
+      { t: 1.0, type: 'slash' }, burnCue(1.3, 'DRESS', 0.08), burnCue(1.75, 'TO KILL.', 0.08),
+      neonCue(2.6, 0.4), airCue(3.0), { t: 5.0, type: 'glint', gain: 0.6 }, { t: 8.3, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
-      withHits(ctx, t, [0.35, 1.1, 1.3], () => {
-        if (t < 0.95) return knifeHero(ctx, t);
-        if (t < 1.5) return slashWipe(ctx, scene(0, (c) => knifeHero(c, t)), scene(1, (c) => dressType(c, t)), prog(t, 0.95, 1.5));
+      withHits(ctx, t, [0.35, [1.0, 0.12]], () => {
+        if (t < 1.0) return knifeHero(ctx, t);
+        if (t < 1.6) return slashWipe(ctx, scene(0, (c) => knifeHero(c, t)), scene(1, (c) => dressType(c, t)), prog(t, 1.0, 1.6));
+        ctx.save();
+        drift(ctx, t - 1.6, 8.4, 960, 0.025);
         dressType(ctx, t);
         const sz = dressSize(ctx);
         ctx.save();
         setFont(ctx, 'Bowlby One', sz);
         const w = ctx.measureText(C().dress.line2).width;
         ctx.restore();
-        sparkle(ctx, W / 2 + w / 2 - sz * 0.16, DRESS_Y + sz * 1.02 - sz * 0.1, 300, t, 3.4);
+        [5.0, 8.3].forEach((s0) => sparkle(ctx, W / 2 + w / 2 - sz * 0.16, DRESS_Y + sz * 1.02 - sz * 0.1, 300, t, s0));
+        ctx.restore();
       });
     },
   });
 
-  // ======================================================= 09 · COSTUME CONTEST (7s)
+  // ======================================================= 09 · COSTUME CONTEST (12s)
   const PUMPS = [
-    { cx: 215, s: 0.48, t0: 0.15 },
-    { cx: 865, s: 0.48, t0: 0.4 },
-    { cx: 540, s: 0.6, t0: 0.65 },
+    { cx: 215, s: 0.48, t0: 0.2 },
+    { cx: 865, s: 0.48, t0: 0.45 },
+    { cx: 540, s: 0.6, t0: 0.7 },
   ];
-  const PUMP_C = [295, 349];      // pumpkin centre in art px
+  const PUMP_C = [295, 349];
   const PUMP_BOTTOM = 1440;
   register({
     id: '09-costume-contest',
-    duration: 7,
+    duration: 12,
     cues: [
-      ...PUMPS.map((p) => ({ t: p.t0, type: 'ignite' })), ...PUMPS.map((p) => ({ t: p.t0, type: 'hit', gain: 0.8 })),
-      { t: 1.0, type: 'hit' }, { t: 1.25, type: 'hit' }, { t: 1.6, type: 'buzz', dur: 0.4 },
-      { t: 2.5, type: 'tick' }, ...PUMPS.map((p, i) => ({ t: 3.2 + i * 0.3, type: 'glint', gain: 0.5 })),
+      ...PUMPS.map((p) => ({ t: p.t0, type: 'ignite' })),
+      burnCue(1.1, 'BEST GROUP'), burnCue(1.6, 'COSTUME'), neonCue(2.2, 0.6), airCue(2.8), neonCue(3.3, 0.4),
+      ...PUMPS.map((p, i) => ({ t: 4.5 + i * 0.35, type: 'glint', gain: 0.45 })),
+      ...PUMPS.map((p, i) => ({ t: 8.5 + i * 0.35, type: 'glint', gain: 0.4 })),
     ],
     draw(ctx, t) {
       const c = C().contest;
-      withHits(ctx, t, [...PUMPS.map((p) => [p.t0, 0.22]), 1.0, 1.25], () => {
-        edgeLight(ctx, t, 0.4);
-        PUMPS.forEach((p, i) => {
-          const x = p.cx - PUMP_C[0] * p.s, y = PUMP_BOTTOM - 645 * p.s;
-          art(ctx, x, y, p.s, { pumpkin: ignite(t, p.t0, i + 1), h: ignite(t, p.t0, i + 4), pumpkinScale: slamScale(t, p.t0, 0.14, 0.2), knifeAlpha: 0 });
-          const [hx, hy] = artH(x, y, p.s);
-          sparkle(ctx, hx + 40 * p.s, hy - 90 * p.s, 170, t, 3.2 + i * 0.3);
-        });
-        miniTitle(ctx, t, 2.2);
-        const sz = Math.min(fit(ctx, c.l1, 150, 940), fit(ctx, c.l2, 150, 940));
-        slamText(ctx, c.l1, W / 2, 620, sz, t, 1.0);
-        slamText(ctx, c.l2, W / 2, 620 + sz * 1.02, sz, t, 1.25);
-        neonLabel(ctx, c.l3, 620 + sz * 1.02 + 118, t, 1.6, { size: 104, tracking: 26 });
-        kicker(ctx, c.prize, 620 + sz * 1.02 + 190, neonA(t, 2.0), { color: BONE, glow: 0, size: 34, tracking: 8 });
-        const pa = ease.out2(prog(t, 2.5, 2.7));
-        if (pa > 0) {
-          const pulse = 1 + 0.03 * Math.sin(t * 7);
-          ctx.save();
-          camera(ctx, slamScale(t, 2.5, 0.25, 0.14) * pulse, W / 2, 1515);
-          ctx.globalAlpha = pa;
-          ctx.strokeStyle = '#FF8A4C';
-          ctx.lineWidth = 4;
-          ctx.shadowColor = 'rgba(255,90,30,1)';
-          ctx.shadowBlur = 24;
-          ctx.beginPath();
-          ctx.roundRect(W / 2 - 250, 1475, 500, 84, 42);
-          ctx.stroke();
-          ctx.restore();
-          label(ctx, c.cta, W / 2, 1531, 40, { tracking: 10, alpha: pa, glow: 16, color: BONE });
-        }
+      ctx.save();
+      drift(ctx, t, 12, 1000, 0.025);
+      edgeLight(ctx, t, 0.4);
+      PUMPS.forEach((p, i) => {
+        const x = p.cx - PUMP_C[0] * p.s, y = PUMP_BOTTOM - 645 * p.s;
+        art(ctx, x, y, p.s, { pumpkin: ignite(t, p.t0, i + 1), h: ignite(t, p.t0, i + 4), knifeAlpha: 0 });
+        const [hx, hy] = artH(x, y, p.s);
+        [4.5, 8.5].forEach((s0) => sparkle(ctx, hx + 40 * p.s, hy - 90 * p.s, 170, t, s0 + i * 0.35));
       });
+      miniTitle(ctx, t, 3.6);
+      const sz = Math.min(fit(ctx, c.l1, 150, 940), fit(ctx, c.l2, 150, 940));
+      revealText(ctx, c.l1, W / 2, 620, sz, t, 1.1, 'burn');
+      revealText(ctx, c.l2, W / 2, 620 + sz * 1.02, sz, t, 1.6, 'burn');
+      neonLabel(ctx, c.l3, 620 + sz * 1.02 + 118, t, 2.2, { size: 104, tracking: 26, dur: 0.6 });
+      kicker(ctx, c.prize, 620 + sz * 1.02 + 190, fadeA(t, 2.8), { color: BONE, glow: 0, size: 34, tracking: 8 });
+      const pa = neonA(t, 3.3, 0.4);
+      if (pa > 0) {
+        const pulse = 1 + 0.025 * Math.sin(t * 5);
+        ctx.save();
+        camera(ctx, pulse, W / 2, 1515);
+        ctx.globalAlpha = pa;
+        ctx.strokeStyle = '#FF8A4C';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = 'rgba(255,90,30,1)';
+        ctx.shadowBlur = 24;
+        ctx.beginPath();
+        ctx.roundRect(W / 2 - 250, 1475, 500, 84, 42);
+        ctx.stroke();
+        ctx.restore();
+        label(ctx, c.cta, W / 2, 1531, 40, { tracking: 10, alpha: pa, glow: 16, color: BONE });
+      }
+      ctx.restore();
     },
   });
 
-  // ======================================================= 10 · EARLY BIRD SOLD OUT (6s)
+  // ======================================================= 10 · EARLY BIRD SOLD OUT (12s)
   register({
     id: '10-early-bird-sold-out',
-    duration: 6,
+    duration: 12,
     cues: [
-      { t: 0.15, type: 'hit' }, { t: 0.4, type: 'hit' }, { t: 0.9, type: 'slash' },
-      { t: 1.05, type: 'stamp' }, { t: 1.7, type: 'buzz', dur: 0.35 }, { t: 3.0, type: 'glint', gain: 0.6 },
+      neonCue(0.2, 0.6), neonCue(0.6, 0.6), { t: 1.5, type: 'slash' }, { t: 1.65, type: 'stamp' },
+      neonCue(2.4, 0.4), { t: 4.0, type: 'glint', gain: 0.6 }, { t: 8.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const c = C().earlyBirdSoldOut;
-      withHits(ctx, t, [0.15, 0.4, [1.05, 0.35]], () => {
-        edgeLight(ctx, t, 0.5);
-        miniTitle(ctx, t, 2.0);
-        const dim = t < 0.9 ? 1 : lerp(1, 0.16, ease.out2(prog(t, 0.9, 1.1)));
+      withHits(ctx, t, [[1.5, 0.12], [1.65, 0.22]], () => {
+        stickerSlot(ctx, t, 1265, 1);   // ticket link sits here from the first frame
+        edgeLight(ctx, t, 0.5 * fadeA(t, 0, 0.6));
+        miniTitle(ctx, t, 2.8);
+        const dim = t < 1.5 ? 1 : lerp(1, 0.16, ease.out2(prog(t, 1.5, 1.8)));
         const s1 = fit(ctx, c.l1, 150, 900), s2 = fit(ctx, c.l2, 230, 960);
-        slamText(ctx, c.l1, W / 2, 820, s1, t, 0.15, { alpha: dim });
-        slamText(ctx, c.l2, W / 2, 1020, s2, t, 0.4, { alpha: dim });
-        const cut = ease.out3(prog(t, 0.9, 1.02));
+        ctx.save();
+        ctx.globalAlpha = dim;
+        revealText(ctx, c.l1, W / 2, 820, s1, t, 0.2, 'neon', { seed: 4, step: 0.05 });
+        revealText(ctx, c.l2, W / 2, 1020, s2, t, 0.6, 'neon', { seed: 9, step: 0.06 });
+        ctx.restore();
+        // the knife cuts through the old offer
+        const cut = ease.out3(prog(t, 1.5, 1.62));
         if (cut > 0) {
-          const la = 1 - 0.6 * ease.out2(prog(t, 1.1, 1.6));
+          const la = 1 - 0.6 * ease.out2(prog(t, 1.7, 2.3));
           const x0 = 60, y0 = 1060, x1 = 1020, y1 = 760;
           ctx.save();
           ctx.globalCompositeOperation = 'lighter';
@@ -686,13 +679,16 @@
           ctx.restore();
           if (cut < 1) glint(ctx, lerp(x0, x1, cut), lerp(y0, y1, cut), 240, 1);
         }
-        if (t >= 1.05) {
-          const s = 1 + 0.7 * (1 - ease.outExpo(prog(t, 1.05, 1.17)));
+        // SOLD OUT! stamp presses down
+        if (t >= 1.65) {
+          const s = 1 + 0.3 * (1 - ease.out3(prog(t, 1.65, 1.85)));
+          const sa = ease.out2(prog(t, 1.65, 1.75));
           const ss = fit(ctx, c.stamp, 170, 780);
           ctx.save();
           ctx.translate(540, 930);
           ctx.rotate(-0.12);
           ctx.scale(s, s);
+          ctx.globalAlpha = sa;
           setFont(ctx, 'Bowlby One', ss);
           const w = ctx.measureText(c.stamp).width;
           ctx.beginPath();
@@ -709,127 +705,132 @@
           ctx.translate(540, 930);
           ctx.rotate(-0.12);
           ctx.scale(s, s);
-          emberText(ctx, c.stamp, 0, ss * 0.18, ss, { color: '#FF4A2E', stroke: '#FFF1E0', glow: 1 + 0.6 * Math.exp(-(t - 1.05) * 8) });
+          emberText(ctx, c.stamp, 0, ss * 0.18, ss, { color: '#FF4A2E', stroke: '#FFF1E0', glow: 0.9 + 0.1 * flicker(t, 3), alpha: sa });
           ctx.restore();
         }
-        neonLabel(ctx, c.sub, 1200, t, 1.7, { size: 44, tracking: 8, color: BONE });
-        stickerSlot(ctx, t, 1265, ease.out2(prog(t, 2.0, 2.3)));
-        sparkle(ctx, 880, 780, 260, t, 3.0);
-      }, { amp: 16 });
+        neonLabel(ctx, c.sub, 1200, t, 2.4, { size: 44, tracking: 8, color: BONE });
+        [4.0, 8.5].forEach((s0) => sparkle(ctx, 880, 780, 260, t, s0));
+      }, { amp: 8 });
     },
   });
 
-  // ======================================================= 11 · TICKETS ON SALE (6s)
+  // ======================================================= 11 · TICKETS ON SALE (10s)
   const TK = { x: 540 - 272 * 0.62, y: 430, s: 0.62 };
   register({
     id: '11-tickets-on-sale',
-    duration: 6,
+    duration: 10,
     cues: [
-      { t: 0.3, type: 'whoosh', dur: 0.2 }, { t: 0.3, type: 'stab' }, { t: 0.35, type: 'ignite' },
-      { t: 0.8, type: 'hit' }, { t: 1.1, type: 'buzz', dur: 0.4 }, { t: 2.4, type: 'glint' },
+      { t: 0.3, type: 'whoosh', dur: 0.2 }, { t: 0.3, type: 'stab' }, { t: 0.45, type: 'ignite' },
+      neonCue(0.6, 0.5), burnCue(0.9, 'TICKETS', 0.07), neonCue(1.6, 0.5), airCue(2.1),
+      { t: 3.5, type: 'glint' }, { t: 7.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const c = C().tickets;
-      withHits(ctx, t, [[0.3, 0.2], [0.35, 0.25], 0.8], () => {
-        edgeLight(ctx, t, 0.45);
+      withHits(ctx, t, [[0.3, 0.18]], () => {
+        stickerSlot(ctx, t, 1300, 1);   // ticket link sits here from the first frame
+        ctx.save();
+        drift(ctx, t, 10, 800, 0.025);
+        edgeLight(ctx, t, 0.45 * fadeA(t, 0, 0.6));
         miniTitle(ctx, t, 0.6);
         const off = stab(t, 0.1, 0.3, 800);
-        art(ctx, TK.x, TK.y, TK.s, { pumpkin: ignite(t, 0.35), h: ignite(t, 0.35, 3), pumpkinScale: slamScale(t, 0.35, 0.12, 0.2), knifeOffset: off });
+        art(ctx, TK.x, TK.y, TK.s, { pumpkin: ignite(t, 0.45), h: ignite(t, 0.45, 3), knifeOffset: off, knifeAlpha: t >= 0.1 ? 1 : 0 });
         const [gx, gy] = artTip(TK.x, TK.y, TK.s, off);
         sparkle(ctx, gx, gy, 260, t, 0.3, { hold: 0.2 });
-        sparkle(ctx, gx, gy, 320, t, 2.4, { hold: 0.2 });
-        slamText(ctx, c.l1, W / 2, 1100, fit(ctx, c.l1, 210, 960), t, 0.8);
-        neonLabel(ctx, c.status, 1185, t, 1.1, { size: 64, tracking: 12 });
-        kicker(ctx, c.cta, 1250, neonA(t, 1.5), { color: BONE, glow: 0, size: 34, tracking: 8 });
-        stickerSlot(ctx, t, 1300, ease.out2(prog(t, 1.8, 2.1)));
+        [3.5, 7.5].forEach((s0) => sparkle(ctx, gx, gy, 320, t, s0, { hold: 0.2 }));
+        revealText(ctx, c.l1, W / 2, 1100, fit(ctx, c.l1, 210, 960), t, 0.9, 'burn', { step: 0.07 });
+        neonLabel(ctx, c.status, 1185, t, 1.6, { size: 64, tracking: 12 });
+        kicker(ctx, c.cta, 1250, fadeA(t, 2.1), { color: BONE, glow: 0, size: 34, tracking: 8 });
+        ctx.restore();
       });
     },
   });
 
-  // ======================================================= 12 · WHAT ARE YOU GOING AS? (6s)
+  // ======================================================= 12 · WHAT ARE YOU GOING AS? (10s)
   const QA = { x: 540 - 272 * 0.55, y: 820, s: 0.55 };
   register({
     id: '12-what-are-you-going-as',
-    duration: 6,
+    duration: 10,
     cues: [
-      { t: 0.2, type: 'hit' }, { t: 0.45, type: 'hit' }, { t: 0.7, type: 'ignite' }, { t: 0.7, type: 'stab' },
-      { t: 1.2, type: 'buzz', dur: 0.35 }, { t: 2.6, type: 'glint', gain: 0.6 },
+      neonCue(0.2, 0.7), burnCue(0.8, 'GOING AS?', 0.07), { t: 1.5, type: 'stab' }, { t: 1.6, type: 'ignite' },
+      airCue(2.2), neonCue(2.6, 0.4), { t: 4.5, type: 'glint', gain: 0.6 }, { t: 8.0, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const c = C().question;
-      withHits(ctx, t, [0.2, 0.45, [0.7, 0.25]], () => {
-        edgeLight(ctx, t, 0.45);
-        miniTitle(ctx, t, 1.4);
-        const off = stab(t, 0.5, 0.7, 700);
-        art(ctx, QA.x, QA.y, QA.s, { pumpkin: ignite(t, 0.7), h: ignite(t, 0.7, 3), pumpkinScale: slamScale(t, 0.7, 0.12, 0.2), knifeOffset: off, knifeAlpha: t >= 0.5 ? 1 : 0 });
+      withHits(ctx, t, [[1.5, 0.15]], () => {
+        stickerSlot(ctx, t, 1360, 1);   // question sticker sits here from the first frame
+        ctx.save();
+        drift(ctx, t, 10, 900, 0.025);
+        edgeLight(ctx, t, 0.45 * fadeA(t, 0, 0.6));
+        miniTitle(ctx, t, 2.6);
+        const off = stab(t, 1.3, 1.5, 700);
+        art(ctx, QA.x, QA.y, QA.s, { pumpkin: ignite(t, 1.6), h: ignite(t, 1.6, 3), knifeOffset: off, knifeAlpha: t >= 1.3 ? 1 : 0 });
         const sz = Math.min(fit(ctx, c.l1, 150, 940), fit(ctx, c.l2, 150, 940));
-        slamText(ctx, c.l1, W / 2, 620, sz, t, 0.2);
-        slamText(ctx, c.l2, W / 2, 620 + sz * 1.05, sz, t, 0.45);
-        neonLabel(ctx, c.sub, 1320, t, 1.2, { size: 42, tracking: 10, color: BONE });
-        stickerSlot(ctx, t, 1360, ease.out2(prog(t, 1.5, 1.8)));
+        revealText(ctx, c.l1, W / 2, 620, sz, t, 0.2, 'neon', { seed: 6, step: 0.05 });
+        revealText(ctx, c.l2, W / 2, 620 + sz * 1.05, sz, t, 0.8, 'burn', { step: 0.07 });
+        revealText(ctx, c.sub, W / 2, 1320, fit(ctx, c.sub, 42, 900, 'Figtree', 10, '800'), t, 2.2, 'fade', { family: 'Figtree', weight: '800', tracking: 10, glow: 0.4 });
         const [gx, gy] = artTip(QA.x, QA.y, QA.s, off);
-        sparkle(ctx, gx, gy, 260, t, 2.6);
+        [4.5, 8.0].forEach((s0) => sparkle(ctx, gx, gy, 260, t, s0));
+        ctx.restore();
       });
     },
   });
 
-  // ======================================================= 13 · LAST CALL (6s)
+  // ======================================================= 13 · LAST CALL (10s)
   register({
     id: '13-last-call',
-    duration: 6,
+    duration: 10,
     cues: [
-      { t: 0.02, type: 'heart' }, { t: 0.3, type: 'riser', dur: 0.25 },
-      { t: 0.55, type: 'hit', gain: 1.1 }, { t: 0.9, type: 'buzz', dur: 0.35 }, { t: 3.0, type: 'glint', gain: 0.6 },
+      { t: 0.05, type: 'heart' }, neonCue(0.5, 0.8), neonCue(1.5, 0.4), airCue(2.0),
+      { t: 3.4, type: 'heart' }, { t: 4.5, type: 'glint', gain: 0.6 }, { t: 6.6, type: 'heart' }, { t: 8.3, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const c = C().lastCall;
       const beat = (t0) => (t >= t0 ? Math.exp(-(t - t0) * 7) : 0);
-      const pulse = 0.35 * (beat(0.02) + beat(0.28));
-      withHits(ctx, t, [[0.55, 0.35]], () => {
-        edgeLight(ctx, t, ease.inOut2(prog(t, 0, 0.45)) * 0.8 + pulse);
-        miniTitle(ctx, t, 1.6);
-        slamText(ctx, c.l1, W / 2, 1000, fit(ctx, c.l1, 230, 960), t, 0.55, { from: 0.3 });
-        neonLabel(ctx, c.l2, 1100, t, 0.9, { size: 62, tracking: 16 });
-        kicker(ctx, c.sub, 1170, neonA(t, 1.2), { color: BONE, glow: 0, size: 34, tracking: 6 });
-        stickerSlot(ctx, t, 1230, ease.out2(prog(t, 1.45, 1.75)));
-        sparkle(ctx, 900, 820, 280, t, 3.0);
-      }, { amp: 18 });
+      const pulse = 0.3 * (beat(0.05) + beat(0.31) + beat(3.4) + beat(3.66) + beat(6.6) + beat(6.86));
+      stickerSlot(ctx, t, 1230, 1);   // ticket link sits here from the first frame
+      ctx.save();
+      drift(ctx, t, 10, 1000, 0.03);
+      edgeLight(ctx, t, ease.inOut2(prog(t, 0, 0.5)) * 0.8 + pulse);
+      miniTitle(ctx, t, 2.4);
+      revealText(ctx, c.l1, W / 2, 1000, fit(ctx, c.l1, 230, 960), t, 0.5, 'neon', { seed: 7, step: 0.07 });
+      neonLabel(ctx, c.l2, 1100, t, 1.5, { size: 62, tracking: 16 });
+      kicker(ctx, c.sub, 1170, fadeA(t, 2.0), { color: BONE, glow: 0, size: 34, tracking: 6 });
+      [4.5, 8.3].forEach((s0) => sparkle(ctx, 900, 820, 280, t, s0));
+      ctx.restore();
     },
   });
 
-  // ======================================================= 14 · TONIGHT (6s)
+  // ======================================================= 14 · TONIGHT (12s)
   function tonightA(ctx, t) {
     const c = C().tonight;
     const beat = (t0) => (t >= t0 ? Math.exp(-(t - t0) * 7) : 0);
-    const pulse = 0.3 * (beat(0.02) + beat(0.28));
-    edgeLight(ctx, t, ease.inOut2(prog(t, 0, 0.45)) + pulse);
-    slamText(ctx, c.headline, W / 2, 1040, fit(ctx, c.headline, 230, 960), t, 0.55, { from: 0.3 });
-    neonLabel(ctx, c.sub, 1165, t, 0.85, { size: 48, tracking: 16, color: BONE });
-    kicker(ctx, c.place, 1230, neonA(t, 1.05), { size: 32, tracking: 10 });
-    if (t >= 1.25) {
-      ctx.save();
-      camera(ctx, slamScale(t, 1.25, 0.3, 0.16), W / 2, 1375);
-      logo(ctx, W / 2, 1375, 170, 1, 0.2 + 0.5 * Math.exp(-(t - 1.25) * 6));
-      ctx.restore();
-    }
+    const pulse = 0.3 * (beat(0.05) + beat(0.31));
+    edgeLight(ctx, t, ease.inOut2(prog(t, 0, 0.5)) + pulse);
+    revealText(ctx, c.headline, W / 2, 1040, fit(ctx, c.headline, 230, 960), t, 0.45, 'burn', { step: 0.08 });
+    neonLabel(ctx, c.sub, 1165, t, 1.4, { size: 48, tracking: 16, color: BONE });
+    kicker(ctx, c.place, 1230, fadeA(t, 1.8), { size: 32, tracking: 10 });
+    const la = fadeA(t, 2.2, 0.8);
+    logo(ctx, W / 2, 1375, 170, la, 0.2 + 0.3 * la * Math.exp(-(t - 2.2) * 2));
   }
   register({
     id: '14-tonight',
-    duration: 6,
+    duration: 12,
     cues: [
-      { t: 0.02, type: 'heart' }, { t: 0.3, type: 'riser', dur: 0.25 },
-      { t: 0.55, type: 'hit', gain: 1.1 }, { t: 0.85, type: 'buzz', dur: 0.3 }, { t: 1.25, type: 'hit', gain: 0.6 },
-      { t: 2.5, type: 'slash' }, { t: 3.3, type: 'glint' },
+      { t: 0.05, type: 'heart' }, burnCue(0.45, 'TONIGHT.', 0.08), neonCue(1.4, 0.4), airCue(1.8), airCue(2.2),
+      { t: 3.8, type: 'slash' }, { t: 4.6, type: 'glint' }, { t: 7.5, type: 'glint', gain: 0.5 }, { t: 10.5, type: 'glint', gain: 0.5 },
     ],
     draw(ctx, t) {
       const lock = (c) => lockup(c, t, { footerText: C().tonight.footer });
-      withHits(ctx, t, [[0.55, 0.35], [1.25, 0.12]], () => {
-        if (t < 2.5) return tonightA(ctx, t);
-        if (t < 3.05) return slashWipe(ctx, scene(0, (c) => tonightA(c, t)), scene(1, lock), prog(t, 2.5, 3.05));
+      withHits(ctx, t, [[3.8, 0.15]], () => {
+        if (t < 3.8) return tonightA(ctx, t);
+        if (t < 4.4) return slashWipe(ctx, scene(0, (c) => tonightA(c, t)), scene(1, lock), prog(t, 3.8, 4.4));
+        ctx.save();
+        drift(ctx, t - 4.4, 7.6, 900, 0.03);
         lock(ctx);
         const [gx, gy] = artTip(LOCK.art.x, LOCK.art.y, LOCK.art.s);
-        glint(ctx, gx, gy, 330, Math.max(0.25, flare(t, 3.3, 0.9, 0.25)));
-      }, { amp: 18 });
+        glint(ctx, gx, gy, 330, Math.max(0.25, flare(t, 4.6, 0.9, 0.25), flare(t, 7.5, 0.9, 0.25), flare(t, 10.5, 0.9, 0.25)));
+        ctx.restore();
+      });
     },
   });
 
