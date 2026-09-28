@@ -116,7 +116,7 @@
   // ======================================================= 02 · MORE ROOM (14s)
   const MC = { AX: 328, AY: 980, AS: 0.78 };
   const MC_LOGO = { x: 540, y: 1250, d: 660 };   // d = wordmark width
-  const RAM = 'Rammetto One';
+  const RAM = 'Copperplate';   // HENDERSON / BREWING CO. in the headline face
 
   function moreA(ctx, t) {
     const c = C().moreRoom;
@@ -161,10 +161,10 @@
     }
     sparkle(ctx, Cx, Cy, 560, t, 7.7);
     [9.8, 12.6].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.46, MC_LOGO.y - MC_LOGO.d * 0.1, 240, t, s0));
-    // type (Rammetto One: the closest match to the poster's title face)
+    // type in the headline face (Copperplate: the closest match to the poster's title)
     kicker(ctx, c.k3, 640, neonA(t, 5.2));
-    revealText(ctx, 'HENDERSON', W / 2, 770, fit(ctx, 'HENDERSON', 124, 920, RAM), t, 5.45, 'fade', { family: RAM });
-    revealText(ctx, c.venue2, W / 2, 900, fit(ctx, c.venue2, 96, 760, RAM), t, 5.8, 'sweep', { family: RAM });
+    revealText(ctx, 'HENDERSON', W / 2, 800, fit(ctx, 'HENDERSON', 170, 940, RAM), t, 5.45, 'fade', { family: RAM });
+    revealText(ctx, c.venue2, W / 2, 935, fit(ctx, c.venue2, 118, 820, RAM), t, 5.8, 'sweep', { family: RAM });
   }
 
   register({
@@ -570,7 +570,7 @@
         dressType(ctx, t);
         const sz = dressSize(ctx);
         ctx.save();
-        setFont(ctx, 'Bowlby One', sz);
+        setFont(ctx, 'Copperplate', sz);
         const w = ctx.measureText(C().dress.line2).width;
         ctx.restore();
         [5.0, 8.3].forEach((s0) => sparkle(ctx, W / 2 + w / 2 - sz * 0.16, DRESS_Y + sz * 1.02 - sz * 0.1, 300, t, s0));
@@ -753,9 +753,9 @@
           const ss = fit(ctx, c.stamp, 170, 780);
           // centre on the real glyph bounds, over the middle of the old offer
           ctx.save();
-          setFont(ctx, 'Bowlby One', s1);
+          setFont(ctx, 'Copperplate', s1);
           const top = 820 - ctx.measureText(c.l1).actualBoundingBoxAscent;
-          setFont(ctx, 'Bowlby One', ss);
+          setFont(ctx, 'Copperplate', ss);
           ctx.textAlign = 'center';
           const m = ctx.measureText(c.stamp);
           ctx.restore();

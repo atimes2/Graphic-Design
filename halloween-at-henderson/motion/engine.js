@@ -7,6 +7,9 @@
 (function () {
   const W = 1080, H = 1920, FPS = 30;
 
+  // headline face: Copperplate New Black Condensed (closest match to the poster title)
+  const DISPLAY = 'Copperplate';
+
   const COLOR = {
     void: '#050303', bone: '#FFF1E0', ember: '#E0301E', pumpkin: '#E8621C',
     rind: '#8A2A0A', candle: '#FFD9A0', glint: '#EAF4FF',
@@ -88,6 +91,7 @@
       document.fonts.load('800 100px "Figtree"'),
       document.fonts.load('100px "Lobster"'),
       document.fonts.load('100px "Rammetto One"'),
+      document.fonts.load('100px "Copperplate"'),
     ]);
     buildGrain();
     buildSparkle();
@@ -335,7 +339,7 @@
     ctx.font = `${weight} ${size}px "${family}"`.trim();
   }
 
-  function fit(ctx, str, size, maxW, family = 'Bowlby One', tracking = 0, weight = '') {
+  function fit(ctx, str, size, maxW, family = DISPLAY, tracking = 0, weight = '') {
     ctx.save();
     setFont(ctx, family, size, weight);
     ctx.letterSpacing = `${tracking}px`;
@@ -350,7 +354,7 @@
     if (a <= 0.001) return;
     ctx.save();
     const ga = ctx.globalAlpha;   // respect any alpha the caller already set
-    setFont(ctx, o.family || 'Bowlby One', size, o.weight);
+    setFont(ctx, o.family || DISPLAY, size, o.weight);
     ctx.textAlign = o.align || 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
@@ -372,7 +376,7 @@
 
   function emberTextLetters(ctx, str, x, y, size, letterFn, o = {}) {
     ctx.save();
-    setFont(ctx, o.family || 'Bowlby One', size, o.weight);
+    setFont(ctx, o.family || DISPLAY, size, o.weight);
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
     const total = ctx.measureText(str).width;
     const align = o.align || 'center';
@@ -433,7 +437,7 @@
   function revealText(ctx, str, x, y, size, t, t0, style = 'burn', o = {}) {
     if (t < t0) return;
     const idle = 0.9 + 0.1 * flicker(t, o.seed ?? 8);
-    const family = o.family || 'Bowlby One';
+    const family = o.family || DISPLAY;
     if (style === 'burn' || style === 'neon') {
       const step = o.step ?? (style === 'burn' ? 0.055 : 0.06);
       const n = str.length;
