@@ -164,12 +164,22 @@ Now build CARD [N]: [paste beat sheet]
 
 ---
 
-## Status: rendered
+## Status: rendered (v2, real event details, silent)
 
-All cards are rendered to `videos/` (see `motion/README.md` for how to edit and re-render). Changes from the plan above:
-- **Card 4** became **"DRESS TO KILL."** plus "Come in costume", which avoids claiming a costume rule or prize I couldn't confirm.
-- **Card 2** credits use safe copy until the Luma details are confirmed: SAT · OCT 31 / AFTER DARK / COME IN COSTUME / RSVP ON LUMA. The copy lives in `motion/content.json`.
-- **Card 6** ends on the lockup with "See you after dark." instead of a doors time.
+The event details are now in: Sat Oct 31, 10PM–2AM at Henderson Brewing Co., 19+, DJs, lasers, a full bar, a free drink for the first 100 and a group costume contest. The final pre-party set (silent MP4s in `videos/`, and music can be added in Instagram) is:
 
-## Open questions (details needed from you)
-See the chat thread. The main ones are the event facts from Luma (which I couldn't access), whether you have layered source art and fonts, and how you want to handle audio.
+| # | File | Length | Post when |
+|---|---|---|---|
+| 1 | `01-the-return` | 12s | Launch day |
+| 2 | `02-more-room`: "Last year we sold out Halloween at Paros → we needed more room → so we're taking over Henderson Brewing Co." | 12s | Launch day |
+| 3 | `03-the-details`: night, hours, place, dress code, 19+ | 15s | Launch day |
+| 4 | `04-the-night`: DJs all night, with lasers firing out of the carved H on a 124 BPM grid and the genres cut on the beat | 10s | Week of |
+| 5 | `05-dress-to-kill`: costumes encouraged, best group costume wins drinks | 10s | ~5 days out |
+| 6 | `06-first-100`: the first 100 guests get a free drink ticket | 7s | Any time; drives early arrival |
+| 7 | `07-countdown-7/3/1` | 6s | 7, 3 and 1 days out |
+| 8 | `08-tickets`: seamless loop, "cheaper the earlier you buy", slot for the link sticker | 8s | Pair with any story |
+| 9 | `09-tonight`: doors 10PM, ending on "See you on the dance floor." | 7s | Oct 31, afternoon |
+
+## Still useful (optional)
+- A higher-resolution poster file would give sharper art (the current source is 1254px).
+- If you ever want sound baked in, `AUDIO=1 node motion/render.mjs` adds the original synthesized score.

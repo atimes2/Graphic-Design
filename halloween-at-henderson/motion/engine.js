@@ -407,14 +407,17 @@
 
   // --------------------------------------------------------------- transitions
   const scenes = [canvas(W, H), canvas(W, H), canvas(W, H)];
-  function scene(i, fn) {
+  function scene(i, fn, transparent = false) {
     const c = scenes[i];
     const x = c.getContext('2d');
     x.setTransform(1, 0, 0, 1, 0, 0);
     x.globalAlpha = 1;
     x.globalCompositeOperation = 'source-over';
-    x.fillStyle = COLOR.void;
-    x.fillRect(0, 0, W, H);
+    x.clearRect(0, 0, W, H);
+    if (!transparent) {
+      x.fillStyle = COLOR.void;
+      x.fillRect(0, 0, W, H);
+    }
     fn(x);
     return c;
   }

@@ -1,14 +1,43 @@
 {
-  "_note": "Edit the copy here, then re-render with `node render.mjs`. Values marked in _todo are placeholders until the Luma details are confirmed.",
-  "_todo": ["details[1].value (time)", "details[3].value (venue/RSVP line)"],
+  "_note": "All on-screen copy. Edit, then re-render with `node render.mjs`.",
   "details": [
     { "kicker": "THE NIGHT", "value": "SAT · OCT 31" },
-    { "kicker": "THE HOUR", "value": "AFTER DARK" },
-    { "kicker": "THE DRESS CODE", "value": "COME IN COSTUME" },
-    { "kicker": "THE GUEST LIST", "value": "RSVP ON LUMA" }
+    { "kicker": "THE HOURS", "value": "10PM – 2AM" },
+    { "kicker": "THE PLACE", "value": "HENDERSON BREWING CO." },
+    { "kicker": "THE DRESS CODE", "value": "COSTUMES ENCOURAGED" },
+    { "kicker": "THE FINE PRINT", "value": "19+ WITH VALID ID" }
   ],
+  "detailsFooter": "TICKETS ON LUMA · CHEAPER THE EARLIER YOU BUY",
+  "moreRoom": {
+    "k1": "LAST YEAR",
+    "big1": "WE SOLD OUT",
+    "sub1": "HALLOWEEN AT PAROS",
+    "k2": "THIS YEAR",
+    "big2a": "WE NEEDED",
+    "big2b": "MORE ROOM.",
+    "k3": "SO WE'RE TAKING OVER",
+    "venue2": "BREWING CO."
+  },
+  "night": {
+    "kicker": "SAT OCT 31 · 10PM – 2AM",
+    "head": "DJS ALL NIGHT",
+    "genres": ["DEEP HOUSE", "TECHNO", "POP REMIXES", "& MORE"],
+    "lines": ["DEEP HOUSE · TECHNO · POP REMIXES", "LIGHTS · LASERS · VISUALS", "FULL BAR ON SITE"]
+  },
+  "dress": {
+    "line1": "DRESS",
+    "line2": "TO KILL.",
+    "sub": "COSTUMES ENCOURAGED",
+    "contest": "BEST GROUP COSTUME WINS DRINKS"
+  },
+  "first100": { "kicker": "THE FIRST", "num": "100", "line": "GUESTS", "sub": "GET A FREE DRINK TICKET" },
   "countdown": [7, 3, 1],
-  "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COME IN COSTUME" },
-  "rsvp": { "headline": "RSVP" },
-  "tonight": { "headline": "TONIGHT.", "sub": "OCTOBER 31", "footer": "See you after dark." }
+  "countdownSub": "OCT 31 · HENDERSON BREWING CO.",
+  "tickets": { "headline": "TICKETS", "sub": "CHEAPER THE EARLIER YOU BUY" },
+  "tonight": {
+    "headline": "TONIGHT.",
+    "sub": "DOORS 10PM",
+    "place": "HENDERSON BREWING CO.",
+    "footer": "See you on the dance floor."
+  }
 }

@@ -4,6 +4,7 @@
 //   node render.mjs 01-the-return        # one card (prefix match)
 //   node render.mjs --stills 01 0,2.5,7  # review stills -> review/
 //   node render.mjs --sheet              # contact sheets -> review/
+//   AUDIO=1 node render.mjs              # also synthesize + mux sound (default: silent)
 //
 import http from 'node:http';
 import fs from 'node:fs';
@@ -17,6 +18,7 @@ const OUT = path.resolve(ROOT, '..', 'videos');
 const REVIEW = path.resolve(ROOT, 'review');
 const FPS = 30;
 const PARALLEL = Number(process.env.PARALLEL || 3);
+const AUDIO = process.env.AUDIO === '1';
 
 const FFMPEG = process.env.FFMPEG ||
   execFileSync('python3', ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())']).toString().trim();
@@ -59,19 +61,24 @@ async function renderCard(page, card) {
   fs.mkdirSync(OUT, { recursive: true });
   const tmp = path.join(ROOT, '.tmp');
   fs.mkdirSync(tmp, { recursive: true });
-  const cuesPath = path.join(tmp, `${card.id}.cues.json`);
-  const wav = path.join(tmp, `${card.id}.wav`);
-  fs.writeFileSync(cuesPath, JSON.stringify(card));
-  await run('python3', [path.join(ROOT, 'audio.py'), cuesPath, wav]);
+  let audioIn = [], audioOut = ['-an'];
+  if (AUDIO) {
+    const cuesPath = path.join(tmp, `${card.id}.cues.json`);
+    const wav = path.join(tmp, `${card.id}.wav`);
+    fs.writeFileSync(cuesPath, JSON.stringify({ cues: [], ...card }));
+    await run('python3', [path.join(ROOT, 'audio.py'), cuesPath, wav]);
+    audioIn = ['-i', wav];
+    audioOut = ['-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest'];
+  }
 
   const mp4 = path.join(OUT, `${card.id}.mp4`);
   const ff = spawn(FFMPEG, [
     '-y', '-loglevel', 'error',
     '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-    '-i', wav,
+    ...audioIn,
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '19', '-maxrate', '14M', '-bufsize', '28M',
     '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-r', String(FPS),
-    '-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest', '-movflags', '+faststart', mp4,
+    ...audioOut, '-movflags', '+faststart', mp4,
   ], { stdio: ['pipe', 'inherit', 'inherit'] });
   const done = new Promise((res, rej) => ff.on('exit', (c) => (c === 0 ? res() : rej(new Error('ffmpeg ' + c)))));
 
