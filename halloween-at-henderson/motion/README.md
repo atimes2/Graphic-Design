@@ -4,7 +4,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 
 | File | What it does |
 |---|---|
-| `prep_layers.py` | Cuts `../reference/poster-01.png` into layers (`layers/`): knife and hand, pumpkin (with the knife area inpainted), H-carving glow, title ember and fill, footer |
+| `prep_layers.py` | Builds `layers/` from the designer layer pack in `../reference/layers/` (falls back to keying `poster-01.png`). The pack merges pumpkin and knife, so the knife and hand are still cut out here (edge feathered by brightness) and the pumpkin behind is inpainted. Also produces the H-carving glow, title ember and fill, and footer |
 | `prep_logo.py` | Keys the Henderson Brewing Co. roundel out of `../reference/henderson-brewing-can.jpg` → `layers/logo.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The nine cards (the countdown renders once per number; list in `../STORIES_PLAN.md`) |

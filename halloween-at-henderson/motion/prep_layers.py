@@ -1,9 +1,10 @@
-"""Cut the flat poster into animatable layers.
+"""Cut the poster into animatable layers.
 
-Everything in the poster sits on near-black, so most layers are drawn with
-additive/screen blending. The knife + hand is cut out with a hand-drawn
-polygon so it can move independently of the pumpkin, and the area behind it
-is inpainted.
+Source of truth is the designer's layer pack in reference/layers/ (title,
+pumpkin+knife artwork, "Returning" line, each with real alpha). The pack keeps
+pumpkin and knife merged, so the knife + hand is still separated here with a
+hand-drawn polygon (intersected with the pack's alpha) and the pumpkin behind
+it is inpainted. Falls back to keying the flat poster if the pack is missing.
 
 Output: motion/layers/*.png (+ layers/meta.json with positions in poster px)
 """
@@ -22,6 +23,23 @@ OUT.mkdir(exist_ok=True)
 poster = Image.open(SRC).convert("RGB")
 P = np.asarray(poster).astype(np.float32)
 W, H = poster.size
+
+PACK = ROOT.parent / "reference" / "layers"
+
+
+def pack_layer(name):
+    """(straight RGB, alpha 0..255) from the layer pack, or None"""
+    f = PACK / name
+    if not f.exists():
+        return None
+    a = np.asarray(Image.open(f).convert("RGBA")).astype(np.float32)
+    return a[..., :3], a[..., 3]
+
+
+ART_L = pack_layer("02_Pumpkin_Knife_Artwork.png")
+TITLE_L = pack_layer("01_Title.png")
+FOOT_L = pack_layer("03_Returning_October_31st.png")
+print("layer pack:", "yes" if ART_L else "no (keying the flat poster)")
 
 # ---------------------------------------------------------------- regions
 ART = (330, 285, 910, 1070)       # knife + pumpkin
@@ -58,22 +76,38 @@ yy, xx = np.mgrid[0:H, 0:W]
 r = np.hypot(xx - GLINT[0], yy - GLINT[1])
 cool = (P[..., 2] > P[..., 0] * 0.75) & (r < 70)       # bluish-white rays
 ray_kill = np.clip((r - 6) / 10, 0, 1)                   # keep a tiny core
-dimmed = P.copy()
+dimmed = (ART_L[0] if ART_L else P).copy()
 dimmed[cool] *= ray_kill[cool][:, None]
 # outside the blade, fade the whole neighbourhood of the tip to black
 outside = (mask_hard == 0) & (r < 70) & (yy > 960)
 dimmed[outside] *= 0.0
 
-# knife layer (RGBA). Over black (left of the pumpkin) let the alpha follow
-# luminance so the hand's glow haze falls off softly instead of a cut edge.
-lum_a = np.clip(dimmed.max(2) / 70, 0, 1) * 255
-left = np.clip((470 - xx) / 25, 0, 1)
-knife_a = mask_soft * (1 - left) + np.minimum(mask_soft, lum_a) * left
+# knife layer (RGBA)
+if ART_L:
+    # the pack's alpha gives the hand's glow a real soft edge
+    art_a = ART_L[1].copy()
+    art_a[outside] = 0
+    knife_a = np.minimum(mask_soft, art_a)
+    # near the cut edge keep only what is bright enough to be hand/blade, so the
+    # pumpkin glow trapped inside the polygon doesn't read as a dark halo
+    edge_d = cv2.distanceTransform((mask_hard > 0).astype(np.uint8), cv2.DIST_L2, 5)
+    lum_k = dimmed.max(2)
+    keep = np.clip((lum_k - 45) / 55, 0, 1)
+    band = np.clip(1 - edge_d / 16, 0, 1)            # 1 at the edge, 0 16px inside
+    knife_a = knife_a * (1 - band * (1 - keep))
+    knife_a = cv2.GaussianBlur(knife_a, (0, 0), 0.7)
+else:
+    # over black (left of the pumpkin) let alpha follow luminance instead
+    lum_a = np.clip(dimmed.max(2) / 70, 0, 1) * 255
+    left = np.clip((470 - xx) / 25, 0, 1)
+    knife_a = mask_soft * (1 - left) + np.minimum(mask_soft, lum_a) * left
 save_rgba(dimmed, knife_a, ART, "knife.png")
+# composite over black: what the pumpkin/H layers are derived from
+flat = dimmed * (ART_L[1][..., None] / 255) if ART_L else dimmed
 
 # pumpkin layer: inpaint where the knife was, then darken the patch a little
 dil = cv2.dilate(mask_hard, np.ones((23, 23), np.uint8))
-src_for_inp = dimmed.copy()
+src_for_inp = flat.copy()
 src_for_inp[dil > 0] = 0
 bgr = cv2.cvtColor(src_for_inp.clip(0, 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
 inp = cv2.inpaint(bgr, dil, 15, cv2.INPAINT_TELEA)
@@ -84,7 +118,10 @@ pumpkin = inp * shade[..., None]
 save_rgb(pumpkin, ART, "pumpkin.png")
 
 # full art (for static lockups)
-save_rgb(dimmed, ART, "art.png")
+if ART_L:
+    save_rgba(ART_L[0], ART_L[1], ART, "art.png")
+else:
+    save_rgb(dimmed, ART, "art.png")
 
 # "H" carving glow: the hot yellow pixels in the H area
 hx0, hy0, hx1, hy1 = 590, 470, 860, 800
@@ -96,16 +133,19 @@ hot = cv2.GaussianBlur(hot, (0, 0), 0.8)
 save_rgba(P, hot * 255, ART, "h_glow.png")
 
 # ---------------------------------------------------------------- title
-t = P
-cream = np.clip((t.min(2) - 120) / 60, 0, 1)            # bright neutral pixels
+if TITLE_L:
+    t, ta = TITLE_L[0], TITLE_L[1] / 255
+else:
+    t, ta = P, np.clip(P.max(2) / 140, 0, 1)
+cream = np.clip((t.min(2) - 120) / 60, 0, 1) * ta        # bright neutral pixels
 lum = t.max(2)
-ember_a = np.clip(lum / 200, 0, 1) * (1 - cream)
+ember_a = (ta if TITLE_L else np.clip(lum / 200, 0, 1)) * (1 - cream)
 fill_rgb = np.dstack([np.full((H, W), 255), np.full((H, W), 242), np.full((H, W), 224)])
 save_rgba(fill_rgb, cream * 255, TITLE, "title_fill.png")
 ember_rgb = t.copy()
 ember_rgb[..., 0] = np.maximum(ember_rgb[..., 0], 200)
 save_rgba(ember_rgb, ember_a * 255, TITLE, "title_ember.png")
-save_rgba(t, np.clip(lum / 140, 0, 1) * 255, TITLE, "title.png")
+save_rgba(t, ta * 255, TITLE, "title.png")
 
 # per-letter column spans for the burn-in, found from the fill mask
 spans = {}
@@ -130,8 +170,11 @@ for name, (y0, y1) in {"line1": (76, 168), "line2": (171, 269)}.items():
     spans[name] = {"y": [y0 - TITLE[1], y1 - TITLE[1]], "cols": merged}
 
 # ---------------------------------------------------------------- footer
-foot_a = np.clip((P.max(2) - 40) / 160, 0, 1)
-save_rgba(P, foot_a * 255, FOOT, "footer.png")
+if FOOT_L:
+    save_rgba(FOOT_L[0], FOOT_L[1], FOOT, "footer.png")
+else:
+    foot_a = np.clip((P.max(2) - 40) / 160, 0, 1)
+    save_rgba(P, foot_a * 255, FOOT, "footer.png")
 
 meta = {
     "poster": [W, H],
