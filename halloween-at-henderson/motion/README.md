@@ -1,0 +1,31 @@
+# Halloween at Henderson: story motion source
+
+Every frame is code: HTML canvas, rendered headless in Chromium via Playwright and encoded with ffmpeg. The sound is synthesized in `audio.py`; nothing is sampled or licensed.
+
+| File | What it does |
+|---|---|
+| `prep_layers.py` | Cuts `../reference/poster-01.png` into layers (`layers/`): knife and hand, pumpkin (with the knife area inpainted), H-carving glow, title ember and fill, footer |
+| `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
+| `cards.js` | The six cards (beat sheets in `../STORIES_PLAN.md`) |
+| `content.json` | **All the copy.** Edit here, then re-render |
+| `audio.py` | Per-card sound from each card's cue list: drone, an original 7/8 piano figure, knife shing, ignition, sizzle, slash, hits. Normalized to −16 LUFS |
+| `render.mjs` | Renders MP4s to `../videos/`, plus review stills and contact sheets |
+| `index.html` | Live preview with a scrubber |
+
+## Use
+
+```bash
+pip install pillow numpy scipy opencv-python-headless imageio-ffmpeg pyloudnorm
+npm install                       # playwright (uses the preinstalled Chromium)
+python3 prep_layers.py            # only if the poster changes
+node render.mjs                   # all cards  -> ../videos/*.mp4 + *-cover.jpg
+node render.mjs 03-countdown      # just the countdowns
+node render.mjs --stills 01 0,4,8 # review frames -> review/
+node render.mjs --sheet           # contact sheets of rendered videos -> review/
+npm run preview                   # open http://localhost:8080 to scrub cards live
+```
+
+Output: 1080×1920, 30fps, H.264 High, yuv420p, AAC 48kHz stereo, faststart, each ≤15s.
+All text sits between y=250 and y=1580 so Instagram's UI never covers it.
+
+To change the countdown numbers, edit `"countdown": [7, 3, 1]` in `content.json`.

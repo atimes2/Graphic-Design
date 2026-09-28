@@ -26,6 +26,22 @@ Well-known short prompts that get shared:
 
 Short prompts like these impress because they're open-ended. For a branded event series, the better approach is the **context stack plus a beat sheet** described below.
 
+### What the Twitter/X examples teach
+
+| Creator | Prompt / method | What to steal |
+|---|---|---|
+| [Pankaj Kumar](https://x.com/pankajkumar_dev/status/2103502614134718609) | "create a motion design video of a poster breaking out of its own frame." | **Start from your own poster.** It gives a concept plus built-in art direction. The model also scored the piece and synced hits to the beat. |
+| [Pankaj Kumar](https://x.com/pankajkumar_dev/status/2103549082585489413) | "make a 30s film where the camera keeps zooming into letters, and every letter reveals a new word…" | **One strong camera idea**, repeated with variations, beats a pile of effects. |
+| [1LittleCoder](https://x.com/1littlecoder/status/2103587706999914649) | "…Avoid the frames and texts on the corners which are typical ai made giveaways!" | **Ban the tells by name.** |
+| [Himanshu](https://x.com/himanshutwtxs/status/2103495232637882858) / [Ajith](https://x.com/ajith_io/status/2103449416325890146) | "make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel… go all out." | **Stakes framing** ("it's your résumé") pushes quality. |
+| [Martijn Verbove](https://x.com/verbove/status/2103483957266268381) | Showed one viral motion post: "explain MakerMap, but make it insane." | **A reference video plus a one-line brief**, and one shape morphing through the whole story. |
+| [twoclipping](https://x.com/twoclipping/status/2103273003555402193) | Open-sourced a template that first asks for "8 to 12 UI states I want the shape to become". | **List the states up front.** |
+| [Charlie Hills](https://x.com/charliejhills/status/2103893708550914076) | 3 steps: pick one motion, show a reference and name every state, ask for HTML/SVG and fix it round by round. | **Name every state, then iterate.** |
+| [Alex Prompter](https://x.com/alex_prompter/status/2103499977632997524) | "Adopt the role of an expert motion designer. Build a 30-second…", giving the scenes, length and pace. | **Direct it like a film:** scenes, runtime, pacing. |
+| [Rexan Wong](https://x.com/rexan_wong/status/2103707054108299437) | His "one prompt" try looked average. The fix: 1–2 reference videos, HyperFrames/Remotion, and a real component kit. | **Context beats cleverness.** |
+
+This series applies all of these. The poster is the reference, the motion rules name what's banned, every card has a beat sheet with exact states, and the cards were built as code, rendered, reviewed frame by frame from contact sheets, then fixed.
+
 ---
 
 ## 2. Creative direction: the "1978" system
@@ -147,6 +163,13 @@ Now build CARD [N]: [paste beat sheet]
 ```
 
 ---
+
+## Status: rendered
+
+All cards are rendered to `videos/` (see `motion/README.md` for how to edit and re-render). Changes from the plan above:
+- **Card 4** became **"DRESS TO KILL."** plus "Come in costume", which avoids claiming a costume rule or prize I couldn't confirm.
+- **Card 2** credits use safe copy until the Luma details are confirmed: SAT · OCT 31 / AFTER DARK / COME IN COSTUME / RSVP ON LUMA. The copy lives in `motion/content.json`.
+- **Card 6** ends on the lockup with "See you after dark." instead of a doors time.
 
 ## Open questions (details needed from you)
 See the chat thread. The main ones are the event facts from Luma (which I couldn't access), whether you have layered source art and fonts, and how you want to handle audio.

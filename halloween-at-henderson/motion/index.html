@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halloween at Henderson · Stories</title>
+<style>
+  @font-face { font-family: "Bowlby One"; src: url(fonts/BowlbyOne-Regular.ttf); }
+  @font-face { font-family: "Figtree"; font-weight: 700; src: url(fonts/Figtree-Bold.ttf); }
+  @font-face { font-family: "Figtree"; font-weight: 800; src: url(fonts/Figtree-ExtraBold.ttf); }
+  @font-face { font-family: "Lobster"; src: url(fonts/Lobster-Regular.ttf); }
+  html, body { margin: 0; background: #111; color: #ddd; font: 14px system-ui, sans-serif; }
+  #ui { height: 44px; display: flex; gap: 10px; align-items: center; justify-content: center; }
+  canvas { display: block; height: calc(100vh - 44px); margin: 0 auto; }
+  body.render #ui { display: none; }
+  body.render canvas { height: auto; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <select id="card"></select>
+  <button id="play">Pause</button>
+  <input id="scrub" type="range" min="0" max="1" step="0.0005" style="width: 40vw">
+  <span id="time">0.00s</span>
+</div>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="engine.js"></script>
+<script src="cards.js"></script>
+<script>
+(async () => {
+  await HH.load();
+  HH_registerCountdowns();
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+
+  // hooks for render.mjs
+  window.HH_frame = (id, t, q = 0.95) => { HH.renderFrame(ctx, id, t); return cv.toDataURL('image/jpeg', q); };
+  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues, loop: !!c.loop }));
+  window.HH_ready = true;
+
+  const params = new URLSearchParams(location.search);
+  if (params.has('render')) { document.body.classList.add('render'); return; }
+
+  // live preview
+  const sel = document.getElementById('card');
+  const scrub = document.getElementById('scrub');
+  const time = document.getElementById('time');
+  const btn = document.getElementById('play');
+  Object.keys(HH.CARDS).forEach((id) => sel.add(new Option(id, id)));
+  if (params.get('card')) sel.value = params.get('card');
+  let playing = true, t = Number(params.get('t') || 0), last = performance.now();
+  sel.onchange = () => { t = 0; };
+  btn.onclick = () => { playing = !playing; btn.textContent = playing ? 'Pause' : 'Play'; };
+  scrub.oninput = () => { t = scrub.value * HH.CARDS[sel.value].duration; playing = false; btn.textContent = 'Play'; };
+  const tick = (now) => {
+    const card = HH.CARDS[sel.value];
+    if (playing) t = (t + (now - last) / 1000) % card.duration;
+    last = now;
+    HH.renderFrame(ctx, card.id, t);
+    scrub.value = t / card.duration;
+    time.textContent = `${t.toFixed(2)}s`;
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

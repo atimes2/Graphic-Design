@@ -1,0 +1,14 @@
+{
+  "_note": "Edit the copy here, then re-render with `node render.mjs`. Values marked in _todo are placeholders until the Luma details are confirmed.",
+  "_todo": ["details[1].value (time)", "details[3].value (venue/RSVP line)"],
+  "details": [
+    { "kicker": "THE NIGHT", "value": "SAT · OCT 31" },
+    { "kicker": "THE HOUR", "value": "AFTER DARK" },
+    { "kicker": "THE DRESS CODE", "value": "COME IN COSTUME" },
+    { "kicker": "THE GUEST LIST", "value": "RSVP ON LUMA" }
+  ],
+  "countdown": [7, 3, 1],
+  "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COME IN COSTUME" },
+  "rsvp": { "headline": "RSVP" },
+  "tonight": { "headline": "TONIGHT.", "sub": "OCTOBER 31", "footer": "See you after dark." }
+}

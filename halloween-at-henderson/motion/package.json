@@ -1,0 +1,13 @@
+{
+  "name": "halloween-at-henderson-motion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "layers": "python3 prep_layers.py",
+    "render": "node render.mjs",
+    "preview": "npx http-server . -p 8080 -c-1"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}
