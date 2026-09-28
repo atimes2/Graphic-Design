@@ -209,74 +209,70 @@
   });
 
   // ======================================================= 03 · THE DETAILS (14s)
-  const DET = { x: 380, y: 170, s: 1.5 };
-  const DT0 = 0.6, DSTEP = 0.85, DWIPE = 4.9;
+  // Built to be read: the knife cuts the screen open onto one clean card, then
+  // the five details arrive one at a time and STAY, stacked like an invitation,
+  // and the finished card holds for ~8s.
+  const DROW_Y0 = 590, DROW_STEP = 158, DR_T0 = 2.0, DR_STEP = 0.7, D_CUT = 0.95;
+  const D_END = DR_T0 + 5 * DR_STEP;   // after the last row
 
-  function detailsArt(ctx, t) {
+  // a thin ember rule that draws out from the centre, a sparkle riding each end
+  function divider(ctx, t, y, t0, half = 380) {
+    const p = ease.inOut2(prog(t, t0, t0 + 0.6));
+    if (p <= 0) return;
+    const h = half * p;
     ctx.save();
-    camera(ctx, lerp(1.0, 1.05, t / 5), 900, 700);
-    art(ctx, DET.x, DET.y, DET.s, { pumpkin: ignite(t, 0.3), h: ignite(t, 0.3, 3), knifeOffset: stab(t, 0.05, 0.3, 800) });
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    ctx.shadowColor = 'rgba(255,90,30,1)';
+    ctx.shadowBlur = 16;
+    ctx.strokeStyle = `rgba(232,98,28,${0.75 * (0.9 + 0.1 * flicker(t, 11))})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(W / 2 - h, y); ctx.lineTo(W / 2 + h, y); ctx.stroke();
     ctx.restore();
-    const g = ctx.createLinearGradient(0, 0, 640, 0);
-    g.addColorStop(0, 'rgba(5,3,3,0.9)');
-    g.addColorStop(1, 'rgba(5,3,3,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 640, H);
-    const g2 = ctx.createLinearGradient(0, 1150, 0, 1500);
-    g2.addColorStop(0, 'rgba(5,3,3,0)');
-    g2.addColorStop(1, 'rgba(5,3,3,0.92)');
-    ctx.fillStyle = g2;
-    ctx.fillRect(0, 1150, W, H - 1150);
+    if (p < 1) { glint(ctx, W / 2 - h, y, 110, 0.8); glint(ctx, W / 2 + h, y, 110, 0.8); }
   }
-  function detailsCredits(ctx, t) {
+
+  function detailsCard(ctx, t) {
     const items = C().details;
+    hGlowBack(ctx, t, W / 2, 920, 0.7 * fadeA(t, 1.0, 1.2), 4.4);
+    edgeLight(ctx, t, 0.3);
+    titleBurn(ctx, W / 2 - 433 * 0.72, 262, 0.72, t, 1.25, 0.035);
+    divider(ctx, t, 490, 1.8);
     items.forEach((it, i) => {
-      const t0 = DT0 + i * DSTEP;
-      const out = 1 - ease.in2(prog(t, t0 + DSTEP - 0.18, t0 + DSTEP));
-      if (t < t0 || out <= 0) return;
-      kicker(ctx, it.kicker, 1372, neonA(t, t0, 0.3) * out, { x: 84, align: 'left', size: 30, tracking: 9 });
-      revealText(ctx, it.value, 84, 1470, fit(ctx, it.value, 84, 912), t, t0 + 0.05, 'fade', { align: 'left', dur: 0.4, alpha: out });
+      const t0 = DR_T0 + i * DR_STEP;
+      const y = DROW_Y0 + i * DROW_STEP;
+      kicker(ctx, it.kicker, y, neonA(t, t0, 0.35), { size: 30, tracking: 10, glow: 16 });
+      revealText(ctx, it.value, W / 2, y + 78, fit(ctx, it.value, 74, 960), t, t0 + 0.15, 'sweep', { dur: 0.6 });
     });
-  }
-  function detailsSummary(ctx, t, t0) {
-    titleBurn(ctx, 173, 280, 0.85, t, t0 + 0.1, 0.02);
-    const gl = ctx.createRadialGradient(W / 2, 1750, 50, W / 2, 1750, 900);
-    gl.addColorStop(0, `rgba(232,98,28,${0.26 * flicker(t, 2)})`);
-    gl.addColorStop(1, 'rgba(232,98,28,0)');
-    ctx.fillStyle = gl;
-    ctx.fillRect(0, 0, W, H);
-    C().details.forEach((it, i) => {
-      const ti = t0 + 0.4 + i * 0.16;
-      const y = 585 + i * 165;
-      kicker(ctx, it.kicker, y, neonA(t, ti, 0.3), { size: 26, tracking: 10, glow: 16 });
-      revealText(ctx, it.value, W / 2, y + 76, fit(ctx, it.value, 64, 900), t, ti + 0.05, 'burn', { step: 0.025 });
-    });
-    const la = fadeA(t, t0 + 1.4, 0.8);
-    logo(ctx, W / 2, 1425, 330, la, 0.15 + 0.3 * la * Math.exp(-(t - t0 - 1.4) * 2));
-    kicker(ctx, C().detailsFooter, 1545, neonA(t, t0 + 1.7), { color: BONE, glow: 0, size: 26, tracking: 5 });
+    divider(ctx, t, 1338, D_END);
+    const la = fadeA(t, D_END + 0.3, 0.9);
+    logo(ctx, W / 2, 1420, 340, la, 0.15 + 0.3 * la * Math.exp(-(t - D_END - 0.3) * 2));
+    kicker(ctx, C().detailsFooter, 1530, neonA(t, D_END + 0.7), { color: BONE, glow: 0, size: 26, tracking: 5 });
   }
 
   register({
     id: '03-the-details',
     duration: 14,
     cues: [
-      { t: 0.3, type: 'stab' }, { t: 0.3, type: 'ignite' },
-      ...[0, 1, 2, 3, 4].map((i) => airCue(DT0 + i * DSTEP)),
-      { t: DWIPE, type: 'slash' }, burnCue(DWIPE + 0.4, 'x'.repeat(40), 0.03),
-      neonCue(DWIPE + 1.7, 0.4), { t: 8.5, type: 'glint', gain: 0.5 }, { t: 11.5, type: 'glint', gain: 0.5 },
+      { t: 0.35, type: 'whoosh', dur: 0.25 }, { t: 0.35, type: 'stab' }, { t: 0.35, type: 'glint', gain: 0.6 },
+      { t: D_CUT, type: 'slash' }, burnCue(1.25, 'HALLOWEEN AT HENDERSON', 0.035), { t: 1.8, type: 'glint', gain: 0.35 },
+      ...[0, 1, 2, 3, 4].map((i) => neonCue(DR_T0 + i * DR_STEP, 0.3)),
+      ...[0, 1, 2, 3, 4].map((i) => ({ t: DR_T0 + i * DR_STEP + 0.15, type: 'glint', gain: 0.3 })),
+      airCue(D_END + 0.3), neonCue(D_END + 0.7, 0.4),
+      { t: 8.5, type: 'glint', gain: 0.45 }, { t: 11.5, type: 'glint', gain: 0.45 },
     ],
     draw(ctx, t) {
-      withHits(ctx, t, [[0.3, 0.15], [DWIPE, 0.12]], () => {
-        if (t < DWIPE) {
-          detailsArt(ctx, t);
-          detailsCredits(ctx, t);
-          return;
+      withHits(ctx, t, [0.35, [D_CUT, 0.12]], () => {
+        if (t < D_CUT) return knifeHero(ctx, t);
+        if (t < D_CUT + 0.6) {
+          return slashWipe(ctx, scene(0, (c) => knifeHero(c, t)), scene(1, (c) => detailsCard(c, t)), prog(t, D_CUT, D_CUT + 0.6));
         }
-        const a = scene(0, (c) => { detailsArt(c, t); detailsCredits(c, t); });
-        const b = scene(1, (c) => { camera(c, lerp(1.0, 1.03, prog(t, DWIPE, 14)), W / 2, 960); detailsSummary(c, t, DWIPE); });
-        slashWipe(ctx, a, b, prog(t, DWIPE, DWIPE + 0.6));
-        [8.5, 11.5].forEach((s0) => sparkle(ctx, W / 2 + 150, 1400, 200, t, s0));
-      }, { amp: 8 });
+        ctx.save();
+        drift(ctx, t - D_CUT - 0.6, 12.4, 900, 0.02);
+        detailsCard(ctx, t);
+        [8.5, 11.5].forEach((s0, i) => sparkle(ctx, W / 2 + (i ? -380 : 380), i ? 1338 : 490, 200, t, s0));
+        ctx.restore();
+      });
     },
   });
 
@@ -584,32 +580,103 @@
   });
 
   // ======================================================= 09 · COSTUME CONTEST (12s)
-  const PUMPS = [
-    { cx: 215, s: 0.48, t0: 0.2 },
-    { cx: 865, s: 0.48, t0: 0.45 },
-    { cx: 540, s: 0.6, t0: 0.7 },
+  // A "group" of costumes as neon signs: witch hat, ghost, masquerade mask.
+  function neonShape(ctx, x, y, s, rot, a, color, pathFn) {
+    if (a <= 0.001) return;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.scale(s, s);
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    pathFn(ctx);
+    ctx.globalAlpha = a * 0.45;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 55;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 16;
+    ctx.stroke();
+    ctx.globalAlpha = a;
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,238,222,0.95)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+  }
+  const COSTUMES = [
+    {   // witch hat
+      x: 220, y: 1275, s: 0.95, t0: 0.2, color: '#FF7A2E', sway: (t) => [0.05 * Math.sin(t * 1.3), 0],
+      path: (c) => {
+        c.beginPath();
+        c.moveTo(-72, 80); c.quadraticCurveTo(-30, -20, 0, -140);
+        c.quadraticCurveTo(22, -168, 64, -150);
+        c.moveTo(12, -122); c.quadraticCurveTo(36, -30, 72, 80);
+        c.moveTo(150, 88); c.ellipse(0, 88, 150, 24, 0, 0, Math.PI * 2);
+        c.moveTo(-62, 50); c.lineTo(62, 50);
+        c.rect(-15, 38, 30, 26);
+      },
+    },
+    {   // ghost
+      x: 540, y: 1225, s: 1.2, t0: 0.45, color: '#FFB27A', sway: (t) => [0, 10 * Math.sin(t * 1.7)],
+      path: (c) => {
+        c.beginPath();
+        c.moveTo(-100, 110); c.lineTo(-100, -20);
+        c.arc(0, -20, 100, Math.PI, 0);
+        c.lineTo(100, 110);
+        const xs = [100, 50, 0, -50, -100];
+        for (let i = 0; i < 4; i++) c.quadraticCurveTo((xs[i] + xs[i + 1]) / 2, i % 2 ? 80 : 142, xs[i + 1], 110);
+        c.closePath();
+        c.moveTo(-22, -25); c.ellipse(-35, -25, 13, 20, 0, 0, Math.PI * 2);
+        c.moveTo(48, -25); c.ellipse(35, -25, 13, 20, 0, 0, Math.PI * 2);
+        c.moveTo(15, 32); c.ellipse(0, 32, 15, 22, 0, 0, Math.PI * 2);
+      },
+    },
+    {   // masquerade mask on a stick
+      x: 860, y: 1255, s: 0.95, t0: 0.7, color: '#FF3A22', sway: (t) => [0.06 * Math.sin(t * 1.1 + 1), 0],
+      path: (c) => {
+        c.beginPath();
+        c.moveTo(0, -5);
+        c.bezierCurveTo(35, -45, 120, -55, 150, -20);
+        c.bezierCurveTo(165, 5, 130, 45, 80, 45);
+        c.bezierCurveTo(45, 45, 25, 22, 0, 28);
+        c.bezierCurveTo(-25, 22, -45, 45, -80, 45);
+        c.bezierCurveTo(-130, 45, -165, 5, -150, -20);
+        c.bezierCurveTo(-120, -55, -35, -45, 0, -5);
+        c.closePath();
+        c.moveTo(-36, 2); c.ellipse(-72, 2, 36, 17, -0.15, 0, Math.PI * 2);
+        c.moveTo(108, 2); c.ellipse(72, 2, 36, 17, 0.15, 0, Math.PI * 2);
+        c.moveTo(138, 32); c.lineTo(178, 175);
+      },
+    },
   ];
-  const PUMP_C = [295, 349];
-  const PUMP_BOTTOM = 1440;
   register({
     id: '09-costume-contest',
     duration: 12,
     cues: [
-      ...PUMPS.map((p) => ({ t: p.t0, type: 'ignite' })),
+      ...COSTUMES.map((p) => neonCue(p.t0, 0.5)),
       burnCue(1.1, 'BEST GROUP'), burnCue(1.6, 'COSTUME'), neonCue(2.2, 0.6), airCue(2.8), neonCue(3.3, 0.4),
-      ...PUMPS.map((p, i) => ({ t: 4.5 + i * 0.35, type: 'glint', gain: 0.45 })),
-      ...PUMPS.map((p, i) => ({ t: 8.5 + i * 0.35, type: 'glint', gain: 0.4 })),
+      ...COSTUMES.map((p, i) => ({ t: 4.5 + i * 0.35, type: 'glint', gain: 0.45 })),
+      ...COSTUMES.map((p, i) => ({ t: 8.5 + i * 0.35, type: 'glint', gain: 0.4 })),
     ],
     draw(ctx, t) {
       const c = C().contest;
       ctx.save();
       drift(ctx, t, 12, 1000, 0.025);
       edgeLight(ctx, t, 0.4);
-      PUMPS.forEach((p, i) => {
-        const x = p.cx - PUMP_C[0] * p.s, y = PUMP_BOTTOM - 645 * p.s;
-        art(ctx, x, y, p.s, { pumpkin: ignite(t, p.t0, i + 1), h: ignite(t, p.t0, i + 4), knifeAlpha: 0 });
-        const [hx, hy] = artH(x, y, p.s);
-        [4.5, 8.5].forEach((s0) => sparkle(ctx, hx + 40 * p.s, hy - 90 * p.s, 170, t, s0 + i * 0.35));
+      COSTUMES.forEach((p, i) => {
+        const a = neon(prog(t, p.t0, p.t0 + 0.5)) * (0.9 + 0.1 * flicker(t, i + 20));
+        const [rot, dy] = p.sway(t);
+        // warm pool of light under each sign
+        const g = ctx.createRadialGradient(p.x, p.y, 10, p.x, p.y, 260 * p.s);
+        g.addColorStop(0, `rgba(255,90,30,${0.18 * a})`);
+        g.addColorStop(1, 'rgba(255,90,30,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+        neonShape(ctx, p.x, p.y + dy, p.s, rot, a, p.color, p.path);
+        [4.5, 8.5].forEach((s0) => sparkle(ctx, p.x + 60 * p.s, p.y - 130 * p.s + dy, 170, t, s0 + i * 0.35));
       });
       miniTitle(ctx, t, 3.6);
       const sz = Math.min(fit(ctx, c.l1, 150, 940), fit(ctx, c.l2, 150, 940));
@@ -684,15 +751,27 @@
           const s = 1 + 0.3 * (1 - ease.out3(prog(t, 1.65, 1.85)));
           const sa = ease.out2(prog(t, 1.65, 1.75));
           const ss = fit(ctx, c.stamp, 170, 780);
+          // centre on the real glyph bounds, over the middle of the old offer
           ctx.save();
-          ctx.translate(540, 930);
+          setFont(ctx, 'Bowlby One', s1);
+          const top = 820 - ctx.measureText(c.l1).actualBoundingBoxAscent;
+          setFont(ctx, 'Bowlby One', ss);
+          ctx.textAlign = 'center';
+          const m = ctx.measureText(c.stamp);
+          ctx.restore();
+          const gw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+          const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+          const gx = (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;   // glyph centre vs anchor
+          const gy = (m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2;
+          const scx = W / 2, scy = (top + 1020) / 2;
+          const padX = ss * 0.32, padY = ss * 0.26;
+          ctx.save();
+          ctx.translate(scx, scy);
           ctx.rotate(-0.12);
           ctx.scale(s, s);
           ctx.globalAlpha = sa;
-          setFont(ctx, 'Bowlby One', ss);
-          const w = ctx.measureText(c.stamp).width;
           ctx.beginPath();
-          ctx.roundRect(-w / 2 - 44, -ss * 0.95, w + 88, ss * 1.3, 22);
+          ctx.roundRect(-gw / 2 - padX, -gh / 2 - padY, gw + padX * 2, gh + padY * 2, 22);
           ctx.fillStyle = 'rgba(12,3,2,0.88)';
           ctx.fill();
           ctx.shadowColor = 'rgba(255,40,20,0.9)';
@@ -702,10 +781,10 @@
           ctx.stroke();
           ctx.restore();
           ctx.save();
-          ctx.translate(540, 930);
+          ctx.translate(scx, scy);
           ctx.rotate(-0.12);
           ctx.scale(s, s);
-          emberText(ctx, c.stamp, 0, ss * 0.18, ss, { color: '#FF4A2E', stroke: '#FFF1E0', glow: 0.9 + 0.1 * flicker(t, 3), alpha: sa });
+          emberText(ctx, c.stamp, -gx, -gy, ss, { color: '#FF4A2E', stroke: '#FFF1E0', glow: 0.9 + 0.1 * flicker(t, 3), alpha: sa });
           ctx.restore();
         }
         neonLabel(ctx, c.sub, 1200, t, 2.4, { size: 44, tracking: 8, color: BONE });

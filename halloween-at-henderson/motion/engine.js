@@ -620,6 +620,9 @@
 
   /* Poster title with per-letter control. letterFn(lineIdx, i, n) -> {ember, fill} */
   function title(ctx, x, y, s, letterFn, o = {}) {
+    // the title art may be higher-res than the 866x230 layout box; s is in layout units
+    const res = A.meta.title_res || 1;
+    s = s / res;
     const meta = A.meta.title_letters;
     const imE = A.img.title_ember, imF = A.img.title_fill;
     const lines = [meta.line1, meta.line2];
@@ -637,7 +640,7 @@
           ctx.save();
           ctx.globalAlpha = clamp(ember);
           ctx.drawImage(imE, left, y0, w, h, x + left * s, y + y0 * s, w * s, h * s);
-          const b = blurred('titleE', imE, 9);
+          const b = blurred('titleE', imE, Math.round(9 * res));
           ctx.globalCompositeOperation = 'lighter';
           ctx.globalAlpha = clamp(ember * 0.9 * glowBoost);
           ctx.drawImage(b.c, left + b.pad, y0 + b.pad, w, h, x + left * s, y + y0 * s, w * s, h * s);

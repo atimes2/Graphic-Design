@@ -5,6 +5,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | File | What it does |
 |---|---|
 | `prep_layers.py` | Builds `layers/` from the designer layer pack in `../reference/layers/`: separate knife and pumpkin (the baked tip star is removed so the animated sparkle replaces it), H-carving glow, title ember and fill, footer |
+| `prep_title.py` | Builds the title layers from the updated lettering in `../reference/title-updated.webp` (keys out the white, splits cream fill from red outline for the burn-in, keeps its higher resolution via `title_res`); run after `prep_layers.py` |
 | `prep_logo.py` | Builds the Henderson Brewing Company wordmark from `../reference/henderson-wordmark.png` (transparent PNG, rebuilt at 5× with crisp edges, cream with an ember glow) → `layers/logo.png` + `logo_glow.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 14 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
@@ -18,7 +19,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 ```bash
 pip install pillow numpy scipy opencv-python-headless imageio-ffmpeg pyloudnorm
 npm install                       # playwright (uses the preinstalled Chromium)
-python3 prep_layers.py && python3 prep_logo.py   # only if the source art changes
+python3 prep_layers.py && python3 prep_title.py && python3 prep_logo.py   # only if the source art changes
 node render.mjs                   # all cards  -> ../videos/*.mp4 + *-cover.jpg
 node render.mjs 05-countdown      # just the countdowns
 node render.mjs --stills 01 0,4,8 # review frames -> review/
