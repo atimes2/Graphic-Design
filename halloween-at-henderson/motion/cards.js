@@ -7,7 +7,7 @@
   const {
     W, H, clamp, lerp, prog, ease, vnoise, flicker, pflicker, neon, flare,
     A, canvas, blurred, drawImg, glint, setFont, emberText, emberTextLetters, label,
-    LOCK, art, artTip, title, scene, slashWipe, register,
+    LOCK, art, artTip, logo, logoByH, title, scene, slashWipe, register,
   } = window.HH;
 
   const EMBER_ORANGE = '#E8621C';
@@ -130,17 +130,58 @@
     emberTextLetters(ctx, c.big2b, W / 2, 940 + sz * 1.05, sz, burn(t, 4.4, 0.06));
   }
 
+  // key art under the venue name; the carved H match-cuts into the brewery's H
+  const MC = { AX: 314, AY: 970, AS: 0.78 };
+  const MC_H = [MC.AX + 385 * MC.AS, MC.AY + 355 * MC.AS];   // carved H centre
+  const MC_HH = 310 * MC.AS;                                  // carved H height
+  const MC_LOGO = { x: 540, y: 1250, d: 440 };                // final roundel
+
   function moreC(ctx, t) {
     const c = A.content.moreRoom;
+    // 1) push into the carved H, drifting it to where the logo will sit
+    const push = ease.inOut3(prog(t, 10.0, 10.9));
+    const s = lerp(1, 2.0, push);
+    const Cx = lerp(MC_H[0], MC_LOGO.x, push), Cy = lerp(MC_H[1], MC_LOGO.y, push);
+    // 2) glint flash on the H, crossfade art -> logo
+    const cut = ease.inOut2(prog(t, 10.62, 11.0));
+    const ign = ease.inOut2(prog(t, 8.8, 9.9));
+    if (cut < 1) {
+      ctx.save();
+      ctx.translate(Cx, Cy);
+      ctx.scale(s, s);
+      ctx.translate(-MC_H[0], -MC_H[1]);
+      ctx.globalAlpha = 1;
+      art(ctx, MC.AX, MC.AY, MC.AS, {
+        pumpkin: ign * flicker(t, 1) * (1 - cut), h: ign * flicker(t + 0.4, 3) * (1 - cut) + 0.6 * push * (1 - cut),
+        knife: ign * 0.95, knifeAlpha: ign * (1 - cut),
+      });
+      ctx.restore();
+    }
+    // 3) the logo's H lands on the carved H, then pulls back to the full roundel
+    if (cut > 0) {
+      const back = ease.inOut3(prog(t, 10.9, 12.0));
+      const Lm = A.meta.logo;
+      const hH0 = MC_HH * 2.0;
+      const hH1 = (Lm.h_box[3] - Lm.h_box[1]) * (MC_LOGO.d / (2 * Lm.radius));
+      const hh = lerp(hH0, hH1, back);
+      const hcx = (Lm.h_box[0] + Lm.h_box[2]) / 2, hcy = (Lm.h_box[1] + Lm.h_box[3]) / 2;
+      const k1 = MC_LOGO.d / (2 * Lm.radius);
+      const endHx = MC_LOGO.x + (hcx - Lm.center[0]) * k1, endHy = MC_LOGO.y + (hcy - Lm.center[1]) * k1;
+      logoByH(ctx, lerp(MC_LOGO.x, endHx, back), lerp(MC_LOGO.y, endHy, back), hh, cut, 0.22 + 0.06 * flicker(t, 2));
+    }
+    glint(ctx, Cx, Cy, 560, flare(t, 10.72, 0.9, 0.0));
+    const [lx, ly] = [MC_LOGO.x + MC_LOGO.d * 0.36, MC_LOGO.y - MC_LOGO.d * 0.36];
+    glint(ctx, lx, ly, 220, flare(t, 12.5, 1.1, 0.0));
+
+    // type stays on top of everything
     kicker(ctx, c.k3, 600, ease.out2(prog(t, 7.6, 8.2)));
-    // "HENDERSON" in the poster's own lettering (title line 2)
-    const s = 1.12;
-    const tx = W / 2 - 433 * s, ty = 650 - 113 * s;
+    const ts = 1.12;
+    const tx = W / 2 - 433 * ts, ty = 650 - 113 * ts;
     ctx.save();
     ctx.beginPath();
-    ctx.rect(tx + 40 * s, ty + 112 * s, 780 * s, 120 * s);  // line 2 only
+    ctx.rect(tx + 40 * ts, ty + 112 * ts, 780 * ts, 120 * ts);  // line 2 only
     ctx.clip();
-    title(ctx, tx, ty, s, (li, i) => {
+    title(ctx, tx, ty, ts, (li, i) => {
       if (li === 0) return { ember: 0, fill: 0 };
       const st = 7.9 + i * 0.07;
       return { ember: neon(prog(t, st, st + 0.45)) * (0.92 + 0.08 * flicker(t, 9)), fill: ease.out2(prog(t, st + 0.3, st + 0.7)) };
@@ -148,17 +189,11 @@
     ctx.restore();
     const sz = fit(ctx, c.venue2, 120, 760);
     emberTextLetters(ctx, c.venue2, W / 2, 900, sz, burn(t, 8.6, 0.06));
-    // the key art lights up underneath
-    const AX = 314, AY = 970, AS = 0.78;
-    const ign = ease.inOut2(prog(t, 8.8, 10.2));
-    art(ctx, AX, AY, AS, { pumpkin: ign * flicker(t, 1), h: ign * flicker(t + 0.4, 3), knife: ign * 0.95, knifeAlpha: ign });
-    const [gx, gy] = artTip(AX, AY, AS);
-    glint(ctx, gx, gy, 240, flare(t, 10.6, 1.2, 0.25));
   }
 
   register({
     id: '02-more-room',
-    duration: 12,
+    duration: 14,
     draw(ctx, t) {
       if (t < 3.0) return moreA(ctx, t);
       if (t < 4.0) {
@@ -234,11 +269,12 @@
     const rows = A.content.details;
     rows.forEach((it, i) => {
       const a = ease.out2(prog(t, t0 + 0.35 + i * 0.16, t0 + 0.95 + i * 0.16));
-      const y = 600 + i * 168;
+      const y = 585 + i * 165;
       kicker(ctx, it.kicker, y, a, { size: 26, tracking: 10, glow: 16 });
       emberText(ctx, it.value, W / 2, y + 76, fit(ctx, it.value, 64, 900), { alpha: a });
     });
-    kicker(ctx, A.content.detailsFooter, 1520, ease.out2(prog(t, t0 + 1.4, t0 + 2.0)), { color: '#FFF1E0', glow: 0, size: 26, tracking: 5 });
+    logo(ctx, W / 2, 1420, 112, ease.out2(prog(t, t0 + 1.2, t0 + 1.8)), 0.15);
+    kicker(ctx, A.content.detailsFooter, 1545, ease.out2(prog(t, t0 + 1.4, t0 + 2.0)), { color: '#FFF1E0', glow: 0, size: 26, tracking: 5 });
   }
 
   register({
@@ -616,6 +652,7 @@
       ctx.restore();
       kicker(ctx, c.sub, 1165, ease.out2(prog(t, 2.6, 3.2)), { color: '#FFF1E0', size: 44, tracking: 16, glow: 18 });
       kicker(ctx, c.place, 1230, ease.out2(prog(t, 2.9, 3.5)), { size: 32, tracking: 10 });
+      logo(ctx, W / 2, 1375, 170, ease.out2(prog(t, 3.2, 3.9)), 0.2);
       const flash = 0.3 * Math.exp(-(t - 2.0) * 20);
       ctx.fillStyle = `rgba(255,200,160,${flash})`;
       ctx.fillRect(0, 0, W, H);

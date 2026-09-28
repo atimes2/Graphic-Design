@@ -171,14 +171,14 @@ The event details are now in: Sat Oct 31, 10PM–2AM at Henderson Brewing Co., 1
 | # | File | Length | Post when |
 |---|---|---|---|
 | 1 | `01-the-return` | 12s | Launch day |
-| 2 | `02-more-room`: "Last year we sold out Halloween at Paros → we needed more room → so we're taking over Henderson Brewing Co." | 12s | Launch day |
-| 3 | `03-the-details`: night, hours, place, dress code, 19+ | 15s | Launch day |
+| 2 | `02-more-room`: "Last year we sold out Halloween at Paros → we needed more room → so we're taking over Henderson Brewing Co." The camera then pushes into the pumpkin's carved H, which **match-cuts into the Henderson Brewing Co. logo's H** and pulls back to the full roundel | 14s | Launch day |
+| 3 | `03-the-details`: night, hours, place, dress code, 19+; the summary card carries the brewery logo | 15s | Launch day |
 | 4 | `04-the-night`: DJs all night, with lasers firing out of the carved H on a 124 BPM grid and the genres cut on the beat | 10s | Week of |
 | 5 | `05-dress-to-kill`: costumes encouraged, best group costume wins drinks | 10s | ~5 days out |
 | 6 | `06-first-100`: the first 100 guests get a free drink ticket | 7s | Any time; drives early arrival |
 | 7 | `07-countdown-7/3/1` | 6s | 7, 3 and 1 days out |
 | 8 | `08-tickets`: seamless loop, "cheaper the earlier you buy", slot for the link sticker | 8s | Pair with any story |
-| 9 | `09-tonight`: doors 10PM, ending on "See you on the dance floor." | 7s | Oct 31, afternoon |
+| 9 | `09-tonight`: doors 10PM plus the brewery logo, ending on "See you on the dance floor." | 7s | Oct 31, afternoon |
 
 ## Still useful (optional)
 - A higher-resolution poster file would give sharper art (the current source is 1254px).

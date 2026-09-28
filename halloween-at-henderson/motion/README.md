@@ -5,6 +5,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | File | What it does |
 |---|---|
 | `prep_layers.py` | Cuts `../reference/poster-01.png` into layers (`layers/`): knife and hand, pumpkin (with the knife area inpainted), H-carving glow, title ember and fill, footer |
+| `prep_logo.py` | Keys the Henderson Brewing Co. roundel out of `../reference/henderson-brewing-can.jpg` → `layers/logo.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The nine cards (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `content.json` | **All the copy.** Edit here, then re-render |
@@ -17,7 +18,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 ```bash
 pip install pillow numpy scipy opencv-python-headless imageio-ffmpeg   # + pyloudnorm for AUDIO=1
 npm install                       # playwright (uses the preinstalled Chromium)
-python3 prep_layers.py            # only if the poster changes
+python3 prep_layers.py && python3 prep_logo.py   # only if the source art changes
 node render.mjs                   # all cards  -> ../videos/*.mp4 + *-cover.jpg
 node render.mjs 07-countdown      # just the countdowns
 node render.mjs --stills 01 0,4,8 # review frames -> review/

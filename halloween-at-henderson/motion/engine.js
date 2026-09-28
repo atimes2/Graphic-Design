@@ -67,7 +67,7 @@
 
   // ------------------------------------------------------------------- assets
   const A = { img: {}, meta: null, blur: new Map(), content: null };
-  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer'];
+  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer', 'logo'];
 
   function loadImage(src) {
     return new Promise((res, rej) => {
@@ -361,6 +361,25 @@
     }
   }
 
+  /* Henderson Brewing Co. roundel (keyed from the can in prep_logo.py).
+   * Placed by its circle centre (cx, cy) at a given circle diameter. */
+  function logo(ctx, cx, cy, diameter, alpha = 1, glow = 0.25) {
+    if (alpha <= 0.001) return;
+    const L = A.meta.logo, im = A.img.logo;
+    const s = diameter / (2 * L.radius);
+    const x = cx - L.center[0] * s, y = cy - L.center[1] * s;
+    drawImg(ctx, im, x, y, s, alpha);
+    if (glow > 0) bloom(ctx, 'logo', im, x, y, s, 36, glow * alpha);
+  }
+  // same, but positioned by the centre of the logo's H at a given H height (for match cuts)
+  function logoByH(ctx, hx, hy, hHeight, alpha = 1, glow = 0.25) {
+    const L = A.meta.logo;
+    const [x0, y0, x1, y1] = L.h_box;
+    const s = hHeight / (y1 - y0);
+    const hcx = (x0 + x1) / 2, hcy = (y0 + y1) / 2;
+    logo(ctx, hx + (L.center[0] - hcx) * s, hy + (L.center[1] - hcy) * s, 2 * L.radius * s, alpha, glow);
+  }
+
   function artTip(x, y, s, off = [0, 0]) {
     const [gx, gy] = A.meta.glint;
     return [x + (gx + off[0]) * s, y + (gy + off[1]) * s];
@@ -500,6 +519,6 @@
   window.HH = {
     W, H, FPS, COLOR, clamp, lerp, prog, ease, hash, vnoise, flicker, pflicker, neon, flare,
     A, load, canvas, blurred, drawImg, bloom, glint, setFont, emberText, emberTextLetters, label,
-    LOCK, art, artTip, title, titleAll, scene, slashWipe, register, CARDS, renderFrame,
+    LOCK, art, artTip, logo, logoByH, title, titleAll, scene, slashWipe, register, CARDS, renderFrame,
   };
 })();
