@@ -5,7 +5,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | File | What it does |
 |---|---|
 | `prep_layers.py` | Builds `layers/` from the designer layer pack in `../reference/layers/`: separate knife and pumpkin (the baked tip star is removed so the animated sparkle replaces it), H-carving glow, title ember and fill, footer |
-| `prep_logo.py` | Keys the Henderson Brewing Co. roundel out of `../reference/henderson-brewing-can.jpg` → `layers/logo.png` (run after `prep_layers.py`) |
+| `prep_logo.py` | Builds the Henderson Brewing Company wordmark from `../reference/henderson-wordmark.png` (transparent PNG, rebuilt at 5× with crisp edges, cream with an ember glow) → `layers/logo.png` + `logo_glow.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 14 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `content.json` | **All the copy.** Edit here, then re-render |

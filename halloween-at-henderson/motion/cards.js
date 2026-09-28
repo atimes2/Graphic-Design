@@ -115,7 +115,7 @@
 
   // ======================================================= 02 · MORE ROOM (14s)
   const MC = { AX: 328, AY: 980, AS: 0.78 };
-  const MC_LOGO = { x: 540, y: 1260, d: 440 };
+  const MC_LOGO = { x: 540, y: 1250, d: 660 };   // d = wordmark width
   const RAM = 'Rammetto One';
 
   function moreA(ctx, t) {
@@ -160,7 +160,7 @@
       logoByH(ctx, lerp(MC_LOGO.x, endHx, back), lerp(MC_LOGO.y, endHy, back), lerp(hH0, hH1, back), cut, 0.22 + 0.06 * flicker(t, 2));
     }
     sparkle(ctx, Cx, Cy, 560, t, 7.7);
-    [9.8, 12.6].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.36, MC_LOGO.y - MC_LOGO.d * 0.36, 240, t, s0));
+    [9.8, 12.6].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.46, MC_LOGO.y - MC_LOGO.d * 0.1, 240, t, s0));
     // type (Rammetto One: the closest match to the poster's title face)
     kicker(ctx, c.k3, 640, neonA(t, 5.2));
     revealText(ctx, 'HENDERSON', W / 2, 770, fit(ctx, 'HENDERSON', 124, 920, RAM), t, 5.45, 'fade', { family: RAM });
@@ -252,7 +252,7 @@
       revealText(ctx, it.value, W / 2, y + 76, fit(ctx, it.value, 64, 900), t, ti + 0.05, 'burn', { step: 0.025 });
     });
     const la = fadeA(t, t0 + 1.4, 0.8);
-    logo(ctx, W / 2, 1420, 112, la, 0.15 + 0.3 * la * Math.exp(-(t - t0 - 1.4) * 2));
+    logo(ctx, W / 2, 1425, 330, la, 0.15 + 0.3 * la * Math.exp(-(t - t0 - 1.4) * 2));
     kicker(ctx, C().detailsFooter, 1545, neonA(t, t0 + 1.7), { color: BONE, glow: 0, size: 26, tracking: 5 });
   }
 
@@ -275,7 +275,7 @@
         const a = scene(0, (c) => { detailsArt(c, t); detailsCredits(c, t); });
         const b = scene(1, (c) => { camera(c, lerp(1.0, 1.03, prog(t, DWIPE, 14)), W / 2, 960); detailsSummary(c, t, DWIPE); });
         slashWipe(ctx, a, b, prog(t, DWIPE, DWIPE + 0.6));
-        [8.5, 11.5].forEach((s0) => sparkle(ctx, W / 2 + 40, 1385, 200, t, s0));
+        [8.5, 11.5].forEach((s0) => sparkle(ctx, W / 2 + 150, 1400, 200, t, s0));
       }, { amp: 8 });
     },
   });
@@ -810,7 +810,7 @@
     neonLabel(ctx, c.sub, 1165, t, 1.4, { size: 48, tracking: 16, color: BONE });
     kicker(ctx, c.place, 1230, fadeA(t, 1.8), { size: 32, tracking: 10 });
     const la = fadeA(t, 2.2, 0.8);
-    logo(ctx, W / 2, 1375, 170, la, 0.2 + 0.3 * la * Math.exp(-(t - 2.2) * 2));
+    logo(ctx, W / 2, 1380, 400, la, 0.2 + 0.3 * la * Math.exp(-(t - 2.2) * 2));
   }
   register({
     id: '14-tonight',

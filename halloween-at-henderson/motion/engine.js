@@ -67,7 +67,7 @@
 
   // ------------------------------------------------------------------- assets
   const A = { img: {}, meta: null, blur: new Map(), content: null };
-  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer', 'logo'];
+  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer', 'logo', 'logo_glow'];
 
   function loadImage(src) {
     return new Promise((res, rej) => {
@@ -597,14 +597,18 @@
     return [Math.cos(a), Math.sin(a)];
   };
 
-  /* Henderson Brewing Co. roundel, placed by circle centre at a diameter. */
-  function logo(ctx, cx, cy, diameter, alpha = 1, glow = 0.25) {
+  /* Henderson Brewing Company wordmark, placed by its centre at a given width
+   * (bone, with an ember glow behind it). */
+  function logo(ctx, cx, cy, width, alpha = 1, glow = 0.25) {
     if (alpha <= 0.001) return;
     const L = A.meta.logo, im = A.img.logo;
-    const s = diameter / (2 * L.radius);
+    const s = width / (2 * L.radius);
     const x = cx - L.center[0] * s, y = cy - L.center[1] * s;
+    if (glow > 0) {
+      bloom(ctx, 'logoG1', A.img.logo_glow, x, y, s, 30, glow * 1.6 * alpha);
+      bloom(ctx, 'logoG2', A.img.logo_glow, x, y, s, 8, glow * 1.2 * alpha);
+    }
     drawImg(ctx, im, x, y, s, alpha);
-    if (glow > 0) bloom(ctx, 'logo', im, x, y, s, 36, glow * alpha);
   }
   function logoByH(ctx, hx, hy, hHeight, alpha = 1, glow = 0.25) {
     const L = A.meta.logo;
