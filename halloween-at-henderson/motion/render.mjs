@@ -4,7 +4,7 @@
 //   node render.mjs 01-the-return        # one card (prefix match)
 //   node render.mjs --stills 01 0,2.5,7  # review stills -> review/
 //   node render.mjs --sheet              # contact sheets -> review/
-//   AUDIO=1 node render.mjs              # also synthesize + mux sound (default: silent)
+//   AUDIO=0 node render.mjs              # silent (default: synthesized SFX, no music)
 //
 import http from 'node:http';
 import fs from 'node:fs';
@@ -18,7 +18,7 @@ const OUT = path.resolve(ROOT, '..', 'videos');
 const REVIEW = path.resolve(ROOT, 'review');
 const FPS = 30;
 const PARALLEL = Number(process.env.PARALLEL || 3);
-const AUDIO = process.env.AUDIO === '1';
+const AUDIO = process.env.AUDIO !== '0';   // SFX on by default
 
 const FFMPEG = process.env.FFMPEG ||
   execFileSync('python3', ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())']).toString().trim();

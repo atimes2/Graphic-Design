@@ -164,22 +164,32 @@ Now build CARD [N]: [paste beat sheet]
 
 ---
 
-## Status: rendered (v2, real event details, silent)
+## Status: v3 rendered (fast cuts, sound effects, no music)
 
-The event details are now in: Sat Oct 31, 10PM–2AM at Henderson Brewing Co., 19+, DJs, lasers, a full bar, a free drink for the first 100 and a group costume contest. The final pre-party set (silent MP4s in `videos/`, and music can be added in Instagram) is:
+This round's feedback: use the updated layer pack (pumpkin and knife now separate), make the sparkle premium, keep the lasers, make everything faster, apply the "Tonight" treatment everywhere (slams, flashes, shake, glow, slash cuts), add 31, 21 and 14 day countdowns, add ticket-status cards, and include sound effects but no music.
+
+Every story lands its first hit within 0.4s and runs 5–8s.
 
 | # | File | Length | Post when |
 |---|---|---|---|
-| 1 | `01-the-return` | 12s | Launch day |
-| 2 | `02-more-room`: "Last year we sold out Halloween at Paros → we needed more room → so we're taking over Henderson Brewing Co." The camera then pushes into the pumpkin's carved H, which **match-cuts into the Henderson Brewing Co. logo's H** and pulls back to the full roundel | 14s | Launch day |
-| 3 | `03-the-details`: night, hours, place, dress code, 19+; the summary card carries the brewery logo | 15s | Launch day |
-| 4 | `04-the-night`: DJs all night, with lasers firing out of the carved H on a 124 BPM grid and the genres cut on the beat | 10s | Week of |
-| 5 | `05-dress-to-kill`: costumes encouraged, best group costume wins drinks | 10s | ~5 days out |
-| 6 | `06-first-100`: the first 100 guests get a free drink ticket | 7s | Any time; drives early arrival |
-| 7 | `07-countdown-7/3/1` | 6s | 7, 3 and 1 days out |
-| 8 | `08-tickets`: seamless loop, "cheaper the earlier you buy", slot for the link sticker | 8s | Pair with any story |
-| 9 | `09-tonight`: doors 10PM plus the brewery logo, ending on "See you on the dance floor." | 7s | Oct 31, afternoon |
+| 01 | `01-the-return`: the knife stabs in, the pumpkin ignites, the title slams in line by line | 7s | Announcement |
+| 02 | `02-more-room`: sold out at Paros → more room → Henderson Brewing Co., then the carved H match-cuts into the brewery logo | 8s | Announcement |
+| 03 | `03-the-details`: the five details hit on beat, then a slash cut to the summary with the logo | 8s | Announcement |
+| 04 | `04-early-bird-on-sale`: EARLY BIRD / TICKETS / NOW AVAILABLE, with a link-sticker slot | 6s | When early bird opens |
+| 05 | `05-countdown-31/21/14/07/03/01`: carved numbers, DAYS TO GO | 5s each | Those days out |
+| 06 | `06-the-night`: beat-synced lasers from the H, DJS ALL NIGHT, genres | 7s | Any time |
+| 07 | `07-first-100`: free drink ticket for the first 100 | 6s | Last week |
+| 08 | `08-dress-to-kill`: costumes encouraged, the group contest line | 6s | Any time |
+| 09 | `09-costume-contest`: three pumpkins ignite, BEST GROUP COSTUME CONTEST, TAG YOUR CREW | 7s | ~2 weeks out |
+| 10 | `10-early-bird-sold-out`: the offer gets slashed, SOLD OUT! stamps down, REGULAR TICKETS ON SALE NOW | 6s | When early bird sells out |
+| 11 | `11-tickets-on-sale`: TICKETS NOW AVAILABLE / GET YOUR TICKETS TODAY, with a link slot | 6s | Any time |
+| 12 | `12-what-are-you-going-as`: slot for a question sticker (engagement) | 6s | ~10 days out |
+| 13 | `13-last-call`: LAST CALL FOR TICKETS, with a link slot | 6s | Final days |
+| 14 | `14-tonight`: TONIGHT. DOORS 10PM, the logo, then a slash to the poster ("See you on the dance floor.") | 6s | Oct 31 |
+
+**Sound:** synthesized SFX only (stabs, slams, slashes, neon buzz, laser zaps, stamp, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
+
+**Copy to check before posting:** "REGULAR TICKETS ON SALE NOW" (10) and "GET YOURS BEFORE THEY'RE GONE" (13) are placeholders; edit them in `motion/content.json`.
 
 ## Still useful (optional)
 - A higher-resolution poster file would give sharper art (the current source is 1254px).
-- If you ever want sound baked in, `AUDIO=1 node motion/render.mjs` adds the original synthesized score.

@@ -1,8 +1,8 @@
 /* Halloween at Henderson: tiny deterministic motion engine.
  *
- * Every frame is a pure function of time: renderFrame(cardId, t) draws the
- * frame for time t (seconds). No wall-clock, no Math.random, so renders are
- * repeatable and the Playwright renderer can step frame by frame.
+ * Every frame is a pure function of time: renderFrame(ctx, cardId, t) draws
+ * the frame for time t (seconds). No wall-clock, no Math.random, so renders
+ * are repeatable and the Playwright renderer can step frame by frame.
  */
 (function () {
   const W = 1080, H = 1920, FPS = 30;
@@ -20,6 +20,7 @@
     linear: (t) => t,
     in2: (t) => t * t,
     out2: (t) => 1 - (1 - t) * (1 - t),
+    out3: (t) => 1 - Math.pow(1 - t, 3),
     inOut2: (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
     inOut3: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
     outExpo: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
@@ -56,13 +57,12 @@
     ks.forEach((k, i) => { s += Math.sin(w * k * t + hash(seed + i) * 6.28) / (1 + i * 0.6); });
     return 0.88 + 0.055 * s;
   };
-  // neon/ember "warm up": flickers on over p in 0..1
+  // neon "warm up": flickers on over p in 0..1
   const neon = (p) => {
     if (p <= 0) return 0;
     if (p >= 1) return 1;
     const steps = [0.0, 0.85, 0.1, 0.55, 0.0, 0.9, 0.6, 1.0];
-    const i = Math.floor(p * steps.length);
-    return steps[Math.min(i, steps.length - 1)];
+    return steps[Math.min(Math.floor(p * steps.length), steps.length - 1)];
   };
 
   // ------------------------------------------------------------------- assets
@@ -89,6 +89,7 @@
       document.fonts.load('100px "Lobster"'),
     ]);
     buildGrain();
+    buildSparkle();
   }
 
   function canvas(w, h) {
@@ -121,7 +122,7 @@
       const x = c.getContext('2d');
       const d = x.createImageData(540, 960);
       for (let i = 0; i < d.data.length; i += 4) {
-        const v = (rnd() + rnd() + rnd()) / 3 * 255;
+        const v = ((rnd() + rnd() + rnd()) / 3) * 255;
         d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
         d.data[i + 3] = 255;
       }
@@ -132,7 +133,6 @@
 
   function post(ctx, t, opts = {}) {
     const f = Math.round(t * FPS);
-    // grain: overlay for mids, a whisper of screen so the blacks breathe
     const g = GRAIN[f % GRAIN.length];
     const ox = -Math.floor(hash(f) * 40), oy = -Math.floor(hash(f + 99) * 40);
     ctx.save();
@@ -143,7 +143,6 @@
     ctx.globalAlpha = 0.035;
     ctx.drawImage(g, ox, oy, W + 80, H + 80);
     ctx.restore();
-    // vignette
     ctx.save();
     const v = ctx.createRadialGradient(W / 2, H * 0.48, H * 0.28, W / 2, H * 0.48, H * 0.72);
     v.addColorStop(0, 'rgba(0,0,0,0)');
@@ -163,7 +162,6 @@
     ctx.restore();
   }
 
-  // additive bloom from a cached blur
   function bloom(ctx, key, im, x, y, s, px, alpha) {
     if (alpha <= 0.001) return;
     const b = blurred(key, im, px);
@@ -174,57 +172,175 @@
     ctx.restore();
   }
 
-  // procedural knife-tip star glint
-  function glint(ctx, x, y, size, intensity, rot = -0.1) {
-    if (intensity <= 0.001 || size <= 0.5) return;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = clamp(intensity);
-    // halo
-    let g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.55);
-    g.addColorStop(0, 'rgba(255,255,255,0.95)');
-    g.addColorStop(0.12, 'rgba(225,240,255,0.55)');
-    g.addColorStop(0.45, 'rgba(255,170,90,0.12)');
-    g.addColorStop(1, 'rgba(255,120,40,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(0, 0, size * 0.55, 0, Math.PI * 2); ctx.fill();
-    // rays
-    const ray = (ang, len, wid) => {
-      ctx.save();
-      ctx.rotate(ang);
-      const lg = ctx.createLinearGradient(0, 0, len, 0);
-      lg.addColorStop(0, 'rgba(255,255,255,1)');
-      lg.addColorStop(0.35, 'rgba(220,236,255,0.6)');
-      lg.addColorStop(1, 'rgba(200,225,255,0)');
-      ctx.fillStyle = lg;
-      ctx.beginPath();
-      ctx.moveTo(0, -wid); ctx.lineTo(len, 0); ctx.lineTo(0, wid); ctx.closePath();
-      ctx.fill();
-      ctx.restore();
+  const camera = (ctx, s, cx = W / 2, cy = H / 2, dx = 0, dy = 0) => {
+    ctx.translate(cx + dx, cy + dy);
+    ctx.scale(s, s);
+    ctx.translate(-cx, -cy);
+  };
+
+  // ============================================================ SPARKLE (v2)
+  // Pre-rendered sprites: a tapered ray with a soft glow, and a spectral ring.
+  const SPR = {};
+  function buildSparkle() {
+    const L = 1024, h = 128;
+    const ray = canvas(L, h);
+    const x = ray.getContext('2d');
+    const shape = (w0, alpha, blur, color) => {
+      x.save();
+      x.filter = blur ? `blur(${blur}px)` : 'none';
+      const g = x.createLinearGradient(0, 0, L, 0);
+      g.addColorStop(0, `rgba(${color},${alpha})`);
+      g.addColorStop(0.25, `rgba(${color},${alpha * 0.55})`);
+      g.addColorStop(0.7, `rgba(${color},${alpha * 0.12})`);
+      g.addColorStop(1, `rgba(${color},0)`);
+      x.fillStyle = g;
+      x.beginPath();
+      x.moveTo(0, h / 2 - w0);
+      x.quadraticCurveTo(L * 0.25, h / 2 - w0 * 0.18, L, h / 2);
+      x.quadraticCurveTo(L * 0.25, h / 2 + w0 * 0.18, 0, h / 2 + w0);
+      x.closePath();
+      x.fill();
+      x.restore();
     };
-    for (let i = 0; i < 4; i++) ray(rot + (i * Math.PI) / 2, size * (i % 2 ? 1.15 : 0.72), size * 0.035);
-    for (let i = 0; i < 4; i++) ray(rot + Math.PI / 4 + (i * Math.PI) / 2, size * 0.42, size * 0.022);
-    // core
-    g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.09);
-    g.addColorStop(0, 'rgba(255,255,255,1)');
-    g.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(0, 0, size * 0.09, 0, Math.PI * 2); ctx.fill();
+    x.globalCompositeOperation = 'lighter';
+    shape(22, 0.35, 14, '150,190,255');    // cool outer glow
+    shape(9, 0.6, 4, '210,228,255');       // mid
+    shape(3.2, 1.0, 0, '255,255,255');     // hot core line
+    SPR.ray = ray;
+
+    const R = 256;
+    const ring = canvas(R * 2, R * 2);
+    const rx = ring.getContext('2d');
+    const cg = rx.createConicGradient(0, R, R);
+    ['255,80,80', '255,200,80', '120,255,160', '90,170,255', '200,110,255', '255,80,80']
+      .forEach((c, i, a) => cg.addColorStop(i / (a.length - 1), `rgba(${c},0.9)`));
+    rx.filter = 'blur(6px)';
+    rx.strokeStyle = cg;
+    rx.lineWidth = 10;
+    rx.beginPath(); rx.arc(R, R, R * 0.62, 0, Math.PI * 2); rx.stroke();
+    SPR.ring = ring;
+  }
+
+  let NOW = 0; // current frame time, for twinkle
+
+  function ray(ctx, ang, len, thick) {
+    ctx.save();
+    ctx.rotate(ang);
+    ctx.drawImage(SPR.ray, 0, -64 * thick, len, 128 * thick);
     ctx.restore();
   }
 
-  // glint envelope: quick flare then decay to a pinpoint
-  const flare = (t, t0, dur = 1.1, base = 0.25) => {
-    const p = (t - t0) / dur;
-    if (p < 0) return 0;
-    if (p < 0.12) return ease.out2(p / 0.12);
-    return base + (1 - base) * Math.exp(-(p - 0.12) * 5);
+  /* Anamorphic 4-point star with twinkle, a secondary diagonal cross, a warm
+   * halo, a faint spectral ring and a white-hot core.
+   * size ~ length of the long rays in px; intensity 0..1 (a little over is ok). */
+  function glint(ctx, x, y, size, intensity, o = {}) {
+    if (intensity <= 0.002 || size <= 1) return;
+    const I = Math.min(intensity, 1.4);
+    const t = o.t ?? NOW;
+    const rot = (o.rot ?? -0.12) + (o.spin ?? 0.35) * Math.sin(t * 0.9 + x * 0.01);
+    const tw = (i) => 1 + 0.16 * Math.sin(t * 17 + i * 1.9) + 0.08 * Math.sin(t * 41 + i * 3.1);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = clamp(I);
+    let g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.5);
+    g.addColorStop(0, 'rgba(255,245,230,0.55)');
+    g.addColorStop(0.15, 'rgba(255,190,120,0.22)');
+    g.addColorStop(1, 'rgba(255,110,40,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2); ctx.fill();
+    // anamorphic horizontal streak
+    ctx.globalAlpha = clamp(I * 0.5);
+    ray(ctx, 0, size * 1.5, 0.5);
+    ray(ctx, Math.PI, size * 1.5, 0.5);
+    // main cross (vertical long, like the poster), twinkling
+    ctx.globalAlpha = clamp(I);
+    ray(ctx, rot - Math.PI / 2, size * 1.05 * tw(0), 1);
+    ray(ctx, rot + Math.PI / 2, size * 1.05 * tw(1), 1);
+    ray(ctx, rot, size * 0.72 * tw(2), 0.85);
+    ray(ctx, rot + Math.PI, size * 0.72 * tw(3), 0.85);
+    // secondary diagonal cross
+    ctx.globalAlpha = clamp(I * 0.6);
+    for (let i = 0; i < 4; i++) ray(ctx, rot + Math.PI / 4 + (i * Math.PI) / 2, size * 0.34 * tw(4 + i), 0.55);
+    // spectral ring
+    ctx.globalAlpha = clamp(I * 0.14);
+    const rr = size * 0.42;
+    ctx.drawImage(SPR.ring, -rr, -rr, rr * 2, rr * 2);
+    // white-hot core
+    ctx.globalAlpha = clamp(I);
+    g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.11);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.4, 'rgba(235,245,255,0.8)');
+    g.addColorStop(1, 'rgba(200,225,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, size * 0.11, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // glint envelope: snap in with a slight overshoot, decay to a hold level
+  const flare = (t, t0, dur = 0.9, base = 0.25) => {
+    const d = t - t0;
+    if (d < 0) return 0;
+    if (d < 0.06) return ease.out2(d / 0.06) * 1.25;
+    return base + (1.25 - base) * Math.exp(-(d - 0.06) / (dur * 0.28));
   };
+  // a one-shot sparkle event (size punches with it)
+  function sparkle(ctx, x, y, size, t, t0, o = {}) {
+    const I = flare(t, t0, o.dur ?? 0.9, o.hold ?? 0);
+    if (I <= 0.002) return;
+    glint(ctx, x, y, size * (0.75 + 0.25 * Math.min(I, 1.2)), I, { t, rot: o.rot, spin: o.spin });
+  }
+
+  // ------------------------------------------------------------- impacts
+  // camera shake summed over a list of hit times
+  const shakeAt = (t, hits, amp = 14) => {
+    let dx = 0, dy = 0;
+    hits.forEach((h0, i) => {
+      const d = t - h0;
+      if (d < 0 || d > 0.6) return;
+      const e = amp * Math.exp(-d * 11);
+      dx += e * Math.sin(d * 83 + i);
+      dy += e * 0.55 * Math.sin(d * 67 + i * 2);
+    });
+    return [dx, dy];
+  };
+  function flash(ctx, t, t0, a = 0.3, color = '255,200,160') {
+    const d = t - t0;
+    if (d < 0 || d > 0.5) return;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = `rgba(${color},${a * Math.exp(-d * 18)})`;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  const slamScale = (t, t0, from = 0.2, dur = 0.16) => 1 + from * (1 - ease.outExpo(prog(t, t0, t0 + dur)));
+
+  // candlelight creeping in from the frame edges (atmosphere for type cards)
+  function edgeLight(ctx, t, amt, seed = 5) {
+    if (amt <= 0.001) return;
+    const lit = amt * flicker(t, seed);
+    [[W / 2, H + 120, 1100, 1], [-150, 1300, 800, 0.6], [W + 150, 700, 800, 0.6]].forEach(([x, y, r, k]) => {
+      const g = ctx.createRadialGradient(x, y, 20, x, y, r);
+      g.addColorStop(0, `rgba(226,74,22,${0.5 * lit * k})`);
+      g.addColorStop(1, 'rgba(226,74,22,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    });
+  }
 
   // --------------------------------------------------------------- text
   function setFont(ctx, family, size, weight = '') {
     ctx.font = `${weight} ${size}px "${family}"`.trim();
+  }
+
+  function fit(ctx, str, size, maxW, family = 'Bowlby One', tracking = 0, weight = '') {
+    ctx.save();
+    setFont(ctx, family, size, weight);
+    ctx.letterSpacing = `${tracking}px`;
+    const w = ctx.measureText(str).width;
+    ctx.restore();
+    return w > maxW ? Math.floor((size * maxW) / w) : size;
   }
 
   // Poster-style type: bone fill, thin ember outline + ember glow
@@ -236,11 +352,10 @@
     ctx.textAlign = o.align || 'center';
     ctx.textBaseline = 'alphabetic';
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
-    const glowA = (o.glow ?? 1) * a;
-    ctx.globalAlpha = clamp(glowA);
-    ctx.shadowColor = 'rgba(224,48,30,0.95)';
+    ctx.globalAlpha = clamp((o.glow ?? 1) * a);
+    ctx.shadowColor = o.glowColor || 'rgba(224,48,30,0.95)';
     ctx.shadowBlur = size * 0.32;
-    ctx.strokeStyle = '#E0301E';
+    ctx.strokeStyle = o.stroke || '#E0301E';
     ctx.lineJoin = 'round';
     ctx.lineWidth = size * 0.075;
     ctx.strokeText(str, x, y);
@@ -253,26 +368,20 @@
     ctx.restore();
   }
 
-  // same, but each letter gets its own progress (for burn-ins)
   function emberTextLetters(ctx, str, x, y, size, letterFn, o = {}) {
     ctx.save();
     setFont(ctx, o.family || 'Bowlby One', size, o.weight);
     ctx.letterSpacing = `${o.tracking ?? 0}px`;
     const total = ctx.measureText(str).width;
     const align = o.align || 'center';
-    let x0 = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+    const x0 = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+    const offs = [];
+    for (let i = 0; i < str.length; i++) offs.push(ctx.measureText(str.slice(0, i)).width);
     ctx.restore();
-    const n = str.length;
-    for (let i = 0; i < n; i++) {
-      ctx.save();
-      setFont(ctx, o.family || 'Bowlby One', size, o.weight);
-      ctx.letterSpacing = `${o.tracking ?? 0}px`;
-      const before = ctx.measureText(str.slice(0, i)).width;
-      ctx.restore();
-      const ch = str[i];
-      if (ch === ' ') continue;
-      const { ember, fill } = letterFn(i, n);
-      emberText(ctx, ch, x0 + before, y, size, { ...o, align: 'left', alpha: 1, glow: ember, fill });
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === ' ') continue;
+      const { ember, fill } = letterFn(i, str.length);
+      emberText(ctx, str[i], x0 + offs[i], y, size, { ...o, align: 'left', alpha: 1, glow: ember, fill });
     }
   }
 
@@ -293,20 +402,72 @@
     ctx.restore();
   }
 
+  // small tracked caps line, auto-fitted
+  function kicker(ctx, str, y, a, o = {}) {
+    const tr = o.tracking ?? 10;
+    const size = fit(ctx, str, o.size ?? 32, o.maxW ?? 940, 'Figtree', tr, '800');
+    label(ctx, str, o.x ?? W / 2, y, size, { tracking: tr, color: o.color ?? COLOR.pumpkin, alpha: a, glow: o.glow ?? 18, align: o.align });
+  }
+
+  /* Slam a headline in at t0: scale punch plus a hot glow that settles.
+   * Pair with shakeAt() + flash() in the card for the full "hit". */
+  function slamText(ctx, str, x, y, size, t, t0, o = {}) {
+    if (t < t0) return;
+    const s = slamScale(t, t0, o.from ?? 0.22, o.dur ?? 0.14);
+    const glow = 0.92 + 0.08 * flicker(t, o.seed ?? 8);
+    ctx.save();
+    camera(ctx, s, x, y - size * 0.35);
+    emberText(ctx, str, x, y, size, { ...o, glow: glow + 0.6 * Math.exp(-(t - t0) * 9), alpha: o.alpha ?? 1 });
+    ctx.restore();
+  }
+
+  // neon tube caps that flicker on
+  function neonLabel(ctx, str, y, t, t0, o = {}) {
+    const a = neon(prog(t, t0, t0 + (o.dur ?? 0.4))) * (o.alpha ?? 1);
+    if (a <= 0) return;
+    const tr = o.tracking ?? 10;
+    const size = fit(ctx, str, o.size ?? 56, o.maxW ?? 960, 'Figtree', tr, '800');
+    label(ctx, str, o.x ?? W / 2, y, size, { tracking: tr, color: o.color ?? '#FF8A4C', alpha: a, glow: o.glow ?? 30, glowColor: 'rgba(255,90,30,1)' });
+    label(ctx, str, o.x ?? W / 2, y, size, { tracking: tr, color: '#FFE2CC', alpha: a * 0.45 });
+  }
+
+  // dashed slot for an Instagram sticker (link / question), sparkle orbiting it
+  function stickerSlot(ctx, t, y, a, o = {}) {
+    if (a <= 0.001) return;
+    const bw = o.w ?? 620, bh = o.h ?? 150, bx = W / 2 - bw / 2, r = 30;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.strokeStyle = 'rgba(255,241,224,0.5)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([14, 12]);
+    ctx.lineDashOffset = -t * 30;
+    ctx.beginPath();
+    ctx.roundRect(bx, y, bw, bh, r);
+    ctx.stroke();
+    ctx.restore();
+    const per = 2 * (bw + bh);
+    const d = ((t / (o.lap ?? 2.4)) % 1) * per;
+    let px, py;
+    if (d < bw) { px = bx + d; py = y; }
+    else if (d < bw + bh) { px = bx + bw; py = y + (d - bw); }
+    else if (d < 2 * bw + bh) { px = bx + bw - (d - bw - bh); py = y + bh; }
+    else { px = bx; py = y + bh - (d - 2 * bw - bh); }
+    glint(ctx, px, py, 110, 0.8 * a, { spin: 1.2 });
+  }
+
   // ------------------------------------------------------ poster building blocks
-  // The standard 9:16 lockup (title / art / footer) in canvas px.
   const LOCK = {
     title: { x: 72, y: 272, s: 1.08 },
-    art: { x: 212, y: 548, s: 1.12 },
+    art: { x: 225, y: 548, s: 1.16 },
     footer: { x: 250, y: 1472, s: 1.0 },
   };
 
-  // knife rendered into an offscreen canvas with brightness + light sweep
-  let knifeBuf = null;
-  function knifeLayer(bright = 1, sweep = -1) {
-    const im = A.img.knife;
-    if (!knifeBuf) knifeBuf = canvas(im.width, im.height);
-    const x = knifeBuf.getContext('2d');
+  // brightness-controlled copies of RGBA layers (offscreen, reused per key)
+  const litBufs = {};
+  function litLayer(key, im, bright = 1, sweep = -1) {
+    let c = litBufs[key];
+    if (!c) c = litBufs[key] = canvas(im.width, im.height);
+    const x = c.getContext('2d');
     x.globalCompositeOperation = 'source-over';
     x.globalAlpha = 1;
     x.clearRect(0, 0, im.width, im.height);
@@ -319,50 +480,66 @@
       x.globalAlpha = 1;
     }
     if (sweep > -0.5 && sweep < 1.5) {
-      // highlight band travelling down the blade axis (hand -> tip)
-      const [gx, gy] = A.meta.glint;
-      const sx = 190, sy = 210;
+      const [gx, gy] = A.meta.glint, [sx, sy] = A.meta.hilt;
       const px = lerp(sx, gx, sweep), py = lerp(sy, gy, sweep);
-      const dx = gx - sx, dy = gy - sy, L = Math.hypot(dx, dy);
-      const ux = dx / L, uy = dy / L;
+      const dx = gx - sx, dy = gy - sy, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
       const g = x.createLinearGradient(px - ux * 70, py - uy * 70, px + ux * 70, py + uy * 70);
       g.addColorStop(0, 'rgba(255,245,230,0)');
-      g.addColorStop(0.5, 'rgba(255,248,238,0.75)');
+      g.addColorStop(0.5, 'rgba(255,248,238,0.8)');
       g.addColorStop(1, 'rgba(255,245,230,0)');
       x.fillStyle = g;
       x.fillRect(0, 0, im.width, im.height);
     }
-    return knifeBuf;
+    return c;
   }
 
-  /* Draw the key art (pumpkin, H glow, knife) at (x, y, s).
-   * o.pumpkin: pumpkin brightness 0..1 (already includes flicker if wanted)
-   * o.h:       H-carving glow 0..1
-   * o.knife:   knife brightness 0..1, o.knifeAlpha, o.knifeOffset [dx,dy] in art px
-   * o.sweep:   blade light sweep position 0..1 (or -1 off)
-   */
+  /* Key art at (x, y, s).
+   *  o.pumpkin brightness (0..1.4; >1 = ignition overshoot), o.pumpkinAlpha,
+   *  o.pumpkinOffset [dx,dy] art px, o.pumpkinScale (about the H), o.h (H glow)
+   *  o.knife brightness, o.knifeAlpha, o.knifeOffset [dx,dy] art px, o.sweep 0..1 */
   function art(ctx, x, y, s, o = {}) {
     const P = A.img.pumpkin, Hh = A.img.h_glow;
-    const pb = o.pumpkin ?? 1;
-    drawImg(ctx, P, x, y, s, pb, 'screen');
-    if (pb > 0.02) bloom(ctx, 'pumpkin', P, x, y, s, 26, 0.32 * pb * (o.bloom ?? 1));
-    const h = o.h ?? 1;
-    if (h > 0.001) {
-      drawImg(ctx, Hh, x, y, s, 0.55 * h, 'lighter');
-      bloom(ctx, 'h1', Hh, x, y, s, 10, 0.8 * h);
-      bloom(ctx, 'h2', Hh, x, y, s, 34, 0.75 * h);
+    const pb = o.pumpkin ?? 1, pa = o.pumpkinAlpha ?? 1;
+    const [pdx, pdy] = o.pumpkinOffset || [0, 0];
+    const ps = o.pumpkinScale ?? 1;
+    const [hcx, hcy] = A.meta.h_center;
+    if (pa > 0.001 && pb > 0.001) {
+      ctx.save();
+      ctx.translate(x + (pdx + hcx) * s, y + (pdy + hcy) * s);
+      ctx.scale(ps, ps);
+      ctx.translate(-(x + hcx * s), -(y + hcy * s));
+      drawImg(ctx, litLayer('pumpkin', P, Math.min(pb, 1)), x, y, s, pa);
+      if (pb > 1) drawImg(ctx, P, x, y, s, (pb - 1) * pa, 'lighter');
+      bloom(ctx, 'pumpkin', P, x, y, s, 26, 0.3 * Math.min(pb, 1.4) * pa * (o.bloom ?? 1));
+      const h = (o.h ?? 1) * pa;
+      if (h > 0.001) {
+        drawImg(ctx, Hh, x, y, s, 0.5 * h, 'lighter');
+        bloom(ctx, 'h1', Hh, x, y, s, 10, 0.75 * h);
+        bloom(ctx, 'h2', Hh, x, y, s, 34, 0.7 * h);
+      }
+      ctx.restore();
     }
-    const kb = o.knife ?? 1;
     const ka = o.knifeAlpha ?? 1;
     if (ka > 0.001) {
       const [dx, dy] = o.knifeOffset || [0, 0];
-      const k = knifeLayer(kb, o.sweep ?? -1);
-      drawImg(ctx, k, x + dx * s, y + dy * s, s, ka);
+      drawImg(ctx, litLayer('knife', A.img.knife, o.knife ?? 1, o.sweep ?? -1), x + dx * s, y + dy * s, s, ka);
     }
   }
 
-  /* Henderson Brewing Co. roundel (keyed from the can in prep_logo.py).
-   * Placed by its circle centre (cx, cy) at a given circle diameter. */
+  function artTip(x, y, s, off = [0, 0]) {
+    const [gx, gy] = A.meta.glint;
+    return [x + (gx + off[0]) * s, y + (gy + off[1]) * s];
+  }
+  function artH(x, y, s) {
+    const [hx, hy] = A.meta.h_center;
+    return [x + hx * s, y + hy * s];
+  }
+  const bladeDir = () => {
+    const a = (A.meta.blade_angle_deg * Math.PI) / 180;
+    return [Math.cos(a), Math.sin(a)];
+  };
+
+  /* Henderson Brewing Co. roundel, placed by circle centre at a diameter. */
   function logo(ctx, cx, cy, diameter, alpha = 1, glow = 0.25) {
     if (alpha <= 0.001) return;
     const L = A.meta.logo, im = A.img.logo;
@@ -371,7 +548,6 @@
     drawImg(ctx, im, x, y, s, alpha);
     if (glow > 0) bloom(ctx, 'logo', im, x, y, s, 36, glow * alpha);
   }
-  // same, but positioned by the centre of the logo's H at a given H height (for match cuts)
   function logoByH(ctx, hx, hy, hHeight, alpha = 1, glow = 0.25) {
     const L = A.meta.logo;
     const [x0, y0, x1, y1] = L.h_box;
@@ -380,14 +556,7 @@
     logo(ctx, hx + (L.center[0] - hcx) * s, hy + (L.center[1] - hcy) * s, 2 * L.radius * s, alpha, glow);
   }
 
-  function artTip(x, y, s, off = [0, 0]) {
-    const [gx, gy] = A.meta.glint;
-    return [x + (gx + off[0]) * s, y + (gy + off[1]) * s];
-  }
-
-  /* Poster title with per-letter control.
-   * letterFn(lineIdx, i, n) -> {ember, fill}  (0..1 each)
-   */
+  /* Poster title with per-letter control. letterFn(lineIdx, i, n) -> {ember, fill} */
   function title(ctx, x, y, s, letterFn, o = {}) {
     const meta = A.meta.title_letters;
     const imE = A.img.title_ember, imF = A.img.title_fill;
@@ -422,8 +591,6 @@
     });
   }
 
-  const titleAll = (a) => () => ({ ember: a, fill: a });
-
   // --------------------------------------------------------------- transitions
   const scenes = [canvas(W, H), canvas(W, H), canvas(W, H)];
   function scene(i, fn, transparent = false) {
@@ -441,24 +608,21 @@
     return c;
   }
 
-  /* Knife-slash wipe from scene A to scene B.
-   * p 0..1: 0-0.28 the cut races across; 0.28-1 the halves part along the
-   * cut's normal and fall away, revealing B.
-   */
+  /* Knife-slash wipe from scene A to scene B (p 0..1). */
   function slashWipe(ctx, A_, B_, p, o = {}) {
     const ang = ((o.angle ?? 62) * Math.PI) / 180;
     const cx = o.cx ?? W / 2, cy = o.cy ?? H / 2;
     const ux = Math.cos(ang), uy = Math.sin(ang);
     const nx = -uy, ny = ux;
     const R = 2600;
-    const cut = ease.inOut2(prog(p, 0, 0.28));
-    const part = ease.inOut3(prog(p, 0.24, 1));
+    const cut = ease.out3(prog(p, 0, 0.3));
+    const part = ease.inOut3(prog(p, 0.22, 1));
     ctx.drawImage(B_, 0, 0);
     if (part < 1) {
       [1, -1].forEach((side) => {
         ctx.save();
-        const d = part * 620 * side;
-        const drift = part * 180 * side;
+        const d = part * 700 * side;
+        const drift = part * 200 * side;
         ctx.translate(nx * d + ux * drift, ny * d + uy * drift);
         ctx.beginPath();
         ctx.moveTo(cx - ux * R, cy - uy * R);
@@ -472,7 +636,6 @@
         ctx.restore();
       });
     }
-    // the cut itself: a white-hot line with ember glow
     const lineA = cut * (1 - ease.out2(prog(p, 0.3, 0.7)));
     if (lineA > 0.001) {
       const L = 1400;
@@ -485,15 +648,15 @@
       ctx.shadowColor = 'rgba(255,90,40,1)';
       ctx.shadowBlur = 40;
       ctx.strokeStyle = 'rgba(255,120,60,0.9)';
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 12;
       ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
       ctx.shadowBlur = 12;
       ctx.shadowColor = 'rgba(255,240,220,1)';
       ctx.strokeStyle = 'rgba(255,250,240,1)';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.5;
       ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
       ctx.restore();
-      if (cut < 1) glint(ctx, x1, y1, 170, lineA);
+      if (cut < 1) glint(ctx, x1, y1, 200, lineA);
     }
   }
 
@@ -503,14 +666,14 @@
 
   function renderFrame(ctx, id, t) {
     const card = CARDS[id];
+    NOW = t;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = COLOR.void;
     ctx.fillRect(0, 0, W, H);
-    // gate weave: ±1px drift
     ctx.save();
-    ctx.translate((vnoise(t * 9) - 0.5) * 2, (vnoise(t * 7 + 50) - 0.5) * 2.4);
+    ctx.translate((vnoise(t * 9) - 0.5) * 2, (vnoise(t * 7 + 50) - 0.5) * 2.4);  // gate weave
     card.draw(ctx, t);
     ctx.restore();
     post(ctx, t, card.post || {});
@@ -518,7 +681,8 @@
 
   window.HH = {
     W, H, FPS, COLOR, clamp, lerp, prog, ease, hash, vnoise, flicker, pflicker, neon, flare,
-    A, load, canvas, blurred, drawImg, bloom, glint, setFont, emberText, emberTextLetters, label,
-    LOCK, art, artTip, logo, logoByH, title, titleAll, scene, slashWipe, register, CARDS, renderFrame,
+    A, load, canvas, blurred, drawImg, bloom, camera, glint, sparkle, shakeAt, flash, slamScale, edgeLight,
+    setFont, fit, emberText, emberTextLetters, label, kicker, slamText, neonLabel, stickerSlot,
+    LOCK, art, artTip, artH, bladeDir, logo, logoByH, title, scene, slashWipe, register, CARDS, renderFrame,
   };
 })();

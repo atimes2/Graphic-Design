@@ -18,22 +18,23 @@
     "k3": "SO WE'RE TAKING OVER",
     "venue2": "BREWING CO."
   },
+  "earlyBird": { "l1": "EARLY BIRD", "l2": "TICKETS", "status": "NOW AVAILABLE", "sub": "CHEAPER THE EARLIER YOU BUY" },
+  "earlyBirdSoldOut": { "l1": "EARLY BIRD", "l2": "TICKETS", "stamp": "SOLD OUT!", "sub": "REGULAR TICKETS ON SALE NOW" },
+  "tickets": { "l1": "TICKETS", "status": "NOW AVAILABLE", "cta": "GET YOUR TICKETS TODAY" },
+  "countdown": [31, 21, 14, 7, 3, 1],
+  "countdownLabel": { "one": "DAY TO GO", "many": "DAYS TO GO" },
+  "countdownSub": "OCT 31 · HENDERSON BREWING CO.",
   "night": {
     "kicker": "SAT OCT 31 · 10PM – 2AM",
     "head": "DJS ALL NIGHT",
     "genres": ["DEEP HOUSE", "TECHNO", "POP REMIXES", "& MORE"],
     "lines": ["DEEP HOUSE · TECHNO · POP REMIXES", "LIGHTS · LASERS · VISUALS", "FULL BAR ON SITE"]
   },
-  "dress": {
-    "line1": "DRESS",
-    "line2": "TO KILL.",
-    "sub": "COSTUMES ENCOURAGED",
-    "contest": "BEST GROUP COSTUME WINS DRINKS"
-  },
   "first100": { "kicker": "THE FIRST", "num": "100", "line": "GUESTS", "sub": "GET A FREE DRINK TICKET" },
-  "countdown": [7, 3, 1],
-  "countdownSub": "OCT 31 · HENDERSON BREWING CO.",
-  "tickets": { "headline": "TICKETS", "sub": "CHEAPER THE EARLIER YOU BUY" },
+  "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COSTUMES ENCOURAGED", "contest": "BEST GROUP COSTUME WINS DRINKS" },
+  "contest": { "l1": "BEST GROUP", "l2": "COSTUME", "l3": "CONTEST", "prize": "WINNERS GET DRINK PRIZES", "cta": "TAG YOUR CREW" },
+  "question": { "l1": "WHAT ARE YOU", "l2": "GOING AS?", "sub": "DROP YOUR COSTUME BELOW" },
+  "lastCall": { "l1": "LAST CALL", "l2": "FOR TICKETS", "sub": "GET YOURS BEFORE THEY'RE GONE" },
   "tonight": {
     "headline": "TONIGHT.",
     "sub": "DOORS 10PM",

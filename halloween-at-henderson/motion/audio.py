@@ -1,8 +1,7 @@
-"""Original sound design for each card, synthesized from the card's cue list.
+"""Sound effects for each card, synthesized from the card's cue list.
 
-Nothing sampled or licensed: a low drone bed, an original 7/8 piano ostinato
-(deliberately not the Carpenter theme), and synthesized SFX (knife "shing",
-candle ignition, ember sizzle, slash, impacts, heartbeat).
+SFX only, no music: knife "shing", stab, slash, impacts, candle ignition,
+neon buzz, laser zaps, stamp, heartbeat, risers. Nothing sampled or licensed.
 
 usage: python3 audio.py cues.json out.wav
 """
@@ -65,18 +64,6 @@ def noise(d):
 
 
 # --------------------------------------------------------------------- sounds
-def piano(freq, d=2.4, vel=0.5):
-    t = t_axis(d)
-    y = np.zeros_like(t)
-    for k, amp in enumerate([1, 0.5, 0.3, 0.18, 0.1, 0.06], start=1):
-        f = freq * k * (1 + 0.0004 * k * k)
-        y += amp * np.sin(2 * np.pi * f * t) * np.exp(-t * (1.6 + 0.9 * k))
-    y *= env(len(t), 0.004, d, 1.0)
-    hammer = hp(noise(0.02), 2000) * np.linspace(1, 0, int(0.02 * SR)) * 0.08
-    y[: len(hammer)] += hammer
-    return y * vel
-
-
 def shing(gain=1.0):
     d = 2.2
     t = t_axis(d)
@@ -139,12 +126,6 @@ def pad(d=6.0):
     return y * 0.035
 
 
-def credit(i=0):
-    notes = [82.41, 77.78, 82.41, 73.42]
-    f = notes[i % 4]
-    return (piano(f, 3.0, 0.5) + piano(f * 2, 3.0, 0.25)) * 0.8
-
-
 def slash():
     d = 1.8
     n = noise(d)
@@ -152,12 +133,66 @@ def slash():
     return sw * 0.9 + shing(0.6) [: len(sw)] * 0.7 + hit(0.4)[: len(sw)]
 
 
-def whoosh():
-    d = 0.9
+def whoosh(dur=0.6):
+    """rises for `dur` seconds and peaks at the end (placed to end on the cue)"""
+    d = dur + 0.15
     n = noise(d)
     t = t_axis(d)
-    e = (t / d) ** 2.5
-    return sweep_bp(n, 250, 2400, q=1.0) * e * 0.8
+    e = np.where(t < dur, (t / dur) ** 2.2, np.exp(-(t - dur) * 30))
+    return sweep_bp(n, 300, 3000, q=1.0, segs=24) * e * 0.9
+
+
+def stab():
+    d = 1.4
+    t = t_axis(d)
+    y = hit(0.75)[: len(t)]
+    ring = sum(a * np.sin(2 * np.pi * f * t) for f, a in [(2150, 0.5), (3470, 0.35), (5200, 0.2)])
+    y += ring * np.exp(-t * 7) * 0.12
+    y += hp(noise(d), 4000) * np.exp(-t * 45) * 0.3
+    return y
+
+
+def tick(gain=1.0):
+    d = 0.35
+    t = t_axis(d)
+    f = 60 + 110 * np.exp(-t * 40)
+    y = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 16)
+    y += hp(noise(d), 2500) * np.exp(-t * 90) * 0.4
+    return np.tanh(y * 1.5) * 0.4 * gain
+
+
+def buzz(dur=0.35):
+    """neon tube catching: gated mains buzz + crackle, gating follows the flicker-on"""
+    d = dur + 0.1
+    t = t_axis(d)
+    y = sum(np.sin(2 * np.pi * 120 * k * t) / k for k in range(1, 12))
+    steps = [0.0, 0.85, 0.1, 0.55, 0.0, 0.9, 0.6, 1.0]
+    idx = np.minimum((t / dur * len(steps)).astype(int), len(steps) - 1)
+    gate = np.array(steps)[idx]
+    gate = np.convolve(gate, np.ones(200) / 200, mode="same")
+    y = bp(y, 150, 3500) * gate * np.clip((d - t) / 0.08, 0, 1)
+    y += hp(noise(d), 3000) * (np.abs(np.diff(gate, prepend=0)) > 0.0005) * 0.6
+    return y * 0.12
+
+
+def laser(i=0):
+    d = 0.32
+    t = t_axis(d)
+    f0 = [2600, 2200, 2900, 2400][i % 4]
+    f = 260 + (f0 - 260) * np.exp(-t * 26)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    y = np.sin(ph + 2.5 * np.sin(ph * 0.5)) * np.exp(-t * 11)
+    return bp(y, 200, 6000) * 0.16
+
+
+def stamp():
+    d = 1.6
+    t = t_axis(d)
+    f = 38 + 50 * np.exp(-t * 14)
+    y = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 4.5)
+    y += lp(noise(d), 900) * np.exp(-t * 25) * 0.9
+    y += hp(noise(d), 1800) * np.exp(-t * 70) * 0.5
+    return np.tanh(y * 1.8) * 0.6
 
 
 def hit(gain=1.0):
@@ -167,8 +202,7 @@ def hit(gain=1.0):
     ph = 2 * np.pi * np.cumsum(f) / SR
     y = np.sin(ph) * env(len(t), 0.003, 1.6, 3.0)
     y += lp(noise(d), 1500) * np.exp(-t * 30) * 0.6
-    for fr in [41.2, 43.65, 61.7]:
-        y += piano(fr, d, 0.35)[: len(t)]
+    y += hp(noise(d), 3000) * np.exp(-t * 60) * 0.25          # transient crack
     return np.tanh(y * 1.4) * 0.55 * gain
 
 
@@ -205,49 +239,18 @@ SFX = {
     "swell": lambda c: swell(),
     "blade": lambda c: blade(),
     "burn": lambda c: burn(c.get("dur", 1.5)),
-    "credit": lambda c: credit(c.get("i", 0)),
     "slash": lambda c: slash(),
-    "whoosh": lambda c: whoosh(),
+    "whoosh": lambda c: whoosh(c.get("dur", 0.6)),
+    "stab": lambda c: stab(),
+    "tick": lambda c: tick(c.get("gain", 1.0)),
+    "buzz": lambda c: buzz(c.get("dur", 0.35)),
+    "laser": lambda c: laser(c.get("i", 0)),
+    "stamp": lambda c: stamp(),
     "hit": lambda c: hit(c.get("gain", 1.0)),
     "heart": lambda c: heart(),
     "riser": lambda c: riser(c.get("dur", 0.9)),
     "carve": lambda c: carve(c.get("dur", 1.2)),
 }
-
-
-# ------------------------------------------------------------------- the bed
-def drone(d, loop_period=None):
-    t = t_axis(d)
-    if loop_period:
-        # every modulation is periodic in loop_period so the loop is seamless
-        m = lambda k, ph=0: np.sin(2 * np.pi * k * t / loop_period + ph)
-        fs = [41.2, 61.875, 82.5]  # tuned to integer cycles over 8s
-        fs = [round(f * loop_period) / loop_period for f in fs]
-        y = sum(np.sin(2 * np.pi * f * t) * (0.6 + 0.4 * m(1, i)) for i, f in enumerate(fs))
-        wind = lp(np.tile(noise(loop_period), int(np.ceil(d / loop_period)) + 1)[: len(t)], 380) * (0.6 + 0.4 * m(2))
-    else:
-        y = sum(np.sin(2 * np.pi * f * t + i) * (0.7 + 0.3 * np.sin(2 * np.pi * t / (5 + i))) for i, f in enumerate([41.2, 61.7, 82.4]))
-        wind = lp(noise(d), 380) * (0.6 + 0.4 * np.sin(2 * np.pi * t / 7))
-    return y * 0.05 + wind * 0.05
-
-
-def ostinato(d, start, eighth=0.2, gain=1.0):
-    """original 7/8 figure in E phrygian: restless, not the film theme"""
-    hi = [659.3, 493.9, 659.3, 493.9, 698.5, 493.9, 587.3]
-    lo = [82.41, 82.41, 87.31, 73.42]
-    out = np.zeros(int(d * SR) + SR * 3)
-    k = 0
-    tt = start
-    while tt < d - 0.05:
-        i = int(tt * SR)
-        note = piano(hi[k % 7], 1.2, 0.16 if k % 7 else 0.22)
-        out[i:i + len(note)] += note
-        if k % 7 == 0:
-            bass = piano(lo[(k // 7) % 4], 2.6, 0.4) + piano(lo[(k // 7) % 4] * 2, 2.6, 0.14)
-            out[i:i + len(bass)] += bass
-        k += 1
-        tt += eighth
-    return out * gain
 
 
 def reverb(x, secs=2.6, wet=0.28):
@@ -261,23 +264,14 @@ def reverb(x, secs=2.6, wet=0.28):
     return fftconvolve(x, irl)[: len(x)] * wet, fftconvolve(x, irr)[: len(x)] * wet
 
 
-MUSIC_START = {
-    "01-the-return": 1.6,
-    "02-the-details": 0.0,
-    "03-countdown": 1.45,
-    "04-dress-to-kill": 2.9,
-    "05-rsvp": 0.0,
-    "06-tonight": 2.0,
-}
-
-
 def add_cues(mono, cues, offset=0.0):
     for c in cues:
         fn = SFX.get(c["type"])
         if not fn:
             continue
-        s = fn(c)
-        i = int((c["t"] + offset) * SR)
+        s = fn(c) * c.get("level", 1.0)
+        t0 = c["t"] - (c.get("dur", 0.6) if c["type"] == "whoosh" else 0)   # whooshes end on the cue
+        i = max(0, int((t0 + offset) * SR))
         j = min(len(mono), i + len(s))
         if j > i:
             mono[i:j] += s[: j - i]
@@ -285,43 +279,22 @@ def add_cues(mono, cues, offset=0.0):
 
 def main(cues_path, out_path):
     card = json.load(open(cues_path))
-    cid, d, loop = card["id"], card["duration"], card.get("loop", False)
+    d = card["duration"]
     L = int(d * SR)
-    tail = 4 * SR
-
-    if loop:
-        # Everything is periodic in d: render three cycles (with reverb) and
-        # keep the middle one, so ringing notes and reverb wrap seamlessly.
-        n = 3 * L + tail
-        mono = np.zeros(n)
-        o = ostinato(3 * d, 0.0, d / 35) * 0.75  # 5 bars of 7/8 per loop
-        mono[: min(len(o), n)] += o[:n]
-        mono[: 3 * L] += drone(3 * d, loop_period=d)
-        for k in range(3):
-            add_cues(mono, card["cues"], k * d)
-        wl, wr = reverb(mono)
-        st = np.stack([mono + wl, mono * 0.98 + wr], 1)[L:2 * L]
-    else:
-        mono = np.zeros(L + tail)
-        mono[:L] += drone(d)
-        key = next((k for k in MUSIC_START if cid.startswith(k)), None)
-        ms = MUSIC_START.get(key, 0.0)
-        o = ostinato(d, ms, 0.17 if cid.startswith("06") else 0.2) * 0.7
-        ramp = np.clip((np.arange(len(o)) / SR - ms) / 2.5, 0, 1)  # music creeps in
-        o *= ramp
-        k = min(len(o), len(mono))
-        mono[:k] += o[:k]
-        add_cues(mono, card["cues"])
-        wl, wr = reverb(mono)
-        st = np.stack([mono + wl, mono * 0.98 + wr], 1)[:L]
-        fade = int(0.35 * SR)
-        st[-fade:] *= np.linspace(1, 0, fade)[:, None]
-        st[:240] *= np.linspace(0, 1, 240)[:, None]
+    mono = np.zeros(L + 3 * SR)
+    add_cues(mono, card.get("cues", []))
+    wl, wr = reverb(mono, secs=1.8, wet=0.2)
+    st = np.stack([mono + wl, mono * 0.98 + wr], 1)[:L]
+    fade = int(0.25 * SR)
+    st[-fade:] *= np.linspace(1, 0, fade)[:, None]
+    st[:120] *= np.linspace(0, 1, 120)[:, None]
 
     # loudness: -16 LUFS integrated, soft-limited to about -1.5 dBFS peak
     import pyloudnorm as pyln
     meter = pyln.Meter(SR)
-    st = pyln.normalize.loudness(st, meter.integrated_loudness(st), -16.0)
+    lufs = meter.integrated_loudness(st)
+    if np.isfinite(lufs):
+        st = pyln.normalize.loudness(st, lufs, -16.0)
     ceil = 10 ** (-1.5 / 20)
     st = np.tanh(st / ceil) * ceil
     wavfile.write(out_path, SR, (st * 32767).astype(np.int16))
