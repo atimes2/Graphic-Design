@@ -173,10 +173,10 @@
     cues: [
       neonCue(0.15, 0.3), neonCue(0.4, 0.7), airCue(1.3), { t: 2.6, type: 'slash' },
       neonCue(2.9, 0.3), burnCue(3.1, 'WE NEEDED'), burnCue(3.6, 'MORE ROOM.'),
-      { t: 5.0, type: 'whoosh', dur: 0.5 }, neonCue(5.2, 0.3), airCue(5.45), { t: 5.8, type: 'glint', gain: 0.6 },
+      { t: 5.0, type: 'whoosh', dur: 0.5 }, neonCue(5.2, 0.3), airCue(5.45),
       { t: 6.55, type: 'stab' }, { t: 6.55, type: 'ignite' },
-      { t: 7.7, type: 'riser', dur: 0.6 }, { t: 7.7, type: 'hit', gain: 0.9 }, { t: 7.7, type: 'glint' },
-      { t: 9.8, type: 'glint', gain: 0.5 }, { t: 12.6, type: 'glint', gain: 0.5 },
+      { t: 7.7, type: 'riser', dur: 0.6 }, { t: 7.7, type: 'hit', gain: 0.9 },
+      // sparkles stay silent here (no glint "ding")
     ],
     draw(ctx, t) {
       withHits(ctx, t, [[2.6, 0.15], [6.55, 0.18], [7.7, 0.4]], () => {
