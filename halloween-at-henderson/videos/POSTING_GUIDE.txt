@@ -11,6 +11,8 @@ TICKETS  (dashed box = drop your ticket link sticker there)
   04-early-bird-on-sale.mp4     12s   when early bird opens
   10-early-bird-sold-out.mp4    12s   when early bird sells out *
   11-tickets-on-sale.mp4        10s   any time
+  15-early-bird-almost-gone.mp4 12s   early bird nearly gone (post now)
+  17-the-earlier-you-buy.mp4    10s   tiered pricing, any time before the last week
   13-last-call.mp4              10s   final days *
 
 COUNTDOWN
@@ -22,7 +24,9 @@ COUNTDOWN
   05-countdown-01.mp4           Oct 30
 
 HYPE / ENGAGEMENT
-  06-the-night.mp4              12s   DJs, lasers, full bar
+  06-the-night.mp4              12s   DJs (bass, techno, pop remixes), lasers, full bar
+  16-on-a-saturday.mp4          10s   Halloween falls on a Saturday
+  18-lights-lasers-visuals.mp4  10s   production / full bar
   07-first-100.mp4              10s   free drink ticket, first 100 guests
   08-dress-to-kill.mp4          10s   costumes encouraged
   09-costume-contest.mp4        12s   best group costume contest
@@ -33,3 +37,8 @@ DAY OF
 
 * Check before posting: "Regular tickets on sale now" (10) and
   "Get yours before they're gone" (13) are placeholder lines.
+
+VENUE TV
+  tv-loop.mp4                   60s   1920x1080, silent, loops seamlessly. Set the TV
+                                      player to repeat. The QR code (luma.com/gj1waa12,
+                                      utm_source=hendersontv) stays on screen the whole time.

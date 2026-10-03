@@ -195,6 +195,12 @@ This round's feedback: the hard hits work for the knife but are too aggressive f
 | 12 | `12-what-are-you-going-as` (question slot) | 10s |
 | 13 | `13-last-call` (link slot) | 10s |
 | 14 | `14-tonight` | 12s |
+| 15 | `15-early-bird-almost-gone` (link slot): ticket meter stops two blocks short | 12s |
+| 16 | `16-on-a-saturday`: October flips by, the 31st lights up | 10s |
+| 17 | `17-the-earlier-you-buy` (link slot): price bars climb, NOW stays lit | 10s |
+| 18 | `18-lights-lasers-visuals`: crossing laser fans on the beat | 10s |
+
+**Venue TV loop** (`tv-loop`, 60s, 1920×1080, silent): seven scenes on the left (poster lockup, sold out → Henderson, DJs and lasers, first 100, costume contest, details, get your tickets) with the ticket QR, date and wordmark fixed in a right-hand column. It loops with no visible seam; the QR is drawn pixel-sharp above the grain.
 
 **Sound:** synthesized SFX only (stab, slash, stamp, neon buzz, ember sizzle, soft air swells, laser zaps, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
 

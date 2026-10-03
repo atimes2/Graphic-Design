@@ -27,14 +27,28 @@
   "night": {
     "kicker": "SAT OCT 31 · 10PM – 2AM",
     "head": "DJS ALL NIGHT",
-    "genres": ["DEEP HOUSE", "TECHNO", "POP REMIXES", "& MORE"],
-    "lines": ["DEEP HOUSE · TECHNO · POP REMIXES", "LIGHTS · LASERS · VISUALS", "FULL BAR ON SITE"]
+    "genres": ["BASS", "TECHNO", "POP REMIXES", "& MORE"],
+    "lines": ["BASS · TECHNO · POP REMIXES", "LIGHTS · LASERS · VISUALS", "FULL BAR ON SITE"]
   },
   "first100": { "kicker": "THE FIRST", "num": "100", "line": "GUESTS", "sub": "GET A FREE DRINK TICKET" },
   "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COSTUMES ENCOURAGED", "contest": "BEST GROUP COSTUME WINS DRINKS" },
   "contest": { "l1": "BEST GROUP", "l2": "COSTUME", "l3": "CONTEST", "prize": "WINNERS GET DRINK PRIZES" },
   "question": { "l1": "WHAT ARE YOU", "l2": "GOING AS?", "sub": "DROP YOUR COSTUME BELOW" },
   "lastCall": { "l1": "LAST CALL", "l2": "FOR TICKETS", "sub": "GET YOURS BEFORE THEY'RE GONE" },
+  "almostGone": { "l1": "EARLY BIRD", "l2": "ALMOST", "l3": "SOLD OUT", "meter": "TICKETS GOING FAST", "sub": "CHEAPER THE EARLIER YOU BUY" },
+  "saturday": { "kicker": "THIS YEAR HALLOWEEN FALLS ON A", "big": "SATURDAY.", "month": "OCTOBER 2026", "foot": "10PM – 2AM · HENDERSON BREWING CO." },
+  "earlier": { "l1": "THE EARLIER", "l2": "YOU BUY,", "l3": "THE LESS YOU PAY", "steps": ["NOW", "LATER", "LAST MINUTE"] },
+  "lights": { "words": ["LIGHTS.", "LASERS.", "VISUALS."], "l1": "FULL BAR ON SITE", "l2": "SAT OCT 31 · 10PM – 2AM" },
+  "tv": {
+    "scan": "SCAN FOR TICKETS",
+    "date": "SAT · OCT 31",
+    "time": "10PM – 2AM · 19+",
+    "cheaper": "CHEAPER THE EARLIER YOU BUY",
+    "ctaKicker": "TICKETS ON SALE NOW",
+    "cta1": "GET YOUR",
+    "cta2": "TICKETS",
+    "ctaSub": "SCAN THE CODE · THE EARLIER YOU BUY THE LESS YOU PAY"
+  },
   "tonight": {
     "headline": "TONIGHT.",
     "sub": "DOORS 10PM",

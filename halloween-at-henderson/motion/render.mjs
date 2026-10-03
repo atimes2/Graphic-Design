@@ -5,6 +5,8 @@
 //   node render.mjs --stills 01 0,2.5,7  # review stills -> review/
 //   node render.mjs --sheet              # contact sheets -> review/
 //   AUDIO=0 node render.mjs              # silent (default: synthesized SFX, no music)
+//   node render.mjs --tv                 # the 60s venue TV loop (1920x1080, silent) from tv.html
+//   node render.mjs --tv --stills tv 0,12  # TV review stills
 //
 import http from 'node:http';
 import fs from 'node:fs';
@@ -36,11 +38,14 @@ function serve() {
   });
 }
 
+const TV = process.argv.includes('--tv');
+const PAGE = TV ? 'tv.html' : 'index.html';
+
 async function openPage(browser, port) {
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1920 } });
   page.on('pageerror', (e) => console.error('pageerror', e));
   page.on('console', (m) => { if (m.type() === 'error') console.error('console', m.text()); });
-  await page.goto(`http://127.0.0.1:${port}/index.html?render=1`);
+  await page.goto(`http://127.0.0.1:${port}/${PAGE}?render=1`);
   await page.waitForFunction(() => window.HH_ready === true, null, { timeout: 60000 });
   return page;
 }
@@ -62,7 +67,7 @@ async function renderCard(page, card) {
   const tmp = path.join(ROOT, '.tmp');
   fs.mkdirSync(tmp, { recursive: true });
   let audioIn = [], audioOut = ['-an'];
-  if (AUDIO) {
+  if (AUDIO && !card.silent) {
     const cuesPath = path.join(tmp, `${card.id}.cues.json`);
     const wav = path.join(tmp, `${card.id}.wav`);
     fs.writeFileSync(cuesPath, JSON.stringify({ cues: [], ...card }));
@@ -98,7 +103,7 @@ async function renderCard(page, card) {
 }
 
 async function main() {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2).filter((a) => a !== '--tv');
   const srv = await serve();
   const port = srv.address().port;
   const browser = await chromium.launch({

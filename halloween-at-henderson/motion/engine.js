@@ -5,7 +5,9 @@
  * are repeatable and the Playwright renderer can step frame by frame.
  */
 (function () {
-  const W = 1080, H = 1920, FPS = 30;
+  // story frame by default; a page can set window.HH_SIZE first (the TV loop is 1920x1080)
+  const { W, H } = window.HH_SIZE || { W: 1080, H: 1920 };
+  const FPS = 30;
 
   // headline face: Copperplate New Black Condensed (closest match to the poster title)
   const DISPLAY = 'Copperplate';
@@ -123,9 +125,9 @@
     let seed = 1;
     const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
     for (let n = 0; n < 8; n++) {
-      const c = canvas(540, 960);
+      const c = canvas(W / 2, H / 2);
       const x = c.getContext('2d');
-      const d = x.createImageData(540, 960);
+      const d = x.createImageData(W / 2, H / 2);
       for (let i = 0; i < d.data.length; i += 4) {
         const v = ((rnd() + rnd() + rnd()) / 3) * 255;
         d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
@@ -149,7 +151,8 @@
     ctx.drawImage(g, ox, oy, W + 80, H + 80);
     ctx.restore();
     ctx.save();
-    const v = ctx.createRadialGradient(W / 2, H * 0.48, H * 0.28, W / 2, H * 0.48, H * 0.72);
+    const R = Math.max(W, H);
+    const v = ctx.createRadialGradient(W / 2, H * 0.48, R * 0.28, W / 2, H * 0.48, R * 0.72);
     v.addColorStop(0, 'rgba(0,0,0,0)');
     v.addColorStop(1, `rgba(0,0,0,${opts.vignette ?? 0.6})`);
     ctx.fillStyle = v;
@@ -743,10 +746,11 @@
     ctx.fillStyle = COLOR.void;
     ctx.fillRect(0, 0, W, H);
     ctx.save();
-    ctx.translate((vnoise(t * 9) - 0.5) * 2, (vnoise(t * 7 + 50) - 0.5) * 2.4);  // gate weave
+    if (card.weave !== false) ctx.translate((vnoise(t * 9) - 0.5) * 2, (vnoise(t * 7 + 50) - 0.5) * 2.4);  // gate weave
     card.draw(ctx, t);
     ctx.restore();
     post(ctx, t, card.post || {});
+    if (card.overlay) card.overlay(ctx, t);   // drawn clean, above grain + vignette (e.g. a QR code)
   }
 
   window.HH = {

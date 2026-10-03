@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halloween at Henderson · TV Loop</title>
+<style>
+  @font-face { font-family: "Bowlby One"; src: url(fonts/BowlbyOne-Regular.ttf); }
+  @font-face { font-family: "Figtree"; font-weight: 700; src: url(fonts/Figtree-Bold.ttf); }
+  @font-face { font-family: "Figtree"; font-weight: 800; src: url(fonts/Figtree-ExtraBold.ttf); }
+  @font-face { font-family: "Lobster"; src: url(fonts/Lobster-Regular.ttf); }
+  @font-face { font-family: "Rammetto One"; src: url(fonts/RammettoOne-Regular.ttf); }
+  @font-face { font-family: "Copperplate"; src: url(fonts/CopperplateNewTrial-BlackCondensed.otf); }
+  html, body { margin: 0; background: #111; color: #ddd; font: 14px system-ui, sans-serif; }
+  #ui { height: 44px; display: flex; gap: 10px; align-items: center; justify-content: center; }
+  canvas { display: block; width: min(100vw, calc((100vh - 44px) * 16 / 9)); margin: 0 auto; }
+  body.render #ui { display: none; }
+  body.render canvas { width: auto; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <button id="play">Pause</button>
+  <input id="scrub" type="range" min="0" max="1" step="0.0002" style="width: 50vw">
+  <span id="time">0.00s</span>
+</div>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>window.HH_SIZE = { W: 1920, H: 1080 };</script>
+<script src="engine.js"></script>
+<script src="cards.js"></script>
+<script src="tv.js"></script>
+<script>
+(async () => {
+  await HH.load();
+  await HH_TV.load();
+  const cv = document.getElementById('c');
+  const ctx = cv.getContext('2d');
+  const ID = 'tv-loop';
+  Object.keys(HH.CARDS).filter((k) => k !== ID).forEach((k) => delete HH.CARDS[k]);   // stories don't fit 16:9
+
+  window.HH_frame = (id, t, q = 0.95) => { HH.renderFrame(ctx, id, t); return cv.toDataURL('image/jpeg', q); };
+  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues || [], silent: !!c.silent }));
+  window.HH_ready = true;
+
+  const params = new URLSearchParams(location.search);
+  if (params.has('render')) { document.body.classList.add('render'); return; }
+
+  const card = HH.CARDS[ID];
+  const scrub = document.getElementById('scrub');
+  const time = document.getElementById('time');
+  const btn = document.getElementById('play');
+  let playing = true, t = Number(params.get('t') || 0), last = performance.now();
+  btn.onclick = () => { playing = !playing; btn.textContent = playing ? 'Pause' : 'Play'; };
+  scrub.oninput = () => { t = scrub.value * card.duration; playing = false; btn.textContent = 'Play'; };
+  const tick = (now) => {
+    if (playing) t = (t + (now - last) / 1000) % card.duration;
+    last = now;
+    HH.renderFrame(ctx, ID, t);
+    scrub.value = t / card.duration;
+    time.textContent = `${t.toFixed(2)}s`;
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

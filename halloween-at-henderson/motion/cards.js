@@ -424,19 +424,23 @@
   const NX = 540 - 272 * 0.85, NY = 1010, NS = 0.85;
   const LT0 = 0.1;
 
-  function lasers(ctx, t, amt) {
+  // beat-synced laser fan from an origin (default: the carved H on card 06)
+  function lasers(ctx, t, amt, o = {}) {
     if (amt <= 0.001) return;
-    const beat = (t - LT0) / BEAT, bar = Math.floor(beat / 4), inBeat = (((beat % 1) + 1) % 1) * BEAT;
+    const t0 = o.t0 ?? LT0;
+    const beat = (t - t0) / BEAT, bar = Math.floor(beat / 4), inBeat = (((beat % 1) + 1) % 1) * BEAT;
     const kick = 0.5 + 0.5 * Math.exp(-inBeat * 7);
-    const n = 7;
-    const [ox, oy] = artH(NX, NY, NS);
+    const n = o.n ?? 7;
+    const [ox, oy] = o.origin || artH(NX, NY, NS);
+    const mir = o.mirror ?? 1;   // -1 flips the sweep direction (for a second fan)
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < n; i++) {
       const k = i - (n - 1) / 2;
       let ang;
-      if (bar % 2 === 0) ang = -90 + k * 13 + 26 * Math.sin((2 * Math.PI * beat) / 8);
-      else ang = -90 + (i % 2 ? 1 : -1) * (6 + 34 * Math.abs(Math.sin((Math.PI * beat) / 2))) + k * 4;
+      const base = o.base ?? -90, spread = o.spread ?? 1;
+      if (bar % 2 === 0) ang = base + (k * 13 + 26 * mir * Math.sin((2 * Math.PI * beat) / 8)) * spread;
+      else ang = base + ((i % 2 ? 1 : -1) * (6 + 34 * Math.abs(Math.sin((Math.PI * beat) / 2))) + k * 4) * spread;
       const on = (Math.floor(beat * 2) % 2 === 1 && i % 2 === 1) ? 0.25 : 1;
       const I = amt * kick * on;
       const a = (ang * Math.PI) / 180;
@@ -453,7 +457,7 @@
       });
     }
     const hz = ctx.createRadialGradient(ox, oy - 500, 50, ox, oy - 500, 1100);
-    hz.addColorStop(0, `rgba(255,70,30,${0.12 * amt * kick})`);
+    hz.addColorStop(0, `rgba(255,70,30,${(o.haze ?? 0.12) * amt * kick})`);
     hz.addColorStop(1, 'rgba(255,70,30,0)');
     ctx.fillStyle = hz;
     ctx.fillRect(0, 0, W, H);
@@ -901,6 +905,278 @@
       });
     },
   });
+
+  // ======================================================= 15 · EARLY BIRD ALMOST GONE (12s)
+  // A ticket meter fills block by block and stops two short; the last lit block
+  // keeps flickering like a dying bulb.
+  const MB = { n: 20, lit: 18, x: 160, y: 1062, w: 760, h: 46, gap: 8, t0: 1.6, step: 0.075 };
+  const MB_END = MB.t0 + MB.lit * MB.step;
+  function meter(ctx, t) {
+    const bw = (MB.w - MB.gap * (MB.n - 1)) / MB.n;
+    const show = fadeA(t, 1.3, 0.4);
+    for (let i = 0; i < MB.n; i++) {
+      const x = MB.x + i * (bw + MB.gap);
+      const st = MB.t0 + i * MB.step;
+      let on = i < MB.lit ? ease.out2(prog(t, st, st + 0.12)) : 0;
+      if (i === MB.lit - 1 && t > MB_END + 0.4) {
+        const cyc = ((t - MB_END - 0.4) % 1.7) / 1.7;   // sputters, recovers
+        on = cyc < 0.3 ? 0.25 + 0.75 * neon(cyc / 0.3) : 1;
+      }
+      ctx.save();
+      ctx.globalAlpha = show;
+      ctx.beginPath();
+      ctx.roundRect(x, MB.y, bw, MB.h, 6);
+      ctx.strokeStyle = 'rgba(255,241,224,0.28)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      if (on > 0.001) {
+        const k = i / (MB.n - 1);
+        ctx.globalAlpha = show * on;
+        ctx.shadowColor = 'rgba(255,80,30,1)';
+        ctx.shadowBlur = 22;
+        ctx.fillStyle = `rgb(255,${Math.round(lerp(196, 58, k))},${Math.round(lerp(110, 30, k))})`;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    // spark riding the leading edge while it fills
+    const p = prog(t, MB.t0, MB_END);
+    if (p > 0 && p < 1) glint(ctx, MB.x + p * MB.lit * (bw + MB.gap), MB.y + MB.h / 2, 150, 0.9);
+    return MB.x + MB.lit * (bw + MB.gap) - MB.gap;
+  }
+  register({
+    id: '15-early-bird-almost-gone',
+    duration: 12,
+    cues: [
+      { t: 0.05, type: 'heart' }, neonCue(0.15, 0.6), burnCue(0.6, 'ALMOST'), burnCue(1.0, 'SOLD OUT'),
+      ...Array.from({ length: MB.lit }, (_, i) => ({ t: MB.t0 + i * MB.step, type: 'tick', level: 0.55 })),
+      neonCue(MB_END + 0.4, 0.3), neonCue(2.9, 0.4), airCue(3.4),
+      { t: 4.2, type: 'heart' }, { t: 5.0, type: 'glint', gain: 0.6 }, { t: 7.8, type: 'heart' }, { t: 9.0, type: 'glint', gain: 0.5 },
+    ],
+    draw(ctx, t) {
+      const c = C().almostGone;
+      const beat = (t0) => (t >= t0 ? Math.exp(-(t - t0) * 7) : 0);
+      const pulse = 0.3 * (beat(0.05) + beat(0.31) + beat(4.2) + beat(4.46) + beat(7.8) + beat(8.06));
+      stickerSlot(ctx, t, 1265, 1);   // ticket link sits here from the first frame
+      ctx.save();
+      drift(ctx, t, 12, 900, 0.025);
+      edgeLight(ctx, t, 0.6 * ease.inOut2(prog(t, 0, 0.5)) + pulse);
+      miniTitle(ctx, t, 2.9);
+      revealText(ctx, c.l1, W / 2, 600, fit(ctx, c.l1, 130, 900), t, 0.15, 'neon', { seed: 12, step: 0.05 });
+      const sz = Math.min(fit(ctx, c.l2, 200, 940), fit(ctx, c.l3, 200, 940));
+      revealText(ctx, c.l2, W / 2, 790, sz, t, 0.6, 'burn', { step: 0.07 });
+      revealText(ctx, c.l3, W / 2, 790 + sz * 1.0, sz, t, 1.0, 'burn', { step: 0.07, color: '#FF4A2E', stroke: '#FFF1E0' });
+      const edge = meter(ctx, t);
+      neonLabel(ctx, c.meter, 1180, t, 2.9, { size: 42, tracking: 12, color: BONE });
+      kicker(ctx, c.sub, 1490, fadeA(t, 3.4), { color: BONE, glow: 0, size: 30, tracking: 6 });
+      [5.0, 9.0].forEach((s0) => sparkle(ctx, edge, MB.y + MB.h / 2, 220, t, s0));
+      ctx.restore();
+    },
+  });
+
+  // ======================================================= 16 · ON A SATURDAY (10s)
+  // October flips by day by day and lands on the 31st, which lights up.
+  const CAL = { first: 4, days: 31, cx: 540, col: 128, y0: 950, row: 100, t0: 1.25, step: 0.04 };   // Oct 1 2026 = Thursday
+  const calPos = (d) => {
+    const i = CAL.first + d - 1;
+    return [CAL.cx + ((i % 7) - 3) * CAL.col, CAL.y0 + Math.floor(i / 7) * CAL.row];
+  };
+  const CAL_HIT = CAL.t0 + (CAL.days - 1) * CAL.step;
+  function calendar(ctx, t) {
+    const c = C().saturday;
+    kicker(ctx, c.month, 790, fadeA(t, 0.9), { color: BONE, glow: 0, size: 30, tracking: 14 });
+    ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d, i) => {
+      label(ctx, d, CAL.cx + (i - 3) * CAL.col, 862, 30, { color: '#E8621C', alpha: fadeA(t, 1.0) * (i === 6 ? 1 : 0.7), glow: i === 6 ? 16 : 0, weight: '800' });
+    });
+    for (let d = 1; d <= CAL.days; d++) {
+      const [x, y] = calPos(d);
+      const hitT = CAL.t0 + (d - 1) * CAL.step;
+      const base = 0.4 * fadeA(t, 0.9 + d * 0.012, 0.4);
+      if (d < CAL.days) {
+        const hl = t >= hitT ? Math.exp(-(t - hitT) * 9) : 0;
+        label(ctx, String(d), x, y, 44, { weight: '700', alpha: base + 0.6 * hl, color: hl > 0.05 ? '#FFD9A0' : BONE, glow: 24 * hl });
+        continue;
+      }
+      // the 31st
+      const on = neon(prog(t, hitT, hitT + 0.35));
+      const ring = ease.inOut2(prog(t, hitT + 0.05, hitT + 0.5));
+      if (ring > 0) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.shadowColor = 'rgba(255,70,30,1)';
+        ctx.shadowBlur = 26;
+        ctx.strokeStyle = `rgba(255,74,46,${0.95 * (0.9 + 0.1 * flicker(t, 14))})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(x, y - 15, 62, 56, -0.2, -Math.PI * 0.6, -Math.PI * 0.6 + ring * Math.PI * 2.1);
+        ctx.stroke();
+        ctx.restore();
+      }
+      label(ctx, '31', x, y, 44, { weight: '700', alpha: Math.max(base, on), color: on > 0.5 ? '#FFF1E0' : BONE, glow: 30 * on });
+    }
+  }
+  register({
+    id: '16-on-a-saturday',
+    duration: 10,
+    cues: [
+      neonCue(0.15, 0.5), burnCue(0.4, 'SATURDAY.', 0.07), airCue(0.9),
+      ...Array.from({ length: 15 }, (_, i) => ({ t: CAL.t0 + i * 2 * CAL.step, type: 'tick', level: 0.35 })),
+      neonCue(CAL_HIT, 0.4), { t: CAL_HIT + 0.1, type: 'glint' }, airCue(2.9), neonCue(3.2, 0.3),
+      { t: 6.0, type: 'glint', gain: 0.5 }, { t: 8.5, type: 'glint', gain: 0.45 },
+    ],
+    draw(ctx, t) {
+      const c = C().saturday;
+      ctx.save();
+      drift(ctx, t, 10, 960, 0.025);
+      edgeLight(ctx, t, 0.45 * fadeA(t, 0, 0.6));
+      miniTitle(ctx, t, 3.2, 270, 0.55);
+      kicker(ctx, c.kicker, 480, neonA(t, 0.15), { size: 34, tracking: 6 });
+      revealText(ctx, c.big, W / 2, 650, fit(ctx, c.big, 190, 960), t, 0.4, 'burn', { step: 0.07 });
+      calendar(ctx, t);
+      kicker(ctx, c.foot, 1500, fadeA(t, 2.9), { color: BONE, glow: 0, size: 30, tracking: 6 });
+      const [x, y] = calPos(CAL.days);
+      [CAL_HIT + 0.1, 6.0, 8.5].forEach((s0) => sparkle(ctx, x + 46, y - 62, 200, t, s0));
+      ctx.restore();
+    },
+  });
+
+  // ======================================================= 17 · THE EARLIER YOU BUY (10s)
+  // Three price bars climb; "NOW" is the short one that stays lit.
+  const BARS = { base: 1190, w: 170, xs: [300, 540, 780], hs: [90, 160, 240], t0: 1.7 };
+  function priceBars(ctx, t) {
+    const c = C().earlier;
+    const tops = [];
+    BARS.xs.forEach((x, i) => {
+      const g = ease.outSoft(prog(t, BARS.t0 + i * 0.18, BARS.t0 + i * 0.18 + 0.5));
+      const h = BARS.hs[i] * g, y = BARS.base - h;
+      tops.push([x, BARS.base - BARS.hs[i]]);
+      if (g <= 0) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x - BARS.w / 2, y, BARS.w, h, [10, 10, 0, 0]);
+      if (i === 0) {
+        const lit = 0.9 + 0.1 * flicker(t, 15);
+        ctx.shadowColor = 'rgba(255,80,30,1)';
+        ctx.shadowBlur = 34 * lit;
+        const gr = ctx.createLinearGradient(0, y, 0, BARS.base);
+        gr.addColorStop(0, '#FFC46E');
+        gr.addColorStop(1, '#E8401C');
+        ctx.fillStyle = gr;
+        ctx.globalAlpha = lit;
+        ctx.fill();
+      } else {
+        ctx.fillStyle = 'rgba(255,241,224,0.06)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,241,224,0.45)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+      ctx.restore();
+      label(ctx, c.steps[i], x, BARS.base + 52, 28, { tracking: 5, color: i === 0 ? '#FF8A4C' : BONE, alpha: fadeA(t, BARS.t0 + i * 0.18 + 0.2) * (i === 0 ? 1 : 0.55), glow: i === 0 ? 20 : 0 });
+    });
+    // baseline
+    ctx.save();
+    ctx.globalAlpha = fadeA(t, 1.5, 0.4) * 0.5;
+    ctx.fillStyle = BONE;
+    ctx.fillRect(170, BARS.base, 740, 2);
+    ctx.restore();
+    // rising ember line across the bar tops, ending in an arrow
+    const p = ease.inOut2(prog(t, 2.4, 3.1));
+    if (p > 0) {
+      const pts = [[tops[0][0] - 110, tops[0][1] - 40], ...tops.map(([x, y]) => [x, y - 40]), [tops[2][0] + 110, tops[2][1] - 80]];
+      const seg = pts.length - 1, f = p * seg, k = Math.min(Math.floor(f), seg - 1), r = f - k;
+      const hx = lerp(pts[k][0], pts[k + 1][0], r), hy = lerp(pts[k][1], pts[k + 1][1], r);
+      ctx.save();
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.shadowColor = 'rgba(255,70,30,1)';
+      ctx.shadowBlur = 18;
+      ctx.strokeStyle = `rgba(255,90,40,${0.9 * (0.9 + 0.1 * flicker(t, 16))})`;
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i <= k; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.lineTo(hx, hy);
+      if (p >= 1) {   // arrow head
+        const [ax, ay] = pts[seg], [bx, by] = pts[seg - 1];
+        const a = Math.atan2(ay - by, ax - bx);
+        ctx.moveTo(ax + Math.cos(a + 2.5) * 34, ay + Math.sin(a + 2.5) * 34);
+        ctx.lineTo(ax, ay);
+        ctx.lineTo(ax + Math.cos(a - 2.5) * 34, ay + Math.sin(a - 2.5) * 34);
+      }
+      ctx.stroke();
+      ctx.restore();
+      if (p < 1) glint(ctx, hx, hy, 170, 1);
+    }
+    return tops[0];
+  }
+  register({
+    id: '17-the-earlier-you-buy',
+    duration: 10,
+    cues: [
+      burnCue(0.2, 'THE EARLIER', 0.06), burnCue(0.7, 'YOU BUY,', 0.06), neonCue(1.3, 0.5),
+      ...[0, 1, 2].map((i) => ({ t: BARS.t0 + i * 0.18, type: 'tick' })),
+      { t: 2.4, type: 'riser', dur: 0.7 }, { t: 3.1, type: 'glint', gain: 0.6 }, airCue(3.4),
+      { t: 5.0, type: 'glint', gain: 0.5 }, { t: 8.0, type: 'glint', gain: 0.45 },
+    ],
+    draw(ctx, t) {
+      const c = C().earlier;
+      stickerSlot(ctx, t, 1300, 1);   // ticket link sits here from the first frame
+      ctx.save();
+      drift(ctx, t, 10, 900, 0.025);
+      edgeLight(ctx, t, 0.45 * fadeA(t, 0, 0.6));
+      miniTitle(ctx, t, 3.4);
+      const sz = Math.min(fit(ctx, c.l1, 170, 940), fit(ctx, c.l2, 170, 940));
+      revealText(ctx, c.l1, W / 2, 560, sz, t, 0.2, 'burn', { step: 0.06 });
+      revealText(ctx, c.l2, W / 2, 560 + sz * 1.02, sz, t, 0.7, 'burn', { step: 0.06 });
+      neonLabel(ctx, c.l3, 560 + sz * 1.02 + 110, t, 1.3, { size: 62, tracking: 12 });
+      const [nx, ny] = priceBars(ctx, t);
+      [5.0, 8.0].forEach((s0) => sparkle(ctx, nx + 70, ny + 6, 200, t, s0));
+      ctx.restore();
+    },
+  });
+
+  // ======================================================= 18 · LIGHTS. LASERS. VISUALS. (10s)
+  const LW_T = [1, 3, 5].map((b) => LT0 + b * BEAT);   // each word lands on a beat
+  register({
+    id: '18-lights-lasers-visuals',
+    duration: 10,
+    cues: [
+      ...Array.from({ length: Math.floor((10 - LT0) / BEAT) }, (_, i) => ({ t: LT0 + i * BEAT, type: 'laser', i })),
+      ...LW_T.map((t0) => neonCue(t0, 0.35)), neonCue(3.4, 0.4), airCue(3.8),
+    ],
+    draw(ctx, t) {
+      const c = C().lights;
+      const on = ease.out2(prog(t, LT0, LT0 + 0.3));
+      const beat = (t - LT0) / BEAT, inBeat = (((beat % 1) + 1) % 1) * BEAT;
+      const kick = t > LT0 ? Math.exp(-inBeat * 7) : 0;
+      lasers(ctx, t, on, { origin: [170, 1960], base: -64, spread: 0.7, n: 5, haze: 0.08 });
+      lasers(ctx, t, on, { origin: [910, 1960], base: -116, spread: 0.7, n: 5, mirror: -1, haze: 0.08 });
+      [[170, 1880], [910, 1880]].forEach(([x, y]) => glint(ctx, x, y, 200, on * (0.35 + 0.65 * kick), { spin: 0.8 }));
+      ctx.save();   // soft shade so the words read over the beams
+      ctx.translate(W / 2, 840);
+      ctx.scale(1, 0.75);
+      const shade = ctx.createRadialGradient(0, 0, 60, 0, 0, 640);
+      shade.addColorStop(0, 'rgba(5,3,3,0.6)');
+      shade.addColorStop(0.55, 'rgba(5,3,3,0.4)');
+      shade.addColorStop(1, 'rgba(5,3,3,0)');
+      ctx.fillStyle = shade;
+      ctx.fillRect(-W, -1400, W * 2, 2800);
+      ctx.restore();
+      miniTitle(ctx, t, 3.0);
+      const sz = Math.min(...c.words.map((w) => fit(ctx, w, 190, 940)));
+      c.words.forEach((w, i) => {
+        if (t < LW_T[i]) return;
+        const a = neon(prog(t, LW_T[i], LW_T[i] + 0.3));
+        emberText(ctx, w, W / 2, 680 + i * sz * 1.05, sz, { alpha: a, glow: (0.9 + 0.1 * flicker(t, 30 + i)) + 0.35 * kick });
+      });
+      neonLabel(ctx, c.l1, 680 + 2 * sz * 1.05 + 150, t, 3.4, { size: 56, tracking: 12 });
+      kicker(ctx, c.l2, 680 + 2 * sz * 1.05 + 220, fadeA(t, 3.8), { color: BONE, glow: 0, size: 32, tracking: 8 });
+    },
+  });
+
+  // building blocks the TV loop (tv.js) reuses
+  window.HH_PARTS = { neonShape, COSTUMES, lasers, ignite, stab, titleLit, titleBurn, hGlowBack, neonA, fadeA, BEAT };
 
   // countdowns register after content.json loads; keep ids in story order
   window.HH_registerCountdowns = () => {
