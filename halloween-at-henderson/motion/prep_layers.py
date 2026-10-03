@@ -60,7 +60,19 @@ k_a[(r < 80) & (yy > TIP[1] + 4)] = 0
 save(knife_rgb, k_a, ART, "knife.png")
 
 # ---- pumpkin (complete; nothing hidden behind the knife any more)
-save(pump_rgb, pump_a, ART, "pumpkin.png")
+# The poster lets the pumpkin fall into shadow left of the blade, so bake that
+# shade in: dark from just behind the blade's left edge outwards, a little light
+# kept up by the hand. (BLADE_EDGE: two points on the blade's left edge.)
+BLADE_EDGE = ((470, 550), (651, 950))
+def smooth(e0, e1, v):
+    v = np.clip((v - e0) / (e1 - e0), 0, 1)
+    return v * v * (3 - 2 * v)
+(ex0, ey0), (ex1, ey1) = BLADE_EDGE
+edge_x = ex0 + (yy - ey0) * (ex1 - ex0) / (ey1 - ey0)
+left = smooth(-45, 85, edge_x - xx)                 # 0 right of the blade -> 1 well left of it
+shade = 1 - left * (0.6 + 0.4 * smooth(500, 760, yy))
+pump_shaded = pump_rgb * shade[..., None]
+save(pump_shaded, pump_a, ART, "pumpkin.png")
 
 # ---- H carving glow: hot pixels inside the H box
 box = np.zeros((H, W), np.float32)
@@ -72,7 +84,7 @@ save(pump_rgb, hot * 255, ART, "h_glow.png")
 
 # ---- full composed art (static use)
 comp_a = pump_a / 255 + k_a / 255 * (1 - pump_a / 255)
-comp = (pump_rgb * (pump_a / 255)[..., None] * (1 - k_a / 255)[..., None] + knife_rgb * (k_a / 255)[..., None])
+comp = (pump_shaded * (pump_a / 255)[..., None] * (1 - k_a / 255)[..., None] + knife_rgb * (k_a / 255)[..., None])
 comp = comp / np.maximum(comp_a[..., None], 1e-4)
 save(comp, comp_a * 255, ART, "art.png")
 
