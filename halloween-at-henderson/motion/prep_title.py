@@ -1,8 +1,10 @@
 """Updated "HALLOWEEN AT HENDERSON" title -> layers/title*.png.
 
-Source: reference/title-updated.webp (bone fill, red outline, on white).
-The white is keyed out by lightness (bone's darkest channel is ~225, the white
-is 255, the red outline is far darker), un-blended from white, then split into:
+Source: reference/title-v3.webp (bone fill, red outline). If the file has its
+own transparency it is used as-is; only an opaque file on white is keyed (by
+lightness: bone's darkest channel is ~225, white 255, the outline far darker)
+and un-blended from white. Keying an already-transparent file punches holes in
+the bone fill, so never do both. The result is split into:
   title_fill.png   the bone letter fill   (burn-in step 2)
   title_ember.png  the red outline        (burn-in step 1, also the glow)
   title.png        both together
@@ -19,7 +21,7 @@ import numpy as np
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent
-SRC = ROOT.parent / "reference" / "title-updated.webp"
+SRC = ROOT.parent / "reference" / "title-v3.webp"
 OUT = ROOT / "layers"
 
 # the old title canvas: 866x230 (poster px), text box inside it
@@ -29,12 +31,14 @@ OLD_TEXT = (12, 6, 858, 227)   # x0, y0, x1, y1 of the lettering in that canvas
 src = np.asarray(Image.open(SRC).convert("RGBA")).astype(np.float32)
 rgb, a_in = src[..., :3], src[..., 3] / 255
 
-# key: the darkest channel separates white (255) from bone (~225) and red (~40)
-mn = rgb.min(2)
-alpha = np.clip((250 - mn) / 20, 0, 1) * a_in
-# un-blend from white
-col = (rgb - (1 - alpha[..., None]) * 255) / np.maximum(alpha[..., None], 1e-3)
-col = np.clip(col, 0, 255)
+if (a_in < 0.5).mean() > 0.05:
+    # already transparent: trust its alpha and colours
+    alpha, col = a_in, rgb
+else:
+    # opaque on white: the darkest channel separates white (255) from bone (~225) and red (~40)
+    mn = rgb.min(2)
+    alpha = np.clip((250 - mn) / 20, 0, 1)
+    col = np.clip((rgb - (1 - alpha[..., None]) * 255) / np.maximum(alpha[..., None], 1e-3), 0, 255)
 
 ys, xs = np.where(alpha > 0.5)
 bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
