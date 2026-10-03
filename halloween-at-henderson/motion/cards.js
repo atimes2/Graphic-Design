@@ -133,28 +133,15 @@
   }
   function moreC(ctx, t) {
     const c = C().moreRoom;
-    // match cut: the lit pumpkin glides and shrinks until its carved H sits on
-    // the wordmark's H, then dissolves into the logo (no zoom, no flash)
-    const Lm = A.meta.logo;
-    const k1 = MC_LOGO.d / (2 * Lm.radius);
-    const hcx = (Lm.h_box[0] + Lm.h_box[2]) / 2, hcy = (Lm.h_box[1] + Lm.h_box[3]) / 2;
-    const endHx = MC_LOGO.x + (hcx - Lm.center[0]) * k1, endHy = MC_LOGO.y + (hcy - Lm.center[1]) * k1;
-    const hScale = ((Lm.h_box[3] - Lm.h_box[1]) * k1) / (A.meta.h_height * MC.AS);
-    const move = ease.inOut3(prog(t, 7.0, 8.0));
-    const out = ease.inOut2(prog(t, 7.75, 8.45));
-    const into = ease.inOut2(prog(t, 7.7, 8.4));
+    // the lit pumpkin and knife hold still and fade out together as one piece,
+    // then the wordmark fades up in their place (no movement, no flash)
+    const out = ease.inOut2(prog(t, 7.4, 8.1));
+    const into = ease.inOut2(prog(t, 7.9, 8.6));
     if (t >= 6.3 && out < 1) {
-      const [hx, hy] = artH(MC.AX, MC.AY, MC.AS);
-      const s = lerp(1, hScale, move);
-      ctx.save();
-      ctx.translate(lerp(hx, endHx, move), lerp(hy, endHy, move));
-      ctx.scale(s, s);
-      ctx.translate(-hx, -hy);
       art(ctx, MC.AX, MC.AY, MC.AS, {
-        pumpkin: ignite(t, 6.55), pumpkinAlpha: 1 - out, h: ignite(t, 6.55, 3) * (1 - out),
-        knifeOffset: stab(t, 6.3, 6.55, 700), knifeAlpha: 1 - ease.out2(prog(t, 7.0, 7.6)),
+        pumpkin: ignite(t, 6.55), pumpkinAlpha: 1 - out, h: ignite(t, 6.55, 3),
+        knifeOffset: stab(t, 6.3, 6.55, 700), knifeAlpha: 1 - out,
       });
-      ctx.restore();
     }
     if (into > 0) {
       logo(ctx, MC_LOGO.x, MC_LOGO.y, MC_LOGO.d, into, 0.22 + 0.06 * flicker(t, 2));
@@ -174,7 +161,7 @@
       neonCue(2.9, 0.3), burnCue(3.1, 'WE NEEDED'), burnCue(3.6, 'MORE ROOM.'),
       neonCue(5.2, 0.3), airCue(5.45),
       { t: 6.55, type: 'stab' }, { t: 6.55, type: 'ignite' },
-      { t: 8.0, type: 'hit', gain: 0.4 },
+      { t: 8.1, type: 'hit', gain: 0.4 },
       // no swooshes or risers, and the sparkles stay silent (no glint "ding")
     ],
     draw(ctx, t) {
