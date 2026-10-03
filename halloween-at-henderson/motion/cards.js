@@ -133,34 +133,33 @@
   }
   function moreC(ctx, t) {
     const c = C().moreRoom;
-    const push = ease.inOut3(prog(t, 7.1, 7.8));
-    const s = lerp(1, 2.0, push);
-    const [hx, hy] = artH(MC.AX, MC.AY, MC.AS);
-    const Cx = lerp(hx, MC_LOGO.x, push), Cy = lerp(hy, MC_LOGO.y, push);
-    const cut = ease.inOut2(prog(t, 7.65, 7.95));
-    if (t >= 6.3 && cut < 1) {
+    // match cut: the lit pumpkin glides and shrinks until its carved H sits on
+    // the wordmark's H, then dissolves into the logo (no zoom, no flash)
+    const Lm = A.meta.logo;
+    const k1 = MC_LOGO.d / (2 * Lm.radius);
+    const hcx = (Lm.h_box[0] + Lm.h_box[2]) / 2, hcy = (Lm.h_box[1] + Lm.h_box[3]) / 2;
+    const endHx = MC_LOGO.x + (hcx - Lm.center[0]) * k1, endHy = MC_LOGO.y + (hcy - Lm.center[1]) * k1;
+    const hScale = ((Lm.h_box[3] - Lm.h_box[1]) * k1) / (A.meta.h_height * MC.AS);
+    const move = ease.inOut3(prog(t, 7.0, 8.0));
+    const out = ease.inOut2(prog(t, 7.75, 8.45));
+    const into = ease.inOut2(prog(t, 7.7, 8.4));
+    if (t >= 6.3 && out < 1) {
+      const [hx, hy] = artH(MC.AX, MC.AY, MC.AS);
+      const s = lerp(1, hScale, move);
       ctx.save();
-      ctx.translate(Cx, Cy);
+      ctx.translate(lerp(hx, endHx, move), lerp(hy, endHy, move));
       ctx.scale(s, s);
       ctx.translate(-hx, -hy);
       art(ctx, MC.AX, MC.AY, MC.AS, {
-        pumpkin: ignite(t, 6.55) * (1 - cut), h: (ignite(t, 6.55, 3) + 0.6 * push) * (1 - cut),
-        knifeOffset: stab(t, 6.3, 6.55, 700), knifeAlpha: 1 - cut,
+        pumpkin: ignite(t, 6.55), pumpkinAlpha: 1 - out, h: ignite(t, 6.55, 3) * (1 - out),
+        knifeOffset: stab(t, 6.3, 6.55, 700), knifeAlpha: 1 - ease.out2(prog(t, 7.0, 7.6)),
       });
       ctx.restore();
     }
-    if (cut > 0) {
-      const back = ease.inOut3(prog(t, 7.8, 8.7));
-      const Lm = A.meta.logo;
-      const k1 = MC_LOGO.d / (2 * Lm.radius);
-      const hH0 = A.meta.h_height * MC.AS * 2.0;
-      const hH1 = (Lm.h_box[3] - Lm.h_box[1]) * k1;
-      const hcx = (Lm.h_box[0] + Lm.h_box[2]) / 2, hcy = (Lm.h_box[1] + Lm.h_box[3]) / 2;
-      const endHx = MC_LOGO.x + (hcx - Lm.center[0]) * k1, endHy = MC_LOGO.y + (hcy - Lm.center[1]) * k1;
-      logoByH(ctx, lerp(MC_LOGO.x, endHx, back), lerp(MC_LOGO.y, endHy, back), lerp(hH0, hH1, back), cut, 0.22 + 0.06 * flicker(t, 2));
+    if (into > 0) {
+      logo(ctx, MC_LOGO.x, MC_LOGO.y, MC_LOGO.d, into, 0.22 + 0.06 * flicker(t, 2));
     }
-    sparkle(ctx, Cx, Cy, 560, t, 7.7);
-    [9.8, 12.6].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.46, MC_LOGO.y - MC_LOGO.d * 0.1, 240, t, s0));
+    [8.4, 10.6, 12.9].forEach((s0) => sparkle(ctx, MC_LOGO.x + MC_LOGO.d * 0.46, MC_LOGO.y - MC_LOGO.d * 0.1, 240, t, s0));
     // type in the headline face (Copperplate: the closest match to the poster's title)
     kicker(ctx, c.k3, 640, neonA(t, 5.2));
     revealText(ctx, 'HENDERSON', W / 2, 800, fit(ctx, 'HENDERSON', 170, 940, RAM), t, 5.45, 'fade', { family: RAM });
@@ -173,13 +172,13 @@
     cues: [
       neonCue(0.15, 0.3), neonCue(0.4, 0.7), airCue(1.3), { t: 2.6, type: 'slash' },
       neonCue(2.9, 0.3), burnCue(3.1, 'WE NEEDED'), burnCue(3.6, 'MORE ROOM.'),
-      { t: 5.0, type: 'whoosh', dur: 0.5 }, neonCue(5.2, 0.3), airCue(5.45),
+      neonCue(5.2, 0.3), airCue(5.45),
       { t: 6.55, type: 'stab' }, { t: 6.55, type: 'ignite' },
-      { t: 7.7, type: 'riser', dur: 0.6 }, { t: 7.7, type: 'hit', gain: 0.9 },
-      // sparkles stay silent here (no glint "ding")
+      { t: 8.0, type: 'hit', gain: 0.4 },
+      // no swooshes or risers, and the sparkles stay silent (no glint "ding")
     ],
     draw(ctx, t) {
-      withHits(ctx, t, [[2.6, 0.15], [6.55, 0.18], [7.7, 0.4]], () => {
+      withHits(ctx, t, [[2.6, 0.15], [6.55, 0.18]], () => {
         if (t < 2.6) return moreA(ctx, t);
         if (t < 3.2) return slashWipe(ctx, scene(0, (c) => moreA(c, t)), scene(1, (c) => moreB(c, t)), prog(t, 2.6, 3.2));
         if (t < 4.8) return moreB(ctx, t);
