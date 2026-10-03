@@ -60,7 +60,19 @@ k_a[(r < 80) & (yy > TIP[1] + 4)] = 0
 save(knife_rgb, k_a, ART, "knife.png")
 
 # ---- pumpkin (complete; nothing hidden behind the knife any more)
-save(pump_rgb, pump_a, ART, "pumpkin.png")
+# The pack's pumpkin is lit evenly, but on the poster its left side (behind the
+# blade and hand) falls off into shadow. Measure that falloff as poster / layer
+# luminance on clean pumpkin pixels (away from the knife), smooth it into a
+# field, and bake it in so the pumpkin always has the poster's shading.
+poster = np.asarray(Image.open(ROOT.parent / "reference" / "poster-01.png").convert("RGB")).astype(np.float32)
+lum = lambda x: x[..., :3] @ np.array([0.3, 0.59, 0.11], np.float32)
+l_pump, l_post = lum(pump_rgb), lum(poster)
+near_knife = cv2.dilate((knife_a > 10).astype(np.uint8), np.ones((25, 25), np.uint8)) > 0
+w = ((pump_a > 240) & ~near_knife & (l_pump > 25)).astype(np.float32)
+ratio = np.clip(l_post / np.maximum(l_pump, 1), 0, 1.5)
+shade = cv2.GaussianBlur(ratio * w, (0, 0), 40) / np.maximum(cv2.GaussianBlur(w, (0, 0), 40), 1e-4)
+shade = np.clip(shade, 0, 1) ** 1.8   # deepen: the measured field is softened by the blur
+save(pump_rgb * shade[..., None], pump_a, ART, "pumpkin.png")
 
 # ---- H carving glow: hot pixels inside the H box
 box = np.zeros((H, W), np.float32)

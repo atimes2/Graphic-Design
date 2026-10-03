@@ -23,8 +23,9 @@
   const DUR = 60;
   const STAGE_W = 1335;   // stage clip; the column starts here
   const SX = 660;         // stage centre
-  const COL = 1600;       // column centre
-  const QR = { cx: COL, cy: 445, mod: 12, pad: 30 };
+  const COL = (STAGE_W + W) / 2;   // column centre (centred in the panel)
+  const CY = -30;         // nudges the column block so it sits centred vertically
+  const QR = { cx: COL, cy: 445 + CY, mod: 12, pad: 30 };
   const TR = 0.6;         // scene transition length
 
   const TV = { qr: null };
@@ -387,12 +388,12 @@
     pSparkle(ctx, q.x - 2, q.y + q.s + 2, 150, t, 15, 11.0);
     // "scan for tickets" neon, which re-flickers on every 15s
     const blink = neon(clamp((t % 15) / 0.75));
-    neonLabel(ctx, c.scan, 178, 1, 0, { x: COL, size: 46, tracking: 10, maxW: 470, color: '#FF9A5C', glow: 38, alpha: (0.85 + 0.15 * fl) * (0.4 + 0.6 * blink) });
+    neonLabel(ctx, c.scan, 178 + CY, 1, 0, { x: COL, size: 46, tracking: 10, maxW: 470, color: '#FF9A5C', glow: 38, alpha: (0.85 + 0.15 * fl) * (0.4 + 0.6 * blink) });
     // date, time, pricing note, wordmark
-    emberText(ctx, c.date, COL, 760, fit(ctx, c.date, 66, 470), { glow: 0.85 + 0.15 * pflicker(t, DUR, 7) });
-    kicker(ctx, c.time, 815, 1, { x: COL, size: 30, tracking: 8, maxW: 470 });
-    kicker(ctx, c.cheaper, 862, 0.9, { x: COL, size: 21, tracking: 5, color: BONE, glow: 0, maxW: 470 });
-    logo(ctx, COL, 950, 320, 1, 0.16 + 0.06 * pflicker(t, DUR, 11));
+    emberText(ctx, c.date, COL, 760 + CY, fit(ctx, c.date, 66, 470), { glow: 0.85 + 0.15 * pflicker(t, DUR, 7) });
+    kicker(ctx, c.time, 815 + CY, 1, { x: COL, size: 30, tracking: 8, maxW: 470 });
+    kicker(ctx, c.cheaper, 862 + CY, 0.9, { x: COL, size: 21, tracking: 5, color: BONE, glow: 0, maxW: 470 });
+    logo(ctx, COL, 950 + CY, 320, 1, 0.16 + 0.06 * pflicker(t, DUR, 11));
   }
 
   // crisp QR modules on a white tile, drawn after grain/vignette
