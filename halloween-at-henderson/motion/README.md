@@ -9,7 +9,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `prep_logo.py` | Builds the Henderson Brewing Company wordmark from `../reference/henderson-wordmark.png` (transparent PNG, rebuilt at 5× with crisp edges, cream with an ember glow) → `layers/logo.png` + `logo_glow.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 18 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
-| `tv.js` + `tv.html` | The 60s venue TV loop (1920×1080, silent, seamless): seven scenes on the left, the ticket QR, date and wordmark fixed on the right |
+| `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
 | `prep_qr.py` | Turns `../reference/tv-qr.png` into a module grid (`layers/qr.json`) so the TV draws the QR pixel-sharp, and checks it still decodes |
 | `content.json` | **All the copy.** Edit here, then re-render |
 | `audio.py` | Synthesized SFX per card (no music), −16 LUFS |

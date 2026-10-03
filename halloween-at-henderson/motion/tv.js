@@ -1,11 +1,11 @@
-/* Halloween at Henderson: 60s venue TV loop (1920x1080, silent, seamless).
+/* Halloween at Henderson: 70s venue TV loop (1920x1080, silent, seamless).
  *
- * Layout: a stage on the left (x 0..1335) cycles through seven scenes from the
+ * Layout: a stage on the left (x 0..1335) cycles through nine scenes from the
  * story set; a fixed column on the right keeps the ticket QR code, the date and
  * the Henderson wordmark on screen the whole time.
  *  - the QR is drawn as clean pixel-aligned modules in the card overlay, above
  *    the grain and vignette, so it always scans
- *  - everything in the column runs on 60s-periodic motion, and scene 1 opens
+ *  - everything in the column runs on 70s-periodic motion, and scene 1 opens
  *    with a transition from scene 7, so the file loops with no visible seam
  *  - scenes favour holds and small movement (candle flicker, drift, sparkles)
  *    over constant animation, since it plays on repeat for weeks
@@ -20,7 +20,7 @@
   const C = () => A.content;
   const BONE = '#FFF1E0';
 
-  const DUR = 60;
+  const DUR = 70;
   const STAGE_W = 1335;   // stage clip; the column starts here
   const SX = 660;         // stage centre
   const COL = (STAGE_W + W) / 2;   // column centre (centred in the panel)
@@ -132,29 +132,77 @@
     ctx.restore();
   }
 
-  // 2 · last year we sold out -> so we're taking over Henderson Brewing Co.
+  // 2-4 · the story: last year we sold out Halloween at Paros -> this year we
+  // needed more room -> so we're taking over Henderson Brewing Co.
+  function sSoldOut(ctx, lt) {
+    const c = C().moreRoom;
+    ctx.save();
+    drift(ctx, lt, 6, 0.03, 480);
+    kicker(ctx, c.k1, 300, neonA(lt, 0.2), sk({ size: 40, tracking: 16 }));
+    revealText(ctx, c.big1, SX, 500, fit(ctx, c.big1, 190, 1150), lt, 0.4, 'neon', { seed: 3, step: 0.05 });
+    revealText(ctx, c.sub1, SX, 630, fit(ctx, c.sub1, 84, 1000), lt, 1.3, 'fade', { tracking: 6 });
+    ctx.restore();
+    setFont(ctx, 'Copperplate', fit(ctx, c.big1, 190, 1150));
+    const w = ctx.measureText(c.big1).width;
+    sparkle(ctx, SX + w / 2 - 20, 380, 280, lt, 2.6);
+  }
+
+  // the walls push out: ember brackets slide apart and the words breathe wider
+  function wall(ctx, lt, x, side, y0, y1) {
+    const a = fadeA(lt, 1.2, 0.4) * (0.9 + 0.1 * flicker(lt, 40 + side));
+    if (a <= 0.001) return;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = 'rgba(255,80,30,1)';
+    ctx.shadowBlur = 24;
+    ctx.strokeStyle = '#FF6A32';
+    ctx.lineWidth = 7;
+    const tick = 46 * -side;
+    ctx.beginPath();
+    ctx.moveTo(x + tick, y0); ctx.lineTo(x, y0); ctx.lineTo(x, y1); ctx.lineTo(x + tick, y1);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,238,222,0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.restore();
+  }
   function sMoreRoom(ctx, lt) {
     const c = C().moreRoom;
-    const out = ease.inOut2(prog(lt, 3.3, 3.8));
-    if (out < 1) {
-      ctx.save();
-      ctx.globalAlpha = 1 - out;
-      camera(ctx, lerp(1, 0.9, out), SX, 470);
-      kicker(ctx, c.k1, 330, neonA(lt, 0.25), sk({ size: 38 }));
-      revealText(ctx, c.big1, SX, 520, fit(ctx, c.big1, 170, 1100), lt, 0.45, 'neon', { seed: 3 });
-      kicker(ctx, c.sub1, 610, fadeA(lt, 1.3), sk({ color: BONE, glow: 0, size: 36, tracking: 12 }));
-      ctx.restore();
-    }
-    if (lt < 3.7) return;
+    const S = Math.min(fit(ctx, c.big2a, 170, 900), fit(ctx, c.big2b, 170, 900));
+    const push = ease.inOut3(prog(lt, 1.9, 3.1));
     ctx.save();
-    drift(ctx, lt - 3.7, 5.3, 0.025, 480);
-    kicker(ctx, c.k3, 330, neonA(lt, 3.75), sk({ size: 38 }));
-    revealText(ctx, 'HENDERSON', SX, 540, fit(ctx, 'HENDERSON', 220, 1100), lt, 4.0, 'fade');
-    revealText(ctx, c.venue2, SX, 680, fit(ctx, c.venue2, 130, 900), lt, 4.4, 'sweep');
+    drift(ctx, lt, 6, 0.02, 470);
+    kicker(ctx, c.k2, 270, neonA(lt, 0.15), sk({ size: 40, tracking: 16 }));
+    revealText(ctx, c.big2a, SX, 470, S, lt, 0.35, 'burn', { step: 0.05, tracking: 8 * push });
+    revealText(ctx, c.big2b, SX, 470 + S * 1.05, S, lt, 0.8, 'burn', { step: 0.05, tracking: 14 * push });
+    setFont(ctx, 'Copperplate', S);
+    const w = ctx.measureText(c.big2b).width;
+    const half = lerp(w / 2 + 70, 590, push);
+    const y0 = 340, y1 = 470 + S * 1.05 + 70;
+    wall(ctx, lt, SX - half, -1, y0, y1);
+    wall(ctx, lt, SX + half, 1, y0, y1);
+    if (push > 0 && push < 1) {
+      glint(ctx, SX - half, y0, 150, 0.9);
+      glint(ctx, SX + half, y1, 150, 0.9);
+    }
+    ctx.restore();
+    [3.1, 4.8].forEach((s0, i) => sparkle(ctx, SX + (i ? -590 : 590), i ? y1 : y0, 220, lt, s0));
+  }
+
+  function sTakeover(ctx, lt) {
+    const c = C().moreRoom;
+    ctx.save();
+    drift(ctx, lt, 7, 0.025, 480);
+    kicker(ctx, c.k3, 320, neonA(lt, 0.2), sk({ size: 40, tracking: 16 }));
+    revealText(ctx, 'HENDERSON', SX, 540, fit(ctx, 'HENDERSON', 220, 1100), lt, 0.45, 'fade');
+    revealText(ctx, c.venue2, SX, 680, fit(ctx, c.venue2, 130, 900), lt, 0.9, 'sweep');
     ctx.restore();
     setFont(ctx, 'Copperplate', fit(ctx, 'HENDERSON', 220, 1100));
     const hw = ctx.measureText('HENDERSON').width;
-    [6.3, 8.0].forEach((s0) => sparkle(ctx, SX + hw / 2 - 10, 400, 260, lt, s0));
+    [3.4, 5.6].forEach((s0) => sparkle(ctx, SX + hw / 2 - 10, 400, 260, lt, s0));
   }
 
   // 3 · DJs all night, beat-synced lasers out of the carved H
@@ -306,7 +354,9 @@
 
   const SCENES = [
     { dur: 9, into: 'slash', draw: sLockup },
-    { dur: 9, into: 'fade', draw: sMoreRoom },
+    { dur: 6, into: 'fade', draw: sSoldOut },
+    { dur: 6, into: 'slash', draw: sMoreRoom },
+    { dur: 7, into: 'push', draw: sTakeover },
     { dur: 9, into: 'slash', draw: sNight },
     { dur: 7, into: 'fade', draw: sFirst100 },
     { dur: 8, into: 'slash', draw: sContest },
@@ -323,10 +373,25 @@
     const lt = t - cur.start;
     if (lt >= TR) return cur.draw(ctx, lt);
     // the outgoing scene keeps holding past its end while the new one arrives
-    const a = scene(0, (c) => prev.draw(c, prev.dur + lt));
-    const b = scene(1, (c) => cur.draw(c, lt));
+    const clear = cur.into === 'push';   // the push zooms both frames, so no backing fill
+    const a = scene(0, (c) => prev.draw(c, prev.dur + lt), clear);
+    const b = scene(1, (c) => cur.draw(c, lt), clear);
     const p = lt / TR;
     if (cur.into === 'slash') return slashWipe(ctx, a, b, p, { cx: SX, cy: H / 2, angle: 64 });
+    if (cur.into === 'push') {
+      // "more room": the old frame falls away into the distance as the new one opens up
+      ctx.save();
+      ctx.globalAlpha = ease.out2(p);
+      camera(ctx, lerp(1.3, 1, ease.out3(p)), SX, H / 2);
+      ctx.drawImage(b, 0, 0);
+      ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = 1 - ease.in2(p);
+      camera(ctx, lerp(1, 0.35, ease.in2(p)), SX, H / 2);
+      ctx.drawImage(a, 0, 0);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.globalAlpha = 1 - ease.in2(p);
     camera(ctx, lerp(1, 1.06, p), SX, H / 2);
@@ -340,7 +405,7 @@
 
   // =============================================================== column
   const ctaBoost = (t) => {
-    const s = SCENES[6];
+    const s = SCENES[SCENES.length - 1];   // the get-your-tickets scene
     return ease.inOut2(prog(t, s.start + 1.0, s.start + 1.8)) * (1 - ease.inOut2(prog(t, s.start + s.dur - 0.4, s.start + s.dur + 0.3)));
   };
   // a periodic sparkle (fires every `every` seconds at phase `at`, loops cleanly)
@@ -384,10 +449,10 @@
     ctx.fill();
     ctx.restore();
     // sparkle peeking from behind the tile's corners now and then
-    pSparkle(ctx, q.x + q.s + 2, q.y - 2, 170, t, 12, 5.5);
-    pSparkle(ctx, q.x - 2, q.y + q.s + 2, 150, t, 15, 11.0);
-    // "scan for tickets" neon, which re-flickers on every 15s
-    const blink = neon(clamp((t % 15) / 0.75));
+    pSparkle(ctx, q.x + q.s + 2, q.y - 2, 170, t, 14, 5.5);
+    pSparkle(ctx, q.x - 2, q.y + q.s + 2, 150, t, 10, 8.0);
+    // "scan for tickets" neon, which re-flickers on every 14s (divides the loop)
+    const blink = neon(clamp((t % 14) / 0.75));
     neonLabel(ctx, c.scan, 178 + CY, 1, 0, { x: COL, size: 46, tracking: 10, maxW: 470, color: '#FF9A5C', glow: 38, alpha: (0.85 + 0.15 * fl) * (0.4 + 0.6 * blink) });
     // date, time, pricing note, wordmark
     emberText(ctx, c.date, COL, 760 + CY, fit(ctx, c.date, 66, 470), { glow: 0.85 + 0.15 * pflicker(t, DUR, 7) });

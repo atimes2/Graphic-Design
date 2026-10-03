@@ -200,7 +200,7 @@ This round's feedback: the hard hits work for the knife but are too aggressive f
 | 17 | `17-the-earlier-you-buy` (link slot): price bars climb, NOW stays lit | 10s |
 | 18 | `18-lights-lasers-visuals`: crossing laser fans on the beat | 10s |
 
-**Venue TV loop** (`tv-loop`, 60s, 1920×1080, silent): seven scenes on the left (poster lockup, sold out → Henderson, DJs and lasers, first 100, costume contest, details, get your tickets) with the ticket QR, date and wordmark fixed in a right-hand column. It loops with no visible seam; the QR is drawn pixel-sharp above the grain.
+**Venue TV loop** (`tv-loop`, 70s, 1920×1080, silent): nine scenes on the left (poster lockup; last year we sold out Halloween at Paros → this year we needed more room → so we're taking over Henderson Brewing Co.; DJs and lasers, first 100, costume contest, details, get your tickets) with the ticket QR, date and wordmark fixed in a right-hand column. It loops with no visible seam; the QR is drawn pixel-sharp above the grain.
 
 **Sound:** synthesized SFX only (stab, slash, stamp, neon buzz, ember sizzle, soft air swells, laser zaps, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
 

@@ -39,6 +39,6 @@ DAY OF
   "Get yours before they're gone" (13) are placeholder lines.
 
 VENUE TV
-  tv-loop.mp4                   60s   1920x1080, silent, loops seamlessly. Set the TV
+  tv-loop.mp4                   70s   1920x1080, silent, loops seamlessly. Set the TV
                                       player to repeat. The QR code (luma.com/gj1waa12,
                                       utm_source=hendersontv) stays on screen the whole time.
