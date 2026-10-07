@@ -5,6 +5,9 @@
   pumpkin-knife-glow.png   the poster look: the pumpkin's left side shaded
                            darker (solid, never see-through), ember halo and
                            the same star; best on dark backgrounds
+  pumpkin-knife-poster.png closest to the poster: the left side of the pumpkin
+                           fades away completely (shadow, then transparent),
+                           halo and star; for dark backgrounds
 
 Built from the motion layers (run after prep_layers.py), at the layer pack's
 native resolution, cropped tight with a margin.
@@ -54,7 +57,10 @@ shaded = rgba(LAYERS / "pumpkin.png")
 orig = rgba(PACK / "05_Pumpkin_with_H.png")[ART[1]:ART[3], ART[0]:ART[2]]
 lum = lambda x: x[..., :3] @ np.array([0.3, 0.59, 0.11], np.float32)
 shade = np.clip(lum(shaded) / np.maximum(lum(orig), 1e-3), 0, 1)
-shade = cv2.GaussianBlur(np.where(orig[..., 3] > 0.5, shade, 1), (0, 0), 3)   # smooth out per-pixel noise
+# smooth out per-pixel noise; normalised by the pumpkin mask so the edge pixels
+# take their neighbours' shade (padding with 1 left a lit rim on the faded side)
+m = (orig[..., 3] > 0.5).astype(np.float32)
+shade = cv2.GaussianBlur(shade * m, (0, 0), 3) / np.maximum(cv2.GaussianBlur(m, (0, 0), 3), 1e-3)
 knife_clean = rgba(LAYERS / "knife.png")                                           # tip star removed
 # faint star rays survive beside the tip (the videos hide them under the animated
 # sparkle). For the logo, fit the blade's two edges just above the tip and keep
@@ -130,3 +136,17 @@ halo = 0.55 * cv2.GaussianBlur(sil, (0, 0), 16) + 0.45 * cv2.GaussianBlur(sil, (
 halo = np.clip(halo * 0.75, 0, 1)
 glow = np.dstack([np.broadcast_to(np.array([0.92, 0.30, 0.10], np.float32), sil.shape + (3,)), halo])
 crop_save(add_star(over(art, glow), tx, ty, SIZE), "pumpkin-knife-glow.png", pad=0)
+
+# 3 · poster: like the poster, the pumpkin's left side fades away completely.
+# It falls into shadow first (darkened colour) and then into transparency, so on
+# black it matches the poster and on other dark colours it reads as shadow, not
+# as a pale see-through ghost. Halo comes from the faded silhouette, so the
+# faded side gets none, as on the poster.
+fade = np.clip((shade - 0.06) / 0.55, 0, 1) ** 1.3
+pumpkin_poster = np.dstack([orig[..., :3] * (0.25 + 0.75 * fade[..., None]), orig[..., 3] * fade])
+art = padded(over(knife_clean, pumpkin_poster), P)
+sil = art[..., 3]
+halo = 0.55 * cv2.GaussianBlur(sil, (0, 0), 16) + 0.45 * cv2.GaussianBlur(sil, (0, 0), 48)
+halo = np.clip(halo * 0.75, 0, 1)
+glow = np.dstack([np.broadcast_to(np.array([0.92, 0.30, 0.10], np.float32), sil.shape + (3,)), halo])
+crop_save(add_star(over(art, glow), tx, ty, SIZE), "pumpkin-knife-poster.png", pad=0)
