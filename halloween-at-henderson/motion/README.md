@@ -10,7 +10,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 18 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
-| `prep_export.py` | Exports the pumpkin + knife art as transparent PNGs to `../exports/` (clean for any background; poster glow for dark backgrounds) |
+| `prep_export.py` | Exports the pumpkin + knife art as transparent PNGs to `../exports/`, both with a crisp drawn knife-tip star: clean (evenly lit, any background) and glow (poster shading as solid darkening + ember halo) |
 | `prep_qr.py` | Turns `../reference/tv-qr.png` into a module grid (`layers/qr.json`) so the TV draws the QR pixel-sharp, and checks it still decodes |
 | `content.json` | **All the copy.** Edit here, then re-render |
 | `audio.py` | Synthesized SFX per card (no music), −16 LUFS |
