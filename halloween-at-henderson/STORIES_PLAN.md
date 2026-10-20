@@ -199,11 +199,11 @@ This round's feedback: the hard hits work for the knife but are too aggressive f
 | 16 | `16-on-a-saturday`: October flips by, the 31st lights up | 10s |
 | 17 | `17-the-earlier-you-buy` (link slot): price bars climb, NOW stays lit | 10s |
 | 18 | `18-lights-lasers-visuals`: crossing laser fans on the beat | 10s |
-| 19 | `19-this-halloween` (link slot): Henderson's wordmark H match-cuts to the carved H, then lasers + date; for your story and Henderson's repost | 14s |
+| 19 | `19-this-halloween` (link slot): "This Halloween" over Henderson's wordmark, knife-slash cut to the pumpkin, then lasers + date; for your story and Henderson's repost | 12s |
 
 **Venue TV loop** (`tv-loop`, 70s, 1920×1080, silent): nine scenes on the left (poster lockup; last year we sold out Halloween at Paros → this year we needed more room → so we're taking over Henderson Brewing Co.; DJs and lasers, first 100, costume contest, details, get your tickets) with the ticket QR, date and wordmark fixed in a right-hand column. It loops with no visible seam; the QR is drawn pixel-sharp above the grain.
 
-**Sound:** synthesized SFX only (stab, slash, stamp, neon buzz, ember sizzle, soft air swells, laser zaps, heartbeat, sparkle "shing"), at −16 LUFS. `AUDIO=0` renders silent.
+**Sound:** none. The synthesized SFX were dropped; all videos are silent (`AUDIO=1` brings the SFX track back).
 
 **Copy to check before posting:** "REGULAR TICKETS ON SALE NOW" (10) and "GET YOURS BEFORE THEY'RE GONE" (13) are placeholders; edit them in `motion/content.json`.
 

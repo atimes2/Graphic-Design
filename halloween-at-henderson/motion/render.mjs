@@ -1,10 +1,10 @@
-// Render the story cards to MP4 (1080x1920, 30fps, H.264 + AAC).
+// Render the story cards to MP4 (1080x1920, 30fps, H.264, silent by default).
 //
 //   node render.mjs                      # all cards
 //   node render.mjs 01-the-return        # one card (prefix match)
 //   node render.mjs --stills 01 0,2.5,7  # review stills -> review/
 //   node render.mjs --sheet              # contact sheets -> review/
-//   AUDIO=0 node render.mjs              # silent (default: synthesized SFX, no music)
+//   AUDIO=1 node render.mjs              # add the synthesized SFX track (default: silent)
 //   node render.mjs --tv                 # the 60s venue TV loop (1920x1080, silent) from tv.html
 //   node render.mjs --tv --stills tv 0,12  # TV review stills
 //
@@ -20,7 +20,7 @@ const OUT = path.resolve(ROOT, '..', 'videos');
 const REVIEW = path.resolve(ROOT, 'review');
 const FPS = 30;
 const PARALLEL = Number(process.env.PARALLEL || 3);
-const AUDIO = process.env.AUDIO !== '0';   // SFX on by default
+const AUDIO = process.env.AUDIO === '1';   // silent by default; AUDIO=1 adds the synthesized SFX
 
 const FFMPEG = process.env.FFMPEG ||
   execFileSync('python3', ['-c', 'import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())']).toString().trim();

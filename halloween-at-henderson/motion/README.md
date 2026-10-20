@@ -1,6 +1,6 @@
 # Halloween at Henderson: story motion source
 
-Every frame is code: HTML canvas, rendered headless in Chromium via Playwright and encoded with ffmpeg. Sound is **SFX only (no music)**, synthesized in `audio.py` from each card's cue list. `AUDIO=0` renders silent.
+Every frame is code: HTML canvas, rendered headless in Chromium via Playwright and encoded with ffmpeg. Videos render **silent**. `AUDIO=1` adds an optional synthesized SFX track from each card's cue list (`audio.py`).
 
 | File | What it does |
 |---|---|
@@ -13,7 +13,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `prep_export.py` | Exports the pumpkin + knife art as transparent PNGs to `../exports/`, both with a crisp drawn knife-tip star: clean (evenly lit, any background), glow (poster shading as solid darkening + ember halo) and poster (left side fades away completely, as on the poster) |
 | `prep_qr.py` | Turns `../reference/tv-qr.png` into a module grid (`layers/qr.json`) so the TV draws the QR pixel-sharp, and checks it still decodes |
 | `content.json` | **All the copy.** Edit here, then re-render |
-| `audio.py` | Synthesized SFX per card (no music), −16 LUFS |
+| `audio.py` | Optional synthesized SFX per card (off by default; `AUDIO=1`), −16 LUFS |
 | `render.mjs` | Renders MP4s to `../videos/`, plus review stills and contact sheets |
 | `index.html` | Live preview with a scrubber |
 
@@ -31,7 +31,7 @@ node render.mjs --tv              # the venue TV loop -> ../videos/tv-loop.mp4 (
 npm run preview                   # open http://localhost:8080 to scrub cards live
 ```
 
-Output: 1080×1920, 30fps, H.264 High, yuv420p, AAC 48kHz SFX track, faststart, 10–14s each.
+Output: 1080×1920, 30fps, H.264 High, yuv420p, silent, faststart, 10–14s each.
 All text sits between y=250 and y=1580 so Instagram's UI never covers it.
 
 To change the countdown numbers, edit `"countdown": [31, 21, 14, 7, 3, 1]` in `content.json`.
