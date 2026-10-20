@@ -1175,6 +1175,104 @@
     },
   });
 
+  // ======================================================= 19 · THIS HALLOWEEN (14s)
+  // For your story and Henderson's repost: their wordmark, then the camera pushes
+  // into its script H, which match-cuts to the carved H on the pumpkin. Pull
+  // back, the knife stabs in, the title burns in and lasers fire out of the H.
+  const TH = {
+    logo: { x: 540, y: 880, w: 620 },
+    focus: [540, 860], big: 760,       // where the H sits, and how tall, at the cut
+    art: { x: 540 - 272 * 0.82, y: 468, s: 0.82 },
+    title: { y: 240, s: 0.9 },
+    push: [1.8, 2.6], cut: [2.45, 2.8], pull: [2.8, 3.9], hit: 3.85, title0: 4.0, lasers: 4.3,
+    slot: 1390,
+  };
+  const TH_BEATS = Math.floor((14 - TH.lasers) / BEAT);
+  // the wordmark's H: centre and height on screen for a logo drawn at (x, y, w)
+  function logoH(x, y, w) {
+    const Lm = A.meta.logo, k = w / (2 * Lm.radius);
+    const hcx = (Lm.h_box[0] + Lm.h_box[2]) / 2, hcy = (Lm.h_box[1] + Lm.h_box[3]) / 2;
+    return [x + (hcx - Lm.center[0]) * k, y + (hcy - Lm.center[1]) * k, (Lm.h_box[3] - Lm.h_box[1]) * k];
+  }
+  register({
+    id: '19-this-halloween',
+    duration: 14,
+    cues: [
+      neonCue(0.2, 0.5), airCue(0.4), { t: TH.push[0], type: 'riser', dur: 0.8 },
+      { t: 2.6, type: 'hit', gain: 0.6 }, { t: 2.6, type: 'glint' },
+      { t: TH.hit, type: 'whoosh', dur: 0.25 }, { t: TH.hit, type: 'stab' }, { t: TH.hit + 0.05, type: 'ignite' },
+      burnCue(TH.title0, 'HALLOWEEN AT HENDERSON', 0.03),
+      ...Array.from({ length: TH_BEATS }, (_, i) => ({ t: TH.lasers + i * BEAT, type: 'laser', i, level: 0.7 })),
+      burnCue(4.9, 'SAT · OCT 31', 0.06), neonCue(5.5, 0.4), airCue(6.0),
+      { t: 8.5, type: 'glint', gain: 0.5 }, { t: 11.5, type: 'glint', gain: 0.45 },
+    ],
+    draw(ctx, t) {
+      const c = C().thisHalloween;
+      const Ar = TH.art;
+      stickerSlot(ctx, t, TH.slot, 1);   // ticket link sits here from the first frame
+      withHits(ctx, t, [[TH.hit, 0.15]], () => {
+        // --- the H: wordmark -> push in -> cut -> pumpkin -> pull back
+        const [lx, ly, lh] = logoH(TH.logo.x, TH.logo.y, TH.logo.w);
+        const push = ease.inOut3(prog(t, ...TH.push));
+        const cut = ease.inOut2(prog(t, ...TH.cut));
+        const pull = ease.inOut3(prog(t, ...TH.pull));
+        const [fx, fy] = artH(Ar.x, Ar.y, Ar.s);
+        const fh = A.meta.h_height * Ar.s;
+        let hx = lerp(lx, TH.focus[0], push), hy = lerp(ly, TH.focus[1], push), hh = lerp(lh, TH.big, push);
+        if (pull > 0) { hx = lerp(TH.focus[0], fx, pull); hy = lerp(TH.focus[1], fy, pull); hh = lerp(TH.big, fh, pull); }
+
+        edgeLight(ctx, t, 0.35 * fadeA(t, 0.2, 0.8) * (1 - cut) + 0.4 * fadeA(t, TH.hit, 0.6));
+        kicker(ctx, c.kicker, 740, neonA(t, 0.2, 0.5) * (1 - ease.out2(prog(t, 1.8, 2.2))), { size: 44, tracking: 18 });
+        if (cut < 1) logoByH(ctx, hx, hy, hh, fadeA(t, 0.4, 0.8) * (1 - cut), 0.2 + 0.3 * push);
+        if (cut > 0) {
+          const s = hh / A.meta.h_height;
+          const ax = hx - A.meta.h_center[0] * s, ay = hy - A.meta.h_center[1] * s;
+          const off = stab(t, TH.hit - 0.25, TH.hit, 800);
+          art(ctx, ax, ay, s, {
+            pumpkinAlpha: cut,
+            pumpkin: Math.max(0.85 * flicker(t, 1), ignite(t, TH.hit)),
+            h: Math.max(0.9, ignite(t, TH.hit, 3) * 1.05),
+            knifeAlpha: t >= TH.hit - 0.25 ? 1 : 0, knifeOffset: off,
+          });
+          if (t >= TH.hit - 0.25) {
+            const [gx, gy] = artTip(ax, ay, s, off);
+            sparkle(ctx, gx, gy, 260, t, TH.hit, { hold: 0.2 });
+            [8.5, 11.5].forEach((s0) => sparkle(ctx, gx, gy, 280, t, s0, { hold: 0.2 }));
+          }
+        }
+        sparkle(ctx, TH.focus[0], TH.focus[1], 520, t, 2.6);
+
+        // --- lasers out of the carved H, on the beat
+        const on = ease.out2(prog(t, TH.lasers, TH.lasers + 0.3));
+        if (on > 0) {
+          lasers(ctx, t, on, { origin: [fx, fy], t0: TH.lasers, spread: 1.15, n: 7 });
+          const inBeat = ((((t - TH.lasers) / BEAT) % 1 + 1) % 1) * BEAT;
+          glint(ctx, fx, fy, 180, on * (0.3 + 0.6 * Math.exp(-inBeat * 7)), { spin: 0.8 });
+        }
+
+        // --- title (soft shade behind it so it reads over the beams)
+        if (t >= TH.title0) {
+          ctx.save();
+          ctx.translate(W / 2, 345);
+          ctx.scale(1, 0.4);
+          const sh = ctx.createRadialGradient(0, 0, 60, 0, 0, 560);
+          sh.addColorStop(0, `rgba(5,3,3,${0.6 * on})`);
+          sh.addColorStop(0.6, `rgba(5,3,3,${0.4 * on})`);
+          sh.addColorStop(1, 'rgba(5,3,3,0)');
+          ctx.fillStyle = sh;
+          ctx.fillRect(-W, -1400, W * 2, 2800);
+          ctx.restore();
+          titleBurn(ctx, W / 2 - 433 * TH.title.s, TH.title.y, TH.title.s, t, TH.title0, 0.03);
+        }
+
+        // --- the info
+        revealText(ctx, c.date, W / 2, 1222, fit(ctx, c.date, 124, 940), t, 4.9, 'burn', { step: 0.06 });
+        neonLabel(ctx, c.djs, 1292, t, 5.5, { size: 58, tracking: 12 });
+        kicker(ctx, c.genres, 1346, fadeA(t, 6.0), { color: BONE, glow: 0, size: 32, tracking: 8 });
+      });
+    },
+  });
+
   // building blocks the TV loop (tv.js) reuses
   window.HH_PARTS = { neonShape, COSTUMES, lasers, ignite, stab, titleLit, titleBurn, hGlowBack, neonA, fadeA, BEAT };
 

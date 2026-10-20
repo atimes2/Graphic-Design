@@ -39,6 +39,7 @@
   "saturday": { "kicker": "THIS YEAR HALLOWEEN FALLS ON A", "big": "SATURDAY.", "month": "OCTOBER 2026", "foot": "10PM – 2AM · HENDERSON BREWING CO." },
   "earlier": { "l1": "THE EARLIER", "l2": "YOU BUY,", "l3": "THE LESS YOU PAY", "steps": ["NOW", "LATER", "LAST MINUTE"] },
   "lights": { "words": ["LIGHTS.", "LASERS.", "VISUALS."], "l1": "FULL BAR ON SITE", "l2": "SAT OCT 31 · 10PM – 2AM" },
+  "thisHalloween": { "kicker": "THIS HALLOWEEN", "date": "SAT · OCT 31", "djs": "DJS ALL NIGHT", "genres": "BASS · TECHNO · POP REMIXES" },
   "tv": {
     "scan": "SCAN FOR TICKETS",
     "date": "SAT · OCT 31",
