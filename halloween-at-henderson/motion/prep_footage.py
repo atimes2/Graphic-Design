@@ -7,6 +7,7 @@ scaled to the Reel's film panel (1000x750) and graded two ways:
   ember  luminance -> black / oxblood / ember / pumpkin / bone, with a little of
          the original colour kept so Kodachrome skin tones still read
   mono   warm black-and-white (the Special Bulletin Reel's old-TV look)
+  color  the clip's own colour, lightly lifted (Holographic Realms' event footage)
 Output: footage/<key>/<grade>/NNNN.jpg + footage/index.json (frame counts).
 """
 import json, os, subprocess, sys
@@ -28,6 +29,7 @@ STOPS = {   # position: rgb
     "blood": [(0.0, (3, 1, 1)), (0.28, (46, 4, 4)), (0.52, (140, 16, 10)), (0.76, (226, 78, 48)), (0.92, (255, 196, 168)), (1.0, (255, 240, 232))],
 }
 KEEP = {"ember": 0.18, "mono": 0.0, "blood": 0.0}   # share of the original colour mixed back in
+# "color" keeps a clip's own colour (the visuals team's footage): only a gentle contrast lift
 
 
 def lut(stops):
@@ -42,6 +44,9 @@ LUTS = {k: lut(v) for k, v in STOPS.items()}
 
 
 def grade(frame, kind):
+    if kind == "color":
+        f = frame.astype(np.float32) / 255
+        return np.clip(255 * (f * f * (3 - 2 * f) * 0.35 + f * 0.65), 0, 255).astype(np.uint8)
     f = frame.astype(np.float32)
     lum = f @ np.array([0.3, 0.59, 0.11], np.float32)
     # normalise each clip's exposure a little, then an S-curve
@@ -84,7 +89,8 @@ def main(keys):
             vf = f"setpts=PTS/{speed},fps=30,{crop},scale={w}:{h}:flags=lanczos,unsharp=5:5:0.8"
         else:
             w, h = W, H
-            vf = f"setpts=PTS/{speed},fps=30,scale={W}:{H}:flags=lanczos,unsharp=5:5:0.6"
+            crop = f"{c['crop']}," if "crop" in c else ""   # e.g. 16:9 phone video cut to the panel's 4:3
+            vf = f"setpts=PTS/{speed},fps=30,{crop}scale={W}:{H}:flags=lanczos,unsharp=5:5:0.6"
         cmd = [FF, "-loglevel", "error", "-ss", str(c["in"]), "-t", str(src_dur + 0.2), "-i", str(SRC / f"{c['src']}.mp4"),
                "-vf", vf, "-frames:v", str(round(c["dur"] * 30)), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
         raw = subprocess.run(cmd, capture_output=True, check=True).stdout

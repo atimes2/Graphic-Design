@@ -65,4 +65,4 @@ The narration is synthetic: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-8
 
 ## Event visuals (Reel F)
 
-The photos in `reel/hr/` are Holographic Realms' own promotional images, taken from their PsyHibit 2027 deck. Holographic Realms is the visuals team for the night. F credits them on screen as "VISUALS BY HOLOGRAPHIC REALMS". Their WhatsApp promo video can replace these photos once it's in the repo.
+The colour footage of lasers, beams, mapped walls and the DJ booth (`v_*` clips) is Holographic Realms' own footage from past events. They are the visuals team for the night, and their clips are in `../whatsapp-videos/` (sent over WhatsApp on Oct 24). F credits them on screen as "VISUALS BY HOLOGRAPHIC REALMS". `prep_footage.py` reads those clips through `footage-src/wa0.mp4` … `wa10.mp4` (links to the files in name order) and keeps their own colour (the `color` grade).

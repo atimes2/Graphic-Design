@@ -413,7 +413,7 @@
     const big = (ctx, str, size, maxW) => fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT);
 
     // a cell's footage at time t: pool rotates every `every` beats from beat n0;
-    // grade 'hr' = a Holographic Realms photo (reel/hr/), shown in its own colour
+    // grade 'hr' = a still photo from reel/hr/, shown in its own colour
     function pick(pool, t, n0, every = 2, off = 0) {
       const bi = beatAt(t);
       const k = Math.max(0, Math.floor((bi - n0) / every));
@@ -426,16 +426,17 @@
       filmRect(ctx, t, r, f.shot, f.grade, { vignette: o.vignette ?? 0.45, dust: f.grade === 'hr' ? 0.3 : 0.7, exposure: o.exposure });
       return f;
     }
-    // light from the visuals laid over the film (screen blend), kicking on each beat
+    // light from the visuals team's footage laid over the film (screen blend), kicking on each beat
     function lights(ctx, t, r, n0, amt = 0.6) {
       const bi = beatAt(t);
-      const name = P.over[Math.floor((bi - n0) / 2 + n0) % P.over.length];
-      const url = `reel/hr/${name}.jpg`;
+      const k = Math.max(0, Math.floor((bi - n0) / 2));
+      const shot = { clip: P.over[(k + n0) % P.over.length], t0: b(n0 + k * 2), at: 0.3 };
+      const url = frameURL(shot, 'color', t - shot.t0);
       if (CAPTURE.on) { CAPTURE.on.push(url); return; }
       const e = getImg(url);
       if (!e.ok) return;
       const kick = Math.exp(-(t - b(bi)) * 5);
-      const im = e.im, z = Math.max(r.w / im.width, r.h / im.height) * (1.08 + 0.04 * kick);
+      const im = e.im, z = Math.max(r.w / im.width, r.h / im.height) * (1.05 + 0.04 * kick);
       ctx.save();
       ctx.beginPath();
       ctx.rect(r.x, r.y, r.w, r.h);
@@ -508,11 +509,11 @@
       dead: [['sk_rise', 'ember'], ['sk_line', 'ember'], ['sk_pairs', 'ember'], ['sk_solo', 'ember']],
       dance: [['dance_band', 'mono'], ['sk_pairs', 'ember'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['sk_solo', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['sk_line', 'ember'], ['dance_smile', 'ember'], ['dance_twirl', 'mono']],
       genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],
-      // Holographic Realms: rooms full of projection and light
-      light: [['p09_23', 'hr'], ['p10_28', 'hr'], ['p03_07', 'hr'], ['p10_27', 'hr']],
-      lightStrips: [['p09_24', 'hr'], ['p03_09', 'hr'], ['p11_34', 'hr'], ['p09_26', 'hr'], ['p02_06', 'hr'], ['p09_25', 'hr']],
-      over: ['p07_17', 'p08_21', 'p11_32', 'p06_15', 'p08_22', 'p07_18'],
-      masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['mask_man', 'mono'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
+      // Holographic Realms' own event footage, in its own colour
+      light: [['v_dj', 'color'], ['v_crowdbeams', 'color'], ['v_pinkwall', 'color'], ['v_laserfan', 'color']],
+      lightStrips: [['v_beams', 'color'], ['v_octagon', 'color'], ['v_booth', 'color'], ['v_crowdbeams2', 'color'], ['v_dj2', 'color'], ['v_lasercrowd', 'color']],
+      over: ['v_laserfan', 'v_beams', 'v_crowdbeams2', 'v_octagon', 'v_laserpink', 'v_booth'],
+      masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['v_costume', 'color'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
       group: [['mask_group', 'ember'], ['sk_line', 'ember'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
       drink: [['bar_toast', 'ember'], ['tap_pour', 'ember'], ['pour_spot', 'ember'], ['bar_smile', 'ember']],
     };
