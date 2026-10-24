@@ -10,6 +10,8 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 19 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
+| `reel.js` + `reel/` | The three ~42s collab Reels (archival film, 1080×1920): timelines and copy in `reel.js` / `content.json` → `reel`, clip list in `reel/footage.json`, rights in `reel/SOURCES.md` |
+| `prep_footage.py` | Downloads the archive.org films (if missing) and cuts + grades the Reel clips into `footage/` (ember and mono grades; not committed, about 600 MB) |
 | `prep_export.py` | Exports the pumpkin + knife art as transparent PNGs to `../exports/`, both with a crisp drawn knife-tip star: clean (evenly lit, any background), glow (poster shading as solid darkening + ember halo) and poster (left side fades away completely, as on the poster) |
 | `prep_qr.py` | Turns `../reference/tv-qr.png` into a module grid (`layers/qr.json`) so the TV draws the QR pixel-sharp, and checks it still decodes |
 | `content.json` | **All the copy.** Edit here, then re-render |
@@ -27,6 +29,7 @@ node render.mjs                   # all cards  -> ../videos/*.mp4 + *-cover.jpg
 node render.mjs 05-countdown      # just the countdowns
 node render.mjs --stills 01 0,4,8 # review frames -> review/
 node render.mjs --sheet           # contact sheets of rendered videos -> review/
+python3 prep_footage.py && node render.mjs reel   # the collab Reels (needs archive.org access)
 node render.mjs --tv              # the venue TV loop -> ../videos/tv-loop.mp4 (silent)
 npm run preview                   # open http://localhost:8080 to scrub cards live
 ```

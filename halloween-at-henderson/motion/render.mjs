@@ -83,7 +83,7 @@ async function renderCard(page, card) {
     ...audioIn,
     '-c:v', 'libx264', '-preset', 'slow',
     // the TV loop is mostly holds: a lighter encode keeps it small (and the QR still scans)
-    ...(card.silent ? ['-crf', '23', '-maxrate', '6M', '-bufsize', '12M'] : ['-crf', '19', '-maxrate', '14M', '-bufsize', '28M']),
+    ...(card.id.startsWith('tv') ? ['-crf', '23', '-maxrate', '6M', '-bufsize', '12M'] : ['-crf', '19', '-maxrate', '14M', '-bufsize', '28M']),
     '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-r', String(FPS),
     ...audioOut, '-movflags', '+faststart', mp4,
   ], { stdio: ['pipe', 'inherit', 'inherit'] });

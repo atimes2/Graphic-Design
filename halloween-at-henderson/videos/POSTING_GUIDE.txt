@@ -47,3 +47,12 @@ VENUE TV
   tv-loop.mp4                   70s   1920x1080, silent, loops seamlessly. Set the TV
                                       player to repeat. The QR code (luma.com/gj1waa12,
                                       utm_source=hendersontv) stays on screen the whole time.
+
+COLLAB REEL (Adam x Henderson Brewing Co.; pick one)
+  1080x1920, ~42s, silent (add a track in Instagram). Text stays inside the 4:5
+  centre so the feed and grid crops hold. Ticket CTA: link in Adam's bio.
+  reel-a-feature-presentation.mp4   1950s movie trailer
+  reel-b-rules-of-the-night.mp4     1950s classroom etiquette film, five rules
+  reel-c-special-bulletin.mp4       vintage TV news interruption, black-and-white
+  Archival footage: Prelinger Archives (archive.org), public domain;
+  see motion/reel/SOURCES.md.

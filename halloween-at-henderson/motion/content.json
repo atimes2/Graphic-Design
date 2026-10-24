@@ -1,11 +1,26 @@
 {
   "_note": "All on-screen copy. Edit, then re-render with `node render.mjs`.",
   "details": [
-    { "kicker": "THE NIGHT", "value": "SAT · OCT 31" },
-    { "kicker": "THE HOURS", "value": "10PM – 2AM" },
-    { "kicker": "THE PLACE", "value": "HENDERSON BREWING CO." },
-    { "kicker": "THE DRESS CODE", "value": "COSTUMES ENCOURAGED" },
-    { "kicker": "THE FINE PRINT", "value": "19+ WITH VALID ID" }
+    {
+      "kicker": "THE NIGHT",
+      "value": "SAT · OCT 31"
+    },
+    {
+      "kicker": "THE HOURS",
+      "value": "10PM – 2AM"
+    },
+    {
+      "kicker": "THE PLACE",
+      "value": "HENDERSON BREWING CO."
+    },
+    {
+      "kicker": "THE DRESS CODE",
+      "value": "COSTUMES ENCOURAGED"
+    },
+    {
+      "kicker": "THE FINE PRINT",
+      "value": "19+ WITH VALID ID"
+    }
   ],
   "detailsFooter": "TICKETS ON LUMA · CHEAPER THE EARLIER YOU BUY",
   "moreRoom": {
@@ -18,28 +33,117 @@
     "k3": "SO WE'RE TAKING OVER",
     "venue2": "BREWING CO."
   },
-  "earlyBird": { "l1": "EARLY BIRD", "l2": "TICKETS", "status": "NOW AVAILABLE", "sub": "CHEAPER THE EARLIER YOU BUY" },
-  "earlyBirdSoldOut": { "l1": "EARLY BIRD", "l2": "TICKETS", "stamp": "SOLD OUT!", "sub": "REGULAR TICKETS ON SALE NOW" },
-  "tickets": { "l1": "TICKETS", "status": "NOW AVAILABLE", "cta": "GET YOUR TICKETS TODAY" },
-  "countdown": [31, 21, 14, 7, 3, 1],
-  "countdownLabel": { "one": "DAY TO GO", "many": "DAYS TO GO" },
+  "earlyBird": {
+    "l1": "EARLY BIRD",
+    "l2": "TICKETS",
+    "status": "NOW AVAILABLE",
+    "sub": "CHEAPER THE EARLIER YOU BUY"
+  },
+  "earlyBirdSoldOut": {
+    "l1": "EARLY BIRD",
+    "l2": "TICKETS",
+    "stamp": "SOLD OUT!",
+    "sub": "REGULAR TICKETS ON SALE NOW"
+  },
+  "tickets": {
+    "l1": "TICKETS",
+    "status": "NOW AVAILABLE",
+    "cta": "GET YOUR TICKETS TODAY"
+  },
+  "countdown": [
+    31,
+    21,
+    14,
+    7,
+    3,
+    1
+  ],
+  "countdownLabel": {
+    "one": "DAY TO GO",
+    "many": "DAYS TO GO"
+  },
   "countdownSub": "OCT 31 · HENDERSON BREWING CO.",
   "night": {
     "kicker": "SAT OCT 31 · 10PM – 2AM",
     "head": "DJS ALL NIGHT",
-    "genres": ["BASS", "TECHNO", "POP REMIXES", "& MORE"],
-    "lines": ["BASS · TECHNO · POP REMIXES", "LIGHTS · LASERS · VISUALS", "FULL BAR ON SITE"]
+    "genres": [
+      "BASS",
+      "TECHNO",
+      "POP REMIXES",
+      "& MORE"
+    ],
+    "lines": [
+      "BASS · TECHNO · POP REMIXES",
+      "LIGHTS · LASERS · VISUALS",
+      "FULL BAR ON SITE"
+    ]
   },
-  "first100": { "kicker": "THE FIRST", "num": "100", "line": "GUESTS", "sub": "GET A FREE DRINK TICKET" },
-  "dress": { "line1": "DRESS", "line2": "TO KILL.", "sub": "COSTUMES ENCOURAGED", "contest": "BEST GROUP COSTUME WINS DRINKS" },
-  "contest": { "l1": "BEST GROUP", "l2": "COSTUME", "l3": "CONTEST", "prize": "WINNERS GET DRINK PRIZES" },
-  "question": { "l1": "WHAT ARE YOU", "l2": "GOING AS?", "sub": "DROP YOUR COSTUME BELOW" },
-  "lastCall": { "l1": "LAST CALL", "l2": "FOR TICKETS", "sub": "GET YOURS BEFORE THEY'RE GONE" },
-  "almostGone": { "l1": "EARLY BIRD", "l2": "ALMOST", "l3": "SOLD OUT", "meter": "TICKETS GOING FAST", "sub": "CHEAPER THE EARLIER YOU BUY" },
-  "saturday": { "kicker": "THIS YEAR HALLOWEEN FALLS ON A", "big": "SATURDAY.", "month": "OCTOBER 2026", "foot": "10PM – 2AM · HENDERSON BREWING CO." },
-  "earlier": { "l1": "THE EARLIER", "l2": "YOU BUY,", "l3": "THE LESS YOU PAY", "steps": ["NOW", "LATER", "LAST MINUTE"] },
-  "lights": { "words": ["LIGHTS.", "LASERS.", "VISUALS."], "l1": "FULL BAR ON SITE", "l2": "SAT OCT 31 · 10PM – 2AM" },
-  "thisHalloween": { "kicker": "THIS HALLOWEEN", "date": "SAT · OCT 31", "djs": "DJS ALL NIGHT", "genres": "BASS · TECHNO · POP REMIXES" },
+  "first100": {
+    "kicker": "THE FIRST",
+    "num": "100",
+    "line": "GUESTS",
+    "sub": "GET A FREE DRINK TICKET"
+  },
+  "dress": {
+    "line1": "DRESS",
+    "line2": "TO KILL.",
+    "sub": "COSTUMES ENCOURAGED",
+    "contest": "BEST GROUP COSTUME WINS DRINKS"
+  },
+  "contest": {
+    "l1": "BEST GROUP",
+    "l2": "COSTUME",
+    "l3": "CONTEST",
+    "prize": "WINNERS GET DRINK PRIZES"
+  },
+  "question": {
+    "l1": "WHAT ARE YOU",
+    "l2": "GOING AS?",
+    "sub": "DROP YOUR COSTUME BELOW"
+  },
+  "lastCall": {
+    "l1": "LAST CALL",
+    "l2": "FOR TICKETS",
+    "sub": "GET YOURS BEFORE THEY'RE GONE"
+  },
+  "almostGone": {
+    "l1": "EARLY BIRD",
+    "l2": "ALMOST",
+    "l3": "SOLD OUT",
+    "meter": "TICKETS GOING FAST",
+    "sub": "CHEAPER THE EARLIER YOU BUY"
+  },
+  "saturday": {
+    "kicker": "THIS YEAR HALLOWEEN FALLS ON A",
+    "big": "SATURDAY.",
+    "month": "OCTOBER 2026",
+    "foot": "10PM – 2AM · HENDERSON BREWING CO."
+  },
+  "earlier": {
+    "l1": "THE EARLIER",
+    "l2": "YOU BUY,",
+    "l3": "THE LESS YOU PAY",
+    "steps": [
+      "NOW",
+      "LATER",
+      "LAST MINUTE"
+    ]
+  },
+  "lights": {
+    "words": [
+      "LIGHTS.",
+      "LASERS.",
+      "VISUALS."
+    ],
+    "l1": "FULL BAR ON SITE",
+    "l2": "SAT OCT 31 · 10PM – 2AM"
+  },
+  "thisHalloween": {
+    "kicker": "THIS HALLOWEEN",
+    "date": "SAT · OCT 31",
+    "djs": "DJS ALL NIGHT",
+    "genres": "BASS · TECHNO · POP REMIXES"
+  },
   "tv": {
     "scan": "SCAN FOR TICKETS",
     "date": "SAT · OCT 31",
@@ -55,5 +159,71 @@
     "sub": "DOORS 10PM",
     "place": "HENDERSON BREWING CO.",
     "footer": "See you on the dance floor."
+  },
+  "reel": {
+    "a": {
+      "presents": "PRESENTS",
+      "bug": "HALLOWEEN AT HENDERSON · OCT 31",
+      "caps": [
+        "ONE NIGHT ONLY.",
+        "THE BREWERY GOES DARK...",
+        "...AND THE DANCE FLOOR\nCOMES ALIVE.",
+        "SATURDAY, OCTOBER 31",
+        "DJS ALL NIGHT",
+        "BASS. TECHNO.\nPOP REMIXES.",
+        "COME IN COSTUME.",
+        "BEST GROUP\nCOSTUME WINS.",
+        "THE FIRST 100 GUESTS",
+        "GET A FREE DRINK."
+      ]
+    },
+    "b": {
+      "presents": "PRESENTS",
+      "title": [
+        "RULES OF",
+        "THE NIGHT"
+      ],
+      "sub": "A SHORT FILM ON PROPER HALLOWEEN CONDUCT",
+      "caps": [
+        "RULE NO. 1",
+        "COME IN COSTUME.",
+        "COSTUMES ENCOURAGED",
+        "RULE NO. 2",
+        "BRING YOUR\nWHOLE CREW.",
+        "BEST GROUP COSTUME WINS DRINKS",
+        "RULE NO. 3",
+        "ARRIVE EARLY.",
+        "THE FIRST 100 GUESTS GET A FREE DRINK",
+        "RULE NO. 4",
+        "DANCE UNTIL 2AM.",
+        "DJS ALL NIGHT · BASS · TECHNO · POP REMIXES",
+        "RULE NO. 5",
+        "GET YOUR\nTICKETS EARLY.",
+        "THE LONGER YOU WAIT, THE MORE YOU PAY"
+      ]
+    },
+    "c": {
+      "bulletin": "SPECIAL BULLETIN",
+      "interrupt": [
+        "WE INTERRUPT",
+        "THIS PROGRAM"
+      ],
+      "tickerTag": "BULLETIN",
+      "ticker": "HALLOWEEN AT HENDERSON · SAT OCT 31 · 10PM – 2AM · 19+ · DJS ALL NIGHT · COSTUMES ENCOURAGED · TICKETS: LINK IN BIO",
+      "caps": [
+        "SPECIAL BULLETIN",
+        "HALLOWEEN TAKEOVER REPORTED\nAT HENDERSON BREWING CO.",
+        "CROWDS EXPECTED\nSATURDAY, OCTOBER 31.",
+        "WITNESSES DESCRIBE LIGHTS,\nLASERS AND DJS ALL NIGHT.",
+        "RESIDENTS URGED TO\nCOME IN COSTUME.",
+        "BASS. TECHNO. POP REMIXES.\nUNTIL 2AM.",
+        "OFFICIALS ADVISE:\nGET YOUR TICKETS EARLY."
+      ]
+    },
+    "end": {
+      "date": "SATURDAY · OCTOBER 31",
+      "time": "10PM – 2AM · 19+",
+      "tickets": "TICKETS · LINK IN BIO"
+    }
   }
 }

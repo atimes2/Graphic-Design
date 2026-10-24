@@ -28,6 +28,7 @@
 <canvas id="c" width="1080" height="1920"></canvas>
 <script src="engine.js"></script>
 <script src="cards.js"></script>
+<script src="reel.js"></script>
 <script>
 (async () => {
   await HH.load();
@@ -36,8 +37,13 @@
   const ctx = cv.getContext('2d');
 
   // hooks for render.mjs
-  window.HH_frame = (id, t, q = 0.95) => { HH.renderFrame(ctx, id, t); return cv.toDataURL('image/jpeg', q); };
-  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues, loop: !!c.loop }));
+  window.HH_frame = async (id, t, q = 0.95) => {
+    const card = HH.CARDS[id];
+    if (card.prepare) await card.prepare(t);   // e.g. the Reels load their footage frame first
+    HH.renderFrame(ctx, id, t);
+    return cv.toDataURL('image/jpeg', q);
+  };
+  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues, loop: !!c.loop, silent: !!c.silent }));
   window.HH_ready = true;
 
   const params = new URLSearchParams(location.search);
@@ -58,6 +64,7 @@
     const card = HH.CARDS[sel.value];
     if (playing) t = (t + (now - last) / 1000) % card.duration;
     last = now;
+    if (card.prepare) card.prepare(t);
     HH.renderFrame(ctx, card.id, t);
     scrub.value = t / card.duration;
     time.textContent = `${t.toFixed(2)}s`;
