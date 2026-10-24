@@ -161,11 +161,10 @@
 
   // the film burns through from a hot spot, revealing black
   const burnBuf = canvas(W, H);
-  function burnOut(ctx, t, t0, dur, drawFn) {
+  function burnOut(ctx, t, t0, dur, drawFn, p = PANEL) {
     const q = ease.in2(prog(t, t0, t0 + dur));
-    const p = PANEL;
     const cx = p.x + p.w * 0.58, cy = p.y + p.h * 0.46;
-    const R = q * 1100;
+    const R = q * (p === PANEL ? 1100 : 2000);
     const b = burnBuf.getContext('2d');
     b.setTransform(1, 0, 0, 1, 0, 0);
     b.globalCompositeOperation = 'source-over';
@@ -183,7 +182,7 @@
     ctx.drawImage(burnBuf, 0, 0);
     if (q > 0 && q < 1) {   // glowing edge of the burn
       ctx.save();
-      panelPath(ctx, p);
+      panelPath(ctx, p, p.r);
       ctx.clip();
       ctx.globalCompositeOperation = 'lighter';
       const ring = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.05);
@@ -197,6 +196,51 @@
     }
   }
 
+  // ------------------------------------------------------- full-screen film
+  const FULL = { x: 0, y: 0, w: W, h: H, r: 0 };
+  function drawFull(ctx, t, img, o = {}) {
+    ctx.save();
+    ctx.fillStyle = '#030101';
+    ctx.fillRect(0, 0, W, H);
+    if (img) {
+      const wx = (vnoise(t * 7.3) - 0.5) * 6, wy = (vnoise(t * 5.1 + 30) - 0.5) * 8;   // a looser, older gate
+      const ex = (o.exposure ?? 1) * (0.9 + 0.14 * vnoise(t * 19 + 3));
+      const z = 1.04 + (o.push ?? 0.05) * (o.lt ?? 0) / 2 + (o.punch ?? 0);
+      ctx.filter = o.negative ? 'invert(1) brightness(1.1)' : `brightness(${ex.toFixed(3)})`;
+      ctx.drawImage(img, (W - W * z) / 2 + wx, (H - H * z) / 2 + wy, W * z, H * z);
+      ctx.filter = 'none';
+    }
+    dust(ctx, t, FULL, 1.4);
+    const v = ctx.createRadialGradient(W / 2, H * 0.48, H * 0.22, W / 2, H * 0.48, H * 0.75);
+    v.addColorStop(0, 'rgba(3,1,1,0)');
+    v.addColorStop(1, 'rgba(3,1,1,0.82)');
+    ctx.fillStyle = v;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  // dark band behind the type so it reads over any frame
+  function textBand(ctx, y0, y1, a = 0.7) {
+    const g = ctx.createLinearGradient(0, y0, 0, y1);
+    g.addColorStop(0, 'rgba(3,1,1,0)');
+    g.addColorStop(0.3, `rgba(3,1,1,${a})`);
+    g.addColorStop(0.7, `rgba(3,1,1,${a})`);
+    g.addColorStop(1, 'rgba(3,1,1,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, y0, W, y1 - y0);
+  }
+  // the film's own line, subtitled for people watching on mute
+  function subtitle(ctx, t, s) {
+    if (t < s.t0 || t > s.t1) return;
+    const a = ease.out2(prog(t, s.t0, s.t0 + 0.12)) * (1 - ease.in2(prog(t, s.t1 - 0.2, s.t1)));
+    const str = `\u201C${s.text}\u201D`;
+    const size = fit(ctx, str, 50, 960, 'Figtree', 1, '700');
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.95)';
+    ctx.shadowBlur = 14;
+    label(ctx, str, W / 2, 1400, size, { weight: '700', tracking: 1, color: BONE, alpha: a });
+    ctx.restore();
+  }
+
   // ------------------------------------------------------------- captions
   // cap = { t0, t1, k (kicker), h (headline, \n = two lines), s (line under the panel), style }
   function caption(ctx, t, cap, o = {}) {
@@ -205,8 +249,8 @@
     ctx.save();
     ctx.globalAlpha = out;
     const lines = cap.h ? cap.h.split('\n') : [];
-    const size = Math.min(...lines.map((l) => fit(ctx, l, lines.length > 1 ? 92 : 118, 980)));
-    const base = 548;
+    const size = Math.min(...lines.map((l) => fit(ctx, l, (lines.length > 1 ? 92 : 118) * (o.scale ?? 1), 980)));
+    const base = o.base ?? 548;
     const ys = lines.length > 1 ? [base - size * 1.02, base] : [base];
     const ky = (ys[0] - size * 0.95) - 18;
     if (cap.k) kicker(ctx, cap.k, ky, (o.kickerAlpha ?? 1) * neon(prog(t, cap.t0, cap.t0 + 0.35)), { size: 38, tracking: 12, glow: 22 });
@@ -429,6 +473,54 @@
     };
   }
 
+  // ---- D · IS IT HALLOWEEN?: full-screen silent-era horror + the films' own voices
+  {
+    const m0 = 9.6, mEnd = m0 + 7 * 2 * BEAT;
+    VARIANTS.d = {
+      id: 'reel-d-is-it-halloween',
+      grade: 'blood',
+      full: true,
+      dur: 35, introEnd: 0,
+      audio: 'reel/audio/reel-d-is-it-halloween.wav',   // film lines + Danse Macabre (reel_audio.py)
+      burn: 22.3, end: 23.1,
+      capBase: 780, capScale: 1.18,
+      shots: [
+        { t0: 0.0, t1: 2.1, clip: 'h_orlok_rise' },
+        { t0: 2.1, t1: 4.2, clip: 'h_ball_stairs' },
+        { t0: 4.2, t1: 6.8, clip: 'h_orlok_window' },
+        { t0: 6.8, t1: 8.4, clip: 'h_cauldron' },
+        { t0: 8.4, t1: m0, clip: 'h_devil' },
+        ...montage(m0, ['h_ball_a', 'h_sabbath_a', 'h_ball_b', 'h_red_death', 'h_sabbath_b', 'h_ball_c', 'h_red_death']),
+        { t0: mEnd, t1: mEnd + 0.66, clip: 'h_unmask' },
+        { t0: mEnd + 0.66, t1: 19.3, clip: 'h_unmask_close' },
+        { t0: 19.3, t1: 23.1, clip: 'h_skull' },
+      ],
+      lasers: [m0, mEnd],
+      laserSnap: true,
+      laserOrigin: [540, 1760],
+      strobe: [m0, mEnd],
+      negative: [[8.4, 8.47], [16.4, 16.47], [22.05, 22.15]],
+      leaks: [],
+      caps: (c) => [
+        { t0: 0.0, t1: 2.1, h: c[0], instant: true },
+        { t0: 2.1, t1: 6.8, k: c[1], h: c[2], style: 'burn' },
+        { t0: 6.8, t1: m0, h: c[3], style: 'neon' },
+        { t0: m0, t1: m0 + 4 * 2 * BEAT, k: c[4], h: c[5], style: 'neon' },
+        { t0: m0 + 4 * 2 * BEAT, t1: mEnd, k: c[5], h: c[6], style: 'neon' },
+        { t0: mEnd, t1: 19.3, k: c[7], h: c[8] },
+        { t0: 19.3, t1: 22.4, k: c[9], h: c[10] },
+      ],
+      subs: (c) => [
+        { t0: 0.25, t1: 2.0, text: c[0] },
+        { t0: 2.35, t1: 3.9, text: c[1] },
+        { t0: 4.5, t1: 6.6, text: c[2] },
+        { t0: 7.2, t1: 9.6, text: c[3] },
+        { t0: 16.5, t1: 19.1, text: c[4] },
+        { t0: 19.6, t1: 21.6, text: c[5] },
+      ],
+    };
+  }
+
   // TV switching on (dir false) / off (dir true) between t0 and t1
   const tvBuf = canvas(W, H);
   function tvShape(ctx, t, t0, t1, off, drawFn) {
@@ -522,12 +614,16 @@
       let exposure = 1;
       if (s && s.dim) exposure *= 1 - 0.95 * ease.in2(prog(t, s.dim[0], s.dim[1]));
       if (s && s.rise) exposure *= ease.out2(prog(t, s.rise[0], s.rise[1]));
-      drawPanel(ctx, t, f && f.im, { crt: v.crt, exposure, lt: s ? t - s.t0 : 0 });
+      if (v.full) {
+        const beat = v.strobe && t > v.strobe[0] && t < v.strobe[1] ? Math.exp(-((((t - v.strobe[0]) / BEAT) % 1) * BEAT) * 14) : 0;
+        const neg = (v.negative || []).some(([a, b]) => t >= a && t < b);
+        drawFull(ctx, t, f && f.im, { exposure: exposure * (1 + 0.35 * beat), lt: s ? t - s.t0 : 0, punch: 0.025 * beat, negative: neg });
+      } else drawPanel(ctx, t, f && f.im, { crt: v.crt, exposure, lt: s ? t - s.t0 : 0 });
       v.shots.forEach((sh, i) => { if (i && !sh.rise && v.shots[i - 1].t1 === sh.t0) spliceFlash(ctx, t, sh.t0, v.crt ? 0.12 : 0.22); });
       v.leaks.forEach(([t0, d, k], i) => leak(ctx, t, t0, d, k, i % 2 === 0));
       if (v.lasers && t > v.lasers[0] && t < v.lasers[1] + 0.5) {
         const amt = ease.out2(prog(t, v.lasers[0], v.lasers[0] + (v.laserSnap ? 0.08 : 0.6))) * (1 - ease.in2(prog(t, v.lasers[1], v.lasers[1] + 0.5)));
-        P().lasers(ctx, t, amt * 0.85, { origin: [540, PANEL.y + PANEL.h + 30], t0: v.lasers[0], spread: 1.3, n: 7, haze: 0.06 });
+        P().lasers(ctx, t, amt * 0.85, { origin: v.laserOrigin || [540, PANEL.y + PANEL.h + 30], t0: v.lasers[0], spread: 1.3, n: 7, haze: 0.06 });
       }
     }
     return {
@@ -547,12 +643,14 @@
         if (t >= firstShot && t < footEnd + 1.0) {
           const inA = firstShot <= 0 ? 1 : ease.out2(prog(t, firstShot, firstShot + 0.25));
           const drawFilm = (c) => { c.save(); c.globalAlpha = inA; film(c, t); c.restore(); };
-          if (v.burn != null && t >= v.burn) burnOut(ctx, t, v.burn, v.end - v.burn, drawFilm);
+          if (v.burn != null && t >= v.burn) burnOut(ctx, t, v.burn, v.end - v.burn, drawFilm, v.full ? FULL : PANEL);
           else if (v.off != null && t >= v.off) tvShape(ctx, t, v.off, v.end, true, drawFilm);
           else drawFilm(ctx);
         }
         if (t < footEnd + 0.1) {
-          caps().forEach((cap) => caption(ctx, t, cap));
+          if (v.full) textBand(ctx, 400, 920, 0.62);
+          caps().forEach((cap) => caption(ctx, t, cap, { base: v.capBase, scale: v.capScale }));
+          if (v.subs) v.subs(A.content.reel[v.id.split('-')[1]].subs).forEach((sb) => subtitle(ctx, t, sb));
           if (v.bug && t > firstShot) kicker(ctx, A.content.reel.a.bug, 1440, 0.6 * ease.out2(prog(t, firstShot, firstShot + 0.6)) * (1 - prog(t, footEnd - 0.3, footEnd)), { size: 28, tracking: 14, color: BONE, glow: 0 });
           if (v.crt) ticker(ctx, t, ease.out2(prog(t, firstShot, firstShot + 0.4)) * (1 - prog(t, v.off - 0.2, v.off)));
         }

@@ -6,6 +6,7 @@ Spec: reel/audio.json. For each Reel:
              Kokoro-82M-v1.0-ONNX, cached in $KOKORO_DIR) unless the WAV is
              already in reel/audio/vo/<reel>/<key>.wav, then given an old
              optical-soundtrack voice: band-limited, a little warmth, a small room
+  clips      short lines of dialogue from public-domain films (reel/audio/clips/)
   music      slices of public-domain recordings from archive.org (downloaded to
              $MUSIC_SRC on first use), de-clicked and band-limited, ducked
              under the narration
@@ -117,6 +118,15 @@ def build(rid, spec):
         v = vintage_voice(load(vodir / f"{l['key']}.wav"))
         i = int(l["t"] * SR)
         vo[i:i + len(v)] += v[: n - i]
+    # lines lifted from the films' own soundtracks (reel/audio/clips/, see SOURCES.md),
+    # each cleaned and brought to the same speech level; the music ducks under them too
+    for c in spec.get("clips", []):
+        x = bandpass(declick(load(OUT / "clips" / c["file"])), 120, 6000)
+        active = np.abs(x) > 0.1 * np.abs(x).max()
+        x = x / (np.sqrt(np.mean(x[active] ** 2)) + 1e-9) * 0.25 * c.get("gain", 1.0)
+        x = x * fade(len(x), 0.01, 0.06)
+        i = int(c["t"] * SR)
+        vo[i:i + len(x)] += x[: n - i]
     music = np.zeros(n)
     cache = {}
     for m in spec.get("music", []):

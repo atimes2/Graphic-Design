@@ -75,5 +75,58 @@
         "fadeOut": 1.8
       }
     ]
+  },
+  "reel-d-is-it-halloween": {
+    "duration": 35,
+    "clips": [
+      {
+        "file": "halloween.wav",
+        "t": 0.3,
+        "gain": 1.5
+      },
+      {
+        "file": "ladies.wav",
+        "t": 2.45
+      },
+      {
+        "file": "comein.wav",
+        "t": 4.6
+      },
+      {
+        "file": "dance.wav",
+        "t": 7.2
+      },
+      {
+        "file": "mask.wav",
+        "t": 16.6
+      },
+      {
+        "file": "afraid.wav",
+        "t": 19.7
+      },
+      {
+        "file": "rightin.wav",
+        "t": 27.2
+      }
+    ],
+    "musicLevel": 0.6,
+    "music": [
+      {
+        "src": "loc-jukebox-134348-danse-macabre",
+        "from": 0.0,
+        "at": 0.0,
+        "dur": 9.8,
+        "fadeIn": 0.05,
+        "fadeOut": 0.25
+      },
+      {
+        "src": "loc-jukebox-134348-danse-macabre",
+        "from": 214.0,
+        "at": 9.6,
+        "dur": 25.4,
+        "fadeIn": 0.04,
+        "fadeOut": 2.2
+      }
+    ]
   }
 }

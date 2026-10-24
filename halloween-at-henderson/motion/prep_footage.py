@@ -25,8 +25,9 @@ W, H = 1000, 750
 STOPS = {   # position: rgb
     "ember": [(0.0, (5, 3, 3)), (0.22, (40, 9, 6)), (0.48, (150, 40, 18)), (0.72, (236, 120, 52)), (0.9, (255, 214, 160)), (1.0, (255, 244, 228))],
     "mono":  [(0.0, (5, 3, 3)), (0.3, (42, 30, 26)), (0.65, (170, 140, 120)), (1.0, (255, 241, 224))],
+    "blood": [(0.0, (3, 1, 1)), (0.28, (46, 4, 4)), (0.52, (140, 16, 10)), (0.76, (226, 78, 48)), (0.92, (255, 196, 168)), (1.0, (255, 240, 232))],
 }
-KEEP = {"ember": 0.18, "mono": 0.0}   # share of the original colour mixed back in
+KEEP = {"ember": 0.18, "mono": 0.0, "blood": 0.0}   # share of the original colour mixed back in
 
 
 def lut(stops):
@@ -75,12 +76,20 @@ def main(keys):
             continue
         speed = c.get("speed", 1.0)
         src_dur = c["dur"] * speed
-        vf = f"setpts=PTS/{speed},fps=30,scale={W}:{H}:flags=lanczos,unsharp=5:5:0.6"
+        if "full" in c:   # full-bleed 9:16 crop for the full-screen Reel
+            f = c["full"]
+            w, h = 1080, 1920
+            crop = (f"crop=w='min(iw,ih*9/16)/{f['zoom']}':h='ih/{f['zoom']}'"
+                    f":x='(iw-ow)*{f['fx']}':y='(ih-oh)*{f.get('fy', 0.5)}'")
+            vf = f"setpts=PTS/{speed},fps=30,{crop},scale={w}:{h}:flags=lanczos,unsharp=5:5:0.8"
+        else:
+            w, h = W, H
+            vf = f"setpts=PTS/{speed},fps=30,scale={W}:{H}:flags=lanczos,unsharp=5:5:0.6"
         cmd = [FF, "-loglevel", "error", "-ss", str(c["in"]), "-t", str(src_dur + 0.2), "-i", str(SRC / f"{c['src']}.mp4"),
                "-vf", vf, "-frames:v", str(round(c["dur"] * 30)), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
         raw = subprocess.run(cmd, capture_output=True, check=True).stdout
-        frames = np.frombuffer(raw, np.uint8).reshape(-1, H, W, 3)
-        for kind in STOPS:   # every clip in both grades; each Reel picks one
+        frames = np.frombuffer(raw, np.uint8).reshape(-1, h, w, 3)
+        for kind in c.get("grades", ["ember", "mono"]):   # each Reel picks one grade
             d = OUT / key / kind
             d.mkdir(parents=True, exist_ok=True)
             for old in d.glob("*.jpg"):
@@ -88,8 +97,13 @@ def main(keys):
             for i, fr in enumerate(frames):
                 Image.fromarray(grade(fr, kind)).save(d / f"{i:04d}.jpg", quality=90)
         print(f"{key}: {len(frames)} frames")
-    index = {k: {"frames": len(list((OUT / k / "ember").glob('*.jpg')))} for k in clips
-             if not k.startswith("_") and (OUT / k / "ember").exists()}
+    index = {}
+    for k, c in clips.items():
+        if k.startswith("_"):
+            continue
+        g = OUT / k / c.get("grades", ["ember"])[0]
+        if g.exists():
+            index[k] = {"frames": len(list(g.glob("*.jpg")))}
     (OUT / "index.json").write_text(json.dumps(index))
 
 

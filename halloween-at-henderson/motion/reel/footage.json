@@ -216,5 +216,201 @@
     "src": "SpotNews1937",
     "in": 54.45,
     "dur": 2.2
+  },
+  "h_orlok_rise": {
+    "src": "nosferatu5",
+    "in": 112.0,
+    "dur": 2.2,
+    "speed": 0.8,
+    "full": {
+      "fx": 0.38,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_ball_stairs": {
+    "src": "phantom",
+    "in": 3740.0,
+    "dur": 2.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_orlok_window": {
+    "src": "nosferatu4",
+    "in": 1052.3,
+    "dur": 2.6,
+    "speed": 0.85,
+    "full": {
+      "fx": 0.48,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_cauldron": {
+    "src": "haxan",
+    "in": 3134.0,
+    "dur": 1.6,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.3,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_devil": {
+    "src": "haxan",
+    "in": 3246.5,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.48,
+      "fy": 0.5,
+      "zoom": 1.15
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_ball_a": {
+    "src": "phantom",
+    "in": 3768.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.45,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_ball_b": {
+    "src": "phantom",
+    "in": 3782.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.55,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_ball_c": {
+    "src": "phantom",
+    "in": 3790.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_sabbath_a": {
+    "src": "haxan",
+    "in": 3270.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.45,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_sabbath_b": {
+    "src": "haxan",
+    "in": 3278.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.55,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_red_death": {
+    "src": "phantom",
+    "in": 3831.0,
+    "dur": 1.4,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_unmask": {
+    "src": "phantom",
+    "in": 3495.0,
+    "dur": 1.4,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.62,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_unmask_close": {
+    "src": "phantom",
+    "in": 3498.5,
+    "dur": 2.2,
+    "speed": 1.0,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.4,
+      "zoom": 1.1
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_skull": {
+    "src": "phantom",
+    "in": 3869.0,
+    "dur": 3.0,
+    "speed": 0.8,
+    "full": {
+      "fx": 0.42,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
   }
 }
