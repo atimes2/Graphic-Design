@@ -410,7 +410,7 @@
     // big type: the heavy grotesk, or the poster's Copperplate
     const COPPER = cfg.font === 'copperplate';
     const FONT = COPPER ? 'Copperplate' : 'Figtree', WEIGHT = COPPER ? '' : '800', TRACK = COPPER ? 1 : -2;
-    const big = (ctx, str, size, maxW) => fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT);
+    const big = (ctx, str, size, maxW, plain) => (plain ? fit(ctx, str, size, maxW, 'Figtree', -2, '800') : fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT));
 
     // a cell's footage at time t: pool rotates every `every` beats from beat n0;
     // grade 'hr' = a still photo from reel/hr/, shown in its own colour
@@ -456,8 +456,9 @@
       if (t < t0) return;
       const p = o.instant ? 1 : ease.out3(prog(t, t0, t0 + 0.18));
       const small = o.small;   // kickers and info lines stay in Figtree
+      const plain = small || o.plain;   // o.plain: a big word set in Figtree (the hook, for legibility)
       label(ctx, str, x, y + (1 - p) * 18, size, {
-        family: small ? 'Figtree' : FONT, weight: small ? '800' : WEIGHT, tracking: o.tracking ?? (small ? 0 : TRACK),
+        family: plain ? 'Figtree' : FONT, weight: plain ? '800' : WEIGHT, tracking: o.tracking ?? (small ? 0 : plain ? -2 : TRACK),
         align: o.align || 'left', color: o.color || BONE, alpha: p * (o.alpha ?? 1), glow: o.glow ?? 0,
       });
     }
@@ -524,7 +525,7 @@
         C().hook.forEach((w, i) => {
           cell(ctx, t, rs[i], P.hook, n0, { off: i * 2 });
           foot(ctx, rs[i]);
-          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, big(ctx, w, 240, rs[i].w - 60), t, 0, { instant: true });
+          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, big(ctx, w, 240, rs[i].w - 60, true), t, 0, { instant: true, plain: true });
         });
       },
       date(ctx, t, n0) {   // 10.31 in film
@@ -664,11 +665,12 @@
       },
     };
   }
-  // F: the main collab post. F-long: the extended cut, with the poster's Copperplate for the big words
-  const F = makeGrid({ id: 'reel-f-the-grid', duration: 31, sections: ['hook', 'date', 'dance', 'genres', 'light', 'costume', 'group', 'drink', 'early'] });
+  // F: the main collab post; F-long: the extended cut. Big words in the poster's Copperplate,
+  // except the opening HALLOWEEN / AT / HENDERSON, kept in Figtree so it reads instantly
+  const F = makeGrid({ id: 'reel-f-the-grid', duration: 28, font: 'copperplate', sections: ['hook', 'date', 'dance', 'genres', 'light', 'costume', 'group', 'early'] });
   const FL = makeGrid({
-    id: 'reel-f-the-grid-long', duration: 37, font: 'copperplate',
-    sections: ['hook', 'date', 'dead', 'dance', 'genres', 'light', 'lightStrips', 'costume', 'group', 'drink', 'early'],
+    id: 'reel-f-the-grid-long', duration: 34, font: 'copperplate',
+    sections: ['hook', 'date', 'dead', 'dance', 'genres', 'light', 'lightStrips', 'costume', 'group', 'early'],
   });
 
   [E, F, FL, G].forEach(register);
