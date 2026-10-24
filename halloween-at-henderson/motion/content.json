@@ -162,13 +162,13 @@
   },
   "reel": {
     "a": {
-      "presents": "PRESENTS",
       "bug": "HALLOWEEN AT HENDERSON · OCT 31",
       "caps": [
-        "ONE NIGHT ONLY.",
-        "THE BREWERY GOES DARK...",
+        "THE BREWERY\nGOES DARK...",
         "...AND THE DANCE FLOOR\nCOMES ALIVE.",
         "SATURDAY, OCTOBER 31",
+        "ONE NIGHT ONLY.",
+        "10PM – 2AM",
         "DJS ALL NIGHT",
         "BASS. TECHNO.\nPOP REMIXES.",
         "COME IN COSTUME.",
@@ -178,7 +178,7 @@
       ]
     },
     "b": {
-      "presents": "PRESENTS",
+      "presents": "AN EDUCATIONAL FILM",
       "title": [
         "RULES OF",
         "THE NIGHT"

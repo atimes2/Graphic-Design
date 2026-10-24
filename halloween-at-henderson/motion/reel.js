@@ -210,7 +210,10 @@
     const ys = lines.length > 1 ? [base - size * 1.02, base] : [base];
     const ky = (ys[0] - size * 0.95) - 18;
     if (cap.k) kicker(ctx, cap.k, ky, (o.kickerAlpha ?? 1) * neon(prog(t, cap.t0, cap.t0 + 0.35)), { size: 38, tracking: 12, glow: 22 });
-    lines.forEach((l, i) => revealText(ctx, l, W / 2, ys[i], size, t, cap.t0 + 0.12 + i * 0.22, cap.style || 'fade', { dur: 0.6, step: 0.04, seed: i + 3 }));
+    lines.forEach((l, i) => {
+      if (cap.instant) emberText(ctx, l, W / 2, ys[i], size, { glow: 0.9 + 0.1 * flicker(t, 3 + i) });   // the hook: fully on screen at frame 0
+      else revealText(ctx, l, W / 2, ys[i], size, t, cap.t0 + 0.12 + i * 0.22, cap.style || 'fade', { dur: 0.6, step: 0.04, seed: i + 3 });
+    });
     if (cap.s) {
       const sz = fit(ctx, cap.s, 40, 980, 'Figtree', 6, '800');
       label(ctx, cap.s, W / 2, PANEL.y + PANEL.h + 78, sz, { tracking: 6, color: BONE, alpha: ease.out2(prog(t, cap.t0 + 0.5, cap.t0 + 1.0)) * out, weight: '800' });
@@ -273,95 +276,83 @@
 
   // ---- A · FEATURE PRESENTATION: a 1950s movie trailer
   {
-    const m0 = 13.6, mEnd = m0 + 8 * 2 * BEAT;
+    // the hook is on screen from frame 0: no logo card, no fade-in
+    const m0 = 9.4, mEnd = m0 + 8 * 2 * BEAT;
     VARIANTS.a = {
       id: 'reel-a-feature-presentation',
       grade: 'ember',
-      burn: 29.2, end: 30.0,
+      dur: 38, introEnd: 0,
+      burn: 25.0, end: 25.8,
       shots: [
-        { t0: 3.2, t1: 4.8, clip: 'car_night' },
-        { t0: 4.8, t1: 6.4, clip: 'car_couples' },
-        { t0: 6.4, t1: 8.0, clip: 'pour_spot' },
-        { t0: 8.0, t1: 9.6, clip: 'pour_tray', dim: [9.0, 9.6] },
-        { t0: 9.6, t1: 10.9, clip: 'coney_luna', rise: [9.6, 10.0] },
-        { t0: 10.9, t1: 12.2, clip: 'coney_sunburst' },
-        { t0: 12.2, t1: m0, clip: 'fair_fountain' },
-        ...montage(m0, ['jive_a', 'dance_band', 'jive_b', 'dance_twirl', 'horns', 'jive_c', 'dance_close', 'jive_d']),
-        { t0: mEnd, t1: 22.6, clip: 'mask_crowd' },
-        { t0: 22.6, t1: 23.8, clip: 'mask_red' },
-        { t0: 23.8, t1: 25.0, clip: 'mask_group' },
-        { t0: 25.0, t1: 26.2, clip: 'mask_group2' },
-        { t0: 26.2, t1: 27.7, clip: 'bar_toast' },
-        { t0: 27.7, t1: 30.0, clip: 'bar_smile' },
+        { t0: 0.0, t1: 2.4, clip: 'pour_spot', dim: [1.9, 2.4] },
+        { t0: 2.4, t1: 3.6, clip: 'jive_a' },
+        { t0: 3.6, t1: 4.9, clip: 'coney_sunburst' },
+        { t0: 4.9, t1: 6.2, clip: 'fair_fountain' },
+        { t0: 6.2, t1: 7.8, clip: 'car_night' },
+        { t0: 7.8, t1: m0, clip: 'car_couples' },
+        ...montage(m0, ['jive_b', 'dance_band', 'jive_c', 'dance_twirl', 'horns', 'jive_d', 'dance_close', 'dance_curtain']),
+        { t0: mEnd, t1: 18.4, clip: 'mask_crowd' },
+        { t0: 18.4, t1: 19.6, clip: 'mask_red' },
+        { t0: 19.6, t1: 20.8, clip: 'mask_group' },
+        { t0: 20.8, t1: 22.0, clip: 'mask_group2' },
+        { t0: 22.0, t1: 23.5, clip: 'bar_toast' },
+        { t0: 23.5, t1: 25.8, clip: 'bar_smile' },
       ],
-      lasers: [9.8, mEnd],
-      leaks: [[3.0, 1.6, 0.5], [9.4, 1.4, 0.6], [mEnd - 0.2, 1.2, 0.5], [26.0, 1.4, 0.45]],
+      lasers: [2.4, mEnd],
+      laserSnap: true,
+      leaks: [[5.9, 1.4, 0.5], [mEnd - 0.2, 1.2, 0.5], [21.8, 1.4, 0.45]],
       caps: (c) => [
-        { t0: 3.4, t1: 6.4, h: c[0] },
-        { t0: 6.5, t1: 9.6, h: c[1] },
-        { t0: 9.7, t1: m0, h: c[2] },
-        { t0: m0, t1: m0 + 4 * 2 * BEAT, k: c[3], h: c[4], style: 'neon' },
-        { t0: m0 + 4 * 2 * BEAT, t1: mEnd, k: c[4], h: c[5], style: 'neon' },
-        { t0: mEnd, t1: 23.8, h: c[6] },
-        { t0: 23.8, t1: 26.2, h: c[7] },
-        { t0: 26.2, t1: 29.3, k: c[8], h: c[9] },
+        { t0: 0.0, t1: 2.4, h: c[0], instant: true },
+        { t0: 2.4, t1: 6.2, h: c[1], style: 'neon' },
+        { t0: 6.3, t1: m0, k: c[2], h: c[3] },
+        { t0: m0, t1: m0 + 4 * 2 * BEAT, k: c[4], h: c[5], style: 'neon' },
+        { t0: m0 + 4 * 2 * BEAT, t1: mEnd, k: c[5], h: c[6], style: 'neon' },
+        { t0: mEnd, t1: 19.6, h: c[7] },
+        { t0: 19.6, t1: 22.0, h: c[8] },
+        { t0: 22.0, t1: 25.1, k: c[9], h: c[10] },
       ],
       bug: true,
-      intro(ctx, t) {   // Henderson Brewing Co. presents
-        const c = A.content.reel.a;
-        const a = 1 - ease.in2(prog(t, 2.7, 3.2));
-        ctx.save();
-        ctx.globalAlpha = a;
-        const beam = ctx.createRadialGradient(540, 900, 20, 540, 900, 700);
-        beam.addColorStop(0, `rgba(255,200,150,${0.08 * flicker(t, 7)})`);
-        beam.addColorStop(1, 'rgba(255,200,150,0)');
-        ctx.fillStyle = beam;
-        ctx.fillRect(0, 0, W, H);
-        logo(ctx, 540, 900, 640, ease.out2(prog(t, 0.3, 1.4)), 0.2);
-        kicker(ctx, c.presents, 1090, ease.out2(prog(t, 1.3, 2.0)), { size: 46, tracking: 30, color: BONE, glow: 0 });
-        ctx.restore();
-      },
     };
   }
 
   // ---- B · RULES OF THE NIGHT: a 1950s classroom etiquette film
   {
-    const r4 = 18.0, r4End = r4 + 6 * 2 * BEAT;
+    const r4 = 19.4, r4End = r4 + 6 * 2 * BEAT;
     VARIANTS.b = {
       id: 'reel-b-rules-of-the-night',
       grade: 'ember',
-      burn: 28.6, end: 29.4,
+      dur: 44, introEnd: 4.6,
+      audio: 'reel/audio/reel-b-rules-of-the-night.wav',   // narrator + Funeral March of a Marionette (reel_audio.py)
+      burn: 30.6, end: 31.4,
       shots: [
-        { t0: 3.6, t1: 5.6, clip: 'gown' },
-        { t0: 5.6, t1: 6.9, clip: 'mask_man' },
-        { t0: 6.9, t1: 8.4, clip: 'mask_crowd' },
-        { t0: 8.4, t1: 10.4, clip: 'arrive_door' },
-        { t0: 10.4, t1: 11.8, clip: 'arrive_group' },
-        { t0: 11.8, t1: 13.2, clip: 'mask_group' },
-        { t0: 13.2, t1: 14.8, clip: 'car_night' },
-        { t0: 14.8, t1: 16.4, clip: 'tap_pour' },
-        { t0: 16.4, t1: r4, clip: 'bar_toast' },
+        { t0: 4.6, t1: 6.6, clip: 'gown' },
+        { t0: 6.6, t1: 8.6, clip: 'mask_man' },
+        { t0: 8.6, t1: 10.6, clip: 'arrive_door' },
+        { t0: 10.6, t1: 12.2, clip: 'arrive_group' },
+        { t0: 12.2, t1: 13.8, clip: 'mask_group' },
+        { t0: 13.8, t1: 15.6, clip: 'car_night' },
+        { t0: 15.6, t1: 17.4, clip: 'tap_pour' },
+        { t0: 17.4, t1: r4, clip: 'bar_toast' },
         ...montage(r4, ['jive_a', 'dance_band', 'jive_b', 'dance_twirl', 'jive_c', 'dance_close']),
-        { t0: r4End, t1: 25.6, clip: 'phone_boy' },
-        { t0: 25.6, t1: 27.2, clip: 'phone_girl' },
-        { t0: 27.2, t1: 29.4, clip: 'coney_sunburst' },
+        { t0: r4End, t1: 27.0, clip: 'phone_boy' },
+        { t0: 27.0, t1: 28.8, clip: 'phone_girl' },
+        { t0: 28.8, t1: 31.4, clip: 'coney_sunburst' },
       ],
       lasers: [r4, r4End],
-      leaks: [[3.4, 1.4, 0.5], [8.2, 1.2, 0.4], [13.0, 1.2, 0.4], [r4End - 0.2, 1.2, 0.45]],
+      leaks: [[4.4, 1.4, 0.5], [8.4, 1.2, 0.4], [13.6, 1.2, 0.4], [r4End - 0.2, 1.2, 0.45]],
       caps: (c) => [
-        { t0: 3.7, t1: 8.4, k: c[0], h: c[1], s: c[2], style: 'burn' },
-        { t0: 8.5, t1: 13.2, k: c[3], h: c[4], s: c[5], style: 'burn' },
-        { t0: 13.3, t1: r4, k: c[6], h: c[7], s: c[8], style: 'burn' },
+        { t0: 4.7, t1: 8.6, k: c[0], h: c[1], s: c[2], style: 'burn' },
+        { t0: 8.7, t1: 13.8, k: c[3], h: c[4], s: c[5], style: 'burn' },
+        { t0: 13.9, t1: r4, k: c[6], h: c[7], s: c[8], style: 'burn' },
         { t0: r4, t1: r4End, k: c[9], h: c[10], s: c[11], style: 'burn' },
-        { t0: r4End + 0.05, t1: 28.7, k: c[12], h: c[13], s: c[14], style: 'burn' },
+        { t0: r4End + 0.05, t1: 30.7, k: c[12], h: c[13], s: c[14], style: 'burn' },
       ],
       intro(ctx, t) {   // title card of a classroom film
         const c = A.content.reel.b;
-        const a = 1 - ease.in2(prog(t, 3.1, 3.6));
+        const a = 1 - ease.in2(prog(t, 4.1, 4.6));
         ctx.save();
         ctx.globalAlpha = a;
-        logo(ctx, 540, 560, 380, ease.out2(prog(t, 0.15, 0.8)), 0.16);
-        kicker(ctx, c.presents, 680, ease.out2(prog(t, 0.4, 1.0)), { size: 34, tracking: 24, color: BONE, glow: 0 });
+        kicker(ctx, c.presents, 700, ease.out2(prog(t, 0.2, 0.8)), { size: 34, tracking: 24 });
         const rule = (y, t0) => {
           const q = ease.inOut2(prog(t, t0, t0 + 0.7));
           ctx.save();
@@ -535,13 +526,14 @@
       v.shots.forEach((sh, i) => { if (i && !sh.rise && v.shots[i - 1].t1 === sh.t0) spliceFlash(ctx, t, sh.t0, v.crt ? 0.12 : 0.22); });
       v.leaks.forEach(([t0, d, k], i) => leak(ctx, t, t0, d, k, i % 2 === 0));
       if (v.lasers && t > v.lasers[0] && t < v.lasers[1] + 0.5) {
-        const amt = ease.out2(prog(t, v.lasers[0], v.lasers[0] + 0.6)) * (1 - ease.in2(prog(t, v.lasers[1], v.lasers[1] + 0.5)));
+        const amt = ease.out2(prog(t, v.lasers[0], v.lasers[0] + (v.laserSnap ? 0.08 : 0.6))) * (1 - ease.in2(prog(t, v.lasers[1], v.lasers[1] + 0.5)));
         P().lasers(ctx, t, amt * 0.85, { origin: [540, PANEL.y + PANEL.h + 30], t0: v.lasers[0], spread: 1.3, n: 7, haze: 0.06 });
       }
     }
     return {
       id: v.id,
-      duration: DUR,
+      duration: v.dur ?? DUR,
+      audio: v.audio,
       silent: true,
       cues: [],
       async prepare(t) {
@@ -550,10 +542,10 @@
         if (s) await getImg(frameURL(s, v.grade, t - s.t0)).p;
       },
       draw(ctx, t) {
-        if (t < 3.6) v.intro(ctx, t);
+        if (v.intro && t < (v.introEnd ?? 3.6)) v.intro(ctx, t);
         const firstShot = v.shots[0].t0;
         if (t >= firstShot && t < footEnd + 1.0) {
-          const inA = ease.out2(prog(t, firstShot, firstShot + 0.25));
+          const inA = firstShot <= 0 ? 1 : ease.out2(prog(t, firstShot, firstShot + 0.25));
           const drawFilm = (c) => { c.save(); c.globalAlpha = inA; film(c, t); c.restore(); };
           if (v.burn != null && t >= v.burn) burnOut(ctx, t, v.burn, v.end - v.burn, drawFilm);
           else if (v.off != null && t >= v.off) tvShape(ctx, t, v.off, v.end, true, drawFilm);

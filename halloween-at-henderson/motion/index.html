@@ -43,7 +43,7 @@
     HH.renderFrame(ctx, id, t);
     return cv.toDataURL('image/jpeg', q);
   };
-  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues, loop: !!c.loop, silent: !!c.silent }));
+  window.HH_cards = () => Object.values(HH.CARDS).map((c) => ({ id: c.id, duration: c.duration, cues: c.cues, loop: !!c.loop, silent: !!c.silent, audio: c.audio || null }));
   window.HH_ready = true;
 
   const params = new URLSearchParams(location.search);

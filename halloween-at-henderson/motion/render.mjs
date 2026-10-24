@@ -67,7 +67,10 @@ async function renderCard(page, card) {
   const tmp = path.join(ROOT, '.tmp');
   fs.mkdirSync(tmp, { recursive: true });
   let audioIn = [], audioOut = ['-an'];
-  if (AUDIO && !card.silent) {
+  if (card.audio) {   // a finished soundtrack (e.g. the Reels' narration + music from reel_audio.py)
+    audioIn = ['-i', path.join(ROOT, card.audio)];
+    audioOut = ['-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-shortest'];
+  } else if (AUDIO && !card.silent) {
     const cuesPath = path.join(tmp, `${card.id}.cues.json`);
     const wav = path.join(tmp, `${card.id}.wav`);
     fs.writeFileSync(cuesPath, JSON.stringify({ cues: [], ...card }));
