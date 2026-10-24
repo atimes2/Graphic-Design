@@ -4,7 +4,7 @@
  *       of silent-era monsters and party-goers, field notes typed in, rubber
  *       stamps; British narrator over Grieg's In the Hall of the Mountain King
  *   F · THE GRID    Swiss editorial grid cut to the beat of Skeleton Jangle
- *       (1918): film strips, footage inside giant type, a running beat ruler
+ *       (1918): film strips, footage inside giant type
  *   G · THE INVITATION   an engraved invitation read by a British narrator,
  *       ballroom footage in an oval cameo, Sibelius' Valse triste
  *
@@ -470,12 +470,12 @@
     }
 
     const P = {
-      hook: [['e_ball', 'ember'], ['jive_a', 'ember'], ['mask_red', 'ember'], ['e_stairs', 'ember'], ['dance_twirl', 'ember'], ['coney_sunburst', 'ember']],
+      hook: [['sk_line', 'ember'], ['jive_a', 'ember'], ['e_ball', 'ember'], ['dance_twirl', 'ember'], ['sk_pairs', 'ember'], ['mask_red', 'ember'], ['sk_solo', 'ember'], ['e_stairs', 'ember']],
       date: [['fair_fountain', 'ember'], ['coney_lights', 'ember'], ['horns', 'ember'], ['jive_b', 'ember']],
-      dance: [['dance_band', 'mono'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['dance_smile', 'ember'], ['e_sabbath', 'ember'], ['dance_twirl', 'mono']],
-      genres: [['horns', 'ember'], ['jive_a', 'mono'], ['coney_sunburst', 'ember']],
-      masks: [['mask_red', 'ember'], ['mask_man', 'mono'], ['e_unmask', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['mask_group2', 'ember']],
-      group: [['mask_group', 'ember'], ['mask_group2', 'mono'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
+      dance: [['dance_band', 'mono'], ['sk_pairs', 'ember'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['sk_solo', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['sk_line', 'ember'], ['dance_smile', 'ember'], ['dance_twirl', 'mono']],
+      genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],
+      masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['mask_man', 'mono'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
+      group: [['mask_group', 'ember'], ['sk_line', 'ember'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
       drink: [['bar_toast', 'ember'], ['tap_pour', 'ember'], ['pour_spot', 'ember'], ['bar_smile', 'ember']],
     };
 
@@ -516,7 +516,7 @@
         });
       },
       (ctx, t, n0) => {   // masks grid, COME IN / COSTUME on a bone band
-        grid4().forEach((r, i) => cell(ctx, t, r, P.masks, n0 + (i % 2), { off: i }));
+        grid4().forEach((r, i) => cell(ctx, t, r, P.masks, n0 + (i % 2), { off: i * 2 }));
         const band = { x: BOX.x, y: BOX.y + BOX.h / 2 - 190, w: BOX.w, h: 380 };
         if (t >= b(n0 + 2)) {
           block(ctx, band, BONE);
@@ -534,7 +534,7 @@
         ctx.fillStyle = sh;
         ctx.fillRect(BOX.x, BOX.y, BOX.w, 520);
         C().group.forEach((w, i) => {
-          const s = fit(ctx, C().group[1], 150, 920, 'Figtree', -2, '800');
+          const s = fit(ctx, C().group[1], 200, 930, 'Figtree', -2, '800');
           word(ctx, w, BOX.x + 36, BOX.y + 40 + s * (0.8 + i * 0.98), s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
         });
       },
@@ -567,19 +567,12 @@
       label(ctx, h2, BOX.x + BOX.w, 160, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
       label(ctx, f1, BOX.x, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
       label(ctx, f2, BOX.x + BOX.w, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
-      // the beat counter: a ruler of ticks that fills bar by bar
-      const bi = Math.min(beatAt(t), END_BEAT - 1);
-      for (let i = 0; i < 16; i++) {
-        ctx.fillStyle = i <= bi % 16 ? PUMPKIN : 'rgba(255,241,224,0.2)';
-        ctx.globalAlpha = a;
-        ctx.fillRect(BOX.x + i * (BOX.w / 16), BOX.y - 26, BOX.w / 16 - 6, 4);
-      }
-      ctx.globalAlpha = 1;
+      hair(ctx, BOX.x, 184, BOX.x + BOX.w, 0.3 * a);
     }
 
     return {
       id,
-      duration: 30,
+      duration: 28,
       audio: 'reel/audio/reel-f-the-grid.wav',
       silent: true,
       cues: [],

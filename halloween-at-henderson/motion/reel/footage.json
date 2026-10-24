@@ -522,5 +522,261 @@
       "mono",
       "ember"
     ]
+  },
+  "sk_line": {
+    "src": "skeleton",
+    "in": 161.5,
+    "dur": 2.4,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_solo": {
+    "src": "skeleton",
+    "in": 108.0,
+    "dur": 2.0,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_peek": {
+    "src": "skeleton",
+    "in": 149.0,
+    "dur": 1.6,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_xylo": {
+    "src": "skeleton",
+    "in": 223.5,
+    "dur": 2.0,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_rise": {
+    "src": "skeleton",
+    "in": 91.0,
+    "dur": 2.0,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_pairs": {
+    "src": "skeleton",
+    "in": 182.0,
+    "dur": 1.6,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "sk_moon": {
+    "src": "skeleton",
+    "in": 24.0,
+    "dur": 2.0,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "cal_wake": {
+    "src": "caligari",
+    "in": 700.5,
+    "dur": 3.0,
+    "speed": 0.8,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "cal_jane": {
+    "src": "caligari",
+    "in": 1818.5,
+    "dur": 2.0,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "jek_turn": {
+    "src": "jekyll",
+    "in": 1757.0,
+    "dur": 2.6,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "jek_claw": {
+    "src": "jekyll",
+    "in": 1760.5,
+    "dur": 2.6,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "jek_face": {
+    "src": "jekyll",
+    "in": 4724.0,
+    "dur": 2.6,
+    "speed": 1,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "frank_rise": {
+    "src": "frank1910",
+    "in": 250.5,
+    "dur": 2.4,
+    "speed": 0.8,
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "h_sk_solo": {
+    "src": "skeleton",
+    "in": 108.0,
+    "dur": 2.0,
+    "speed": 1,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_sk_xylo": {
+    "src": "skeleton",
+    "in": 223.5,
+    "dur": 2.0,
+    "speed": 1,
+    "full": {
+      "fx": 0.42,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_sk_rise": {
+    "src": "skeleton",
+    "in": 91.0,
+    "dur": 2.0,
+    "speed": 1,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_sk_pairs": {
+    "src": "skeleton",
+    "in": 182.0,
+    "dur": 1.6,
+    "speed": 1,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_cal_wake": {
+    "src": "caligari",
+    "in": 700.5,
+    "dur": 3.0,
+    "speed": 0.8,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_cal_jane": {
+    "src": "caligari",
+    "in": 1818.5,
+    "dur": 2.0,
+    "speed": 1,
+    "full": {
+      "fx": 0.55,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_jek_claw": {
+    "src": "jekyll",
+    "in": 1760.5,
+    "dur": 2.6,
+    "speed": 1,
+    "full": {
+      "fx": 0.45,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_jek_face": {
+    "src": "jekyll",
+    "in": 4724.0,
+    "dur": 2.6,
+    "speed": 1,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
+  },
+  "h_frank_rise": {
+    "src": "frank1910",
+    "in": 250.5,
+    "dur": 2.4,
+    "speed": 0.8,
+    "full": {
+      "fx": 0.5,
+      "fy": 0.5,
+      "zoom": 1.0
+    },
+    "grades": [
+      "blood"
+    ]
   }
 }

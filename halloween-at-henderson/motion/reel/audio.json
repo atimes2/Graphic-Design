@@ -262,13 +262,13 @@
     "musicLevel": 0.5
   },
   "reel-f-the-grid": {
-    "duration": 30,
+    "duration": 28,
     "music": [
       {
         "src": "loc-jukebox-28585-skeleton-jangle",
         "from": 0.064,
         "at": 0.0,
-        "dur": 30.0,
+        "dur": 28.0,
         "fadeIn": 0.02,
         "fadeOut": 2.5
       }

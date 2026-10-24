@@ -17,7 +17,7 @@ Every clip in the collab Reels comes from the [Prelinger Archives](https://archi
 
 Clip in/out points: `footage.json`. `prep_footage.py` downloads any missing film into `footage-src/` and grades the clips into `footage/`.
 
-## Silent horror (Reels D, E, F, G)
+## Silent horror and animation (Reels D, E, F, G)
 
 Public domain in the US (published before 1931) **and** in Canada (director and principal authors died before 1972, so life + 50 years has run out). Checked 2026-10-24.
 
@@ -26,6 +26,12 @@ Public domain in the US (published before 1931) **and** in Canada (director and 
 | Nosferatu (dir. F. W. Murnau, d. 1931) | 1922 | [Nosferatu_DVD_quality](https://archive.org/details/Nosferatu_DVD_quality) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `h_orlok_rise`, `h_orlok_window`, `e_orlok`, `e_orlok_win` |
 | The Phantom of the Opera (dir. Rupert Julian, d. 1943) | 1925 | [PhantomOfTheOpera1925HD](https://archive.org/details/PhantomOfTheOpera1925HD) | [public domain mark](http://creativecommons.org/publicdomain/mark/1.0/) | `h_ball_*`, `h_red_death`, `h_unmask*`, `h_skull`, `e_stairs`, `e_ball*`, `e_red_death`, `e_unmask`, `e_skull` |
 | Häxan (dir. Benjamin Christensen, d. 1959) | 1922 | [Haxan_201510](https://archive.org/details/Haxan_201510) | [public domain mark](http://creativecommons.org/publicdomain/mark/1.0/) | `h_cauldron`, `h_devil`, `h_sabbath_*`, `e_cauldron`, `e_sabbath`, `e_devil` |
+| The Skeleton Dance (Disney Silly Symphony; animated by Ub Iwerks, d. 1971; Walt Disney, d. 1966) | 1929 | [the-skeleton-dance-1929](https://archive.org/details/the-skeleton-dance-1929) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | `sk_*`, `h_sk_*` (picture only: Carl Stalling's score is not used) |
+| The Cabinet of Dr. Caligari (dir. Robert Wiene, d. 1938) | 1920 | [DasKabinettdesDoktorCaligari…](https://archive.org/details/DasKabinettdesDoktorCaligariTheCabinetofDrCaligari) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `cal_wake`, `cal_jane`, `h_cal_*` |
+| Dr. Jekyll and Mr. Hyde (dir. John S. Robertson, d. 1964) | 1920 | [Dr.JekyllAndMr.Hyde1920…](https://archive.org/details/Dr.JekyllAndMr.Hyde1920DirectorJohnS.Robertson) | none on the record; the film is public domain (US: published 1920; Canada: director died 1964) | `jek_*`, `h_jek_*` |
+| Frankenstein (Edison; dir. J. Searle Dawley, d. 1949) | 1910 | [frankenstein-1910-1080p-hd-2017-restoration](https://archive.org/details/frankenstein-1910-1080p-hd-2017-restoration) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/) | `frank_rise`, `h_frank_rise` |
+
+*The Skeleton Dance* entered the US public domain on 1 January 2025. Only its picture is used, never Disney's name or characters. Universal's *Dracula* and *Frankenstein* (1931) are still under US copyright until 1 January 2027, so they are not used.
 
 Left out: *Night of the Living Dead*, *House on Haunted Hill* and *Carnival of Souls* are public domain in the US but **not** in Canada.
 
