@@ -397,14 +397,17 @@
   // ======================================================================
   // F · THE GRID
   // ======================================================================
-  // the grid Reels share one system; each cut is a list of sections, eight beats apiece
+  // the grid Reels share one system; each cut is a list of sections, eight beats apiece by default
   function makeGrid(cfg) {
     const BOX = { x: 40, y: 200, w: 1000, h: 1400 }, GUT = 14;
     const BEATS = { list: null };
     const beatsReady = fetch('reel/beats-f.json').then((r) => r.json()).then((j) => { BEATS.list = j.beats; });
     const b = (n) => BEATS.list[n];
     const beatAt = (t) => { const L = BEATS.list; let i = 0; while (i + 1 < L.length && L[i + 1] <= t) i++; return i; };
-    const END_BEAT = cfg.sections.length * 8;
+    // sections run eight beats unless given as [name, beats]
+    const SECS = cfg.sections.map((x) => (Array.isArray(x) ? { name: x[0], beats: x[1] } : { name: x, beats: 8 }));
+    SECS.reduce((n, sc) => { sc.n0 = n; return n + sc.beats; }, 0);
+    const END_BEAT = SECS.reduce((n, sc) => n + sc.beats, 0);
     const C = () => A.content.reel.f;
     const buf = window.HH.canvas(W, H);
     // big type: the heavy grotesk, or the poster's Copperplate
@@ -512,7 +515,9 @@
       genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],
       // Holographic Realms' own event footage, in its own colour
       light: [['v_warehouse2', 'color'], ['v_dj', 'color'], ['v_crowdbeams', 'color'], ['v_pinkwall', 'color']],
-      lightStrips: [['v_beams', 'color'], ['v_octagon', 'color'], ['v_booth', 'color'], ['v_crowdbeams2', 'color'], ['v_dj2', 'color'], ['v_lasercrowd', 'color']],
+      lightStrips: [['v_beams', 'color'], ['v_octagon', 'color'], ['v_booth', 'color'], ['v_beams4', 'color'], ['v_warehouse3', 'color'], ['v_crowdbeams2', 'color'],
+        ['v_octagon2', 'color'], ['v_dj2', 'color'], ['v_beams3', 'color'], ['v_lasercrowd', 'color'], ['v_fog', 'color']],
+      danceReal: [['v_dj', 'color'], ['v_crowdbeams', 'color'], ['v_beams3', 'color'], ['v_lasercrowd', 'color'], ['v_dj2', 'color'], ['v_beams4', 'color']],
       over: ['v_laserfan', 'v_beams', 'v_crowdbeams2', 'v_octagon', 'v_laserpink', 'v_booth'],
       masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['v_costume', 'color'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
       group: [['mask_group', 'ember'], ['sk_line', 'ember'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
@@ -544,8 +549,9 @@
         });
       },
       dance(ctx, t, n0) {   // four dance cells cutting on alternate beats, the visuals' light over them, DJS ALL NIGHT across
-        grid4().forEach((r, i) => cell(ctx, t, r, P.dance, n0 + (i % 2), { off: i * 2 }));
-        lights(ctx, t, BOX, n0, 0.42);
+        // old film and the visuals team's real nights, dancing side by side
+        grid4().forEach((r, i) => cell(ctx, t, r, i === 1 || i === 2 ? P.danceReal : P.dance, n0 + (i % 2), { off: i * 2 }));
+        lights(ctx, t, BOX, n0, 0.3);
         const bar = { x: BOX.x, y: BOX.y + BOX.h / 2 - 95, w: BOX.w, h: 190 };
         if (t >= b(n0 + 1)) {
           block(ctx, bar, EMBER);
@@ -578,7 +584,7 @@
         rows(3).forEach((r, i) => {
           const t0 = b(n0 + i * 2);
           if (t < t0) { ctx.save(); ctx.strokeStyle = BONE; ctx.globalAlpha = 0.2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); return; }
-          cell(ctx, t, r, P.lightStrips, n0 + i * 2, { off: i * 2 });
+          cell(ctx, t, r, P.lightStrips, n0 + i * 2, { off: i * 4 });
           foot(ctx, r);
           const w = C().lights[i];
           word(ctx, w, r.x + 28, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
@@ -638,7 +644,7 @@
       label(ctx, f2, BOX.x + BOX.w, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
       hair(ctx, BOX.x, 184, BOX.x + BOX.w, 0.3 * a);
     }
-    const section = (t) => Math.floor(beatAt(t) / 8);
+    const section = (t) => { const bi = beatAt(t); let k = 0; while (k + 1 < SECS.length && SECS[k + 1].n0 <= bi) k++; return bi < END_BEAT ? k : SECS.length; };
 
     return {
       id: cfg.id,
@@ -651,8 +657,8 @@
         // draw once off-screen to learn which frames this moment needs, then wait for them
         const want = [];
         const k = section(t);
-        if (k < cfg.sections.length) {
-          try { CAPTURE.on = want; SEC[cfg.sections[k]](window.HH.canvas(8, 8).getContext('2d'), t, k * 8); } finally { CAPTURE.on = null; }
+        if (k < SECS.length) {
+          try { CAPTURE.on = want; SEC[SECS[k].name](window.HH.canvas(8, 8).getContext('2d'), t, SECS[k].n0); } finally { CAPTURE.on = null; }
         }
         await Promise.all(want.map((u) => getImg(u).p));
       },
@@ -660,7 +666,7 @@
         const k = section(t);
         const endT = b(END_BEAT);
         chrome(ctx, t, 1 - prog(t, endT, endT + 0.3));
-        if (k < cfg.sections.length) SEC[cfg.sections[k]](ctx, t, k * 8);
+        if (k < SECS.length) SEC[SECS[k].name](ctx, t, SECS[k].n0);
         endCard(ctx, t, endT);
       },
     };
@@ -669,8 +675,8 @@
   // except the opening HALLOWEEN / AT / HENDERSON, kept in Figtree so it reads instantly
   const F = makeGrid({ id: 'reel-f-the-grid', duration: 28, font: 'copperplate', sections: ['hook', 'date', 'dance', 'genres', 'light', 'costume', 'group', 'early'] });
   const FL = makeGrid({
-    id: 'reel-f-the-grid-long', duration: 34, font: 'copperplate',
-    sections: ['hook', 'date', 'dead', 'dance', 'genres', 'light', 'lightStrips', 'costume', 'group', 'early'],
+    id: 'reel-f-the-grid-long', duration: 37, font: 'copperplate',
+    sections: ['hook', 'date', 'dead', 'dance', 'genres', 'light', ['lightStrips', 16], 'costume', 'group', 'early'],
   });
 
   [E, F, FL, G].forEach(register);

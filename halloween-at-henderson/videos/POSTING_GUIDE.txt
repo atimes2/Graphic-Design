@@ -66,8 +66,8 @@ COLLAB REEL (Adam x Henderson Brewing Co.; pick one)
                                                   skeletons, Holographic Realms' event footage; no voice.
                                                   Opening words in Figtree, the rest in Copperplate.
                                                   (Free-drink section cut for now.)
-  reel-f-the-grid-long.mp4          34s  sound    longer cut of F with THE DEAD WILL DANCE and
-                                                  VISUALS / LIGHTS / ALL NIGHT sections
+  reel-f-the-grid-long.mp4          37s  sound    THE PICK. Longer cut of F with THE DEAD WILL DANCE and
+                                                  a two-bar VISUALS / LIGHTS / ALL NIGHT section
   reel-g-the-invitation.mp4         40s  sound    engraved invitation, oval cameo; narrator
                                                   + Valse triste
   "sound" Reels have their soundtrack baked in. When posting them, leave

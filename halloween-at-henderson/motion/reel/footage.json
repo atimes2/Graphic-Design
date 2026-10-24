@@ -942,5 +942,45 @@
     "grades": [
       "color"
     ]
+  },
+  "v_beams3": {
+    "src": "whatsapp-2026-10-24_17-12-58",
+    "in": 8.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "crop": "crop=ih*4/3:ih",
+    "grades": [
+      "color"
+    ]
+  },
+  "v_beams4": {
+    "src": "whatsapp-2026-10-24_17-13-05-1",
+    "in": 4.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "crop": "crop=ih*4/3:ih",
+    "grades": [
+      "color"
+    ]
+  },
+  "v_octagon2": {
+    "src": "whatsapp-2026-10-24_17-12-25",
+    "in": 40.0,
+    "dur": 2.0,
+    "speed": 1.0,
+    "crop": "crop=iw*0.8:ih*0.6:iw*0.1:ih*0.18",
+    "grades": [
+      "color"
+    ]
+  },
+  "v_warehouse3": {
+    "src": "whatsapp-2026-10-24_17-11-35",
+    "in": 8.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "crop": "crop=ih*4/3:ih",
+    "grades": [
+      "color"
+    ]
   }
 }
