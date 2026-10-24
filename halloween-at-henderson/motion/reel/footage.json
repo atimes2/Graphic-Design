@@ -412,5 +412,115 @@
     "grades": [
       "blood"
     ]
+  },
+  "e_orlok": {
+    "src": "nosferatu5",
+    "in": 112.0,
+    "dur": 2.2,
+    "speed": 0.8,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_orlok_win": {
+    "src": "nosferatu4",
+    "in": 1052.3,
+    "dur": 2.6,
+    "speed": 0.85,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_stairs": {
+    "src": "phantom",
+    "in": 3740.0,
+    "dur": 2.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_ball": {
+    "src": "phantom",
+    "in": 3768.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_ball_b": {
+    "src": "phantom",
+    "in": 3782.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_red_death": {
+    "src": "phantom",
+    "in": 3831.0,
+    "dur": 1.4,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_unmask": {
+    "src": "phantom",
+    "in": 3498.5,
+    "dur": 2.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_skull": {
+    "src": "phantom",
+    "in": 3869.0,
+    "dur": 3.0,
+    "speed": 0.8,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_cauldron": {
+    "src": "haxan",
+    "in": 3134.0,
+    "dur": 1.6,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_sabbath": {
+    "src": "haxan",
+    "in": 3270.0,
+    "dur": 1.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
+  },
+  "e_devil": {
+    "src": "haxan",
+    "in": 3246.5,
+    "dur": 1.2,
+    "speed": 1.0,
+    "grades": [
+      "mono",
+      "ember"
+    ]
   }
 }

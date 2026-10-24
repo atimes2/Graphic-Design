@@ -660,4 +660,10 @@
   }
 
   Object.values(VARIANTS).forEach((v) => register(build(v)));
+
+  // shared with reel2.js (Reels E-G)
+  window.HH_REEL = {
+    BONE, FPS, BEAT, PANEL, FULL, footIndex, getImg, frameURL, shotAt, dust, spliceFlash, leak,
+    drawFull, burnOut, endCard, caption, subtitle, textBand, montage,
+  };
 })();

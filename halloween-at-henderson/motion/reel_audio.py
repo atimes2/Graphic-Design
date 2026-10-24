@@ -77,13 +77,16 @@ def tts(lines, voice, speed, outdir):
         return
     from kokoro_onnx import Kokoro
     model, voices = KOKORO_DIR / "model.onnx", KOKORO_DIR / "voices.npz"
+    base = "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main"
+    KOKORO_DIR.mkdir(parents=True, exist_ok=True)
     if not model.exists():
-        KOKORO_DIR.mkdir(parents=True, exist_ok=True)
-        base = "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main"
         subprocess.run(["curl", "-sSL", "-o", str(model), f"{base}/onnx/model.onnx"], check=True)
+    have = dict(np.load(voices)) if voices.exists() else {}
+    if voice not in have:   # each voice is a small style file; collect them in voices.npz
         vb = KOKORO_DIR / f"{voice}.bin"
         subprocess.run(["curl", "-sSL", "-o", str(vb), f"{base}/voices/{voice}.bin"], check=True)
-        np.savez(voices, **{voice: np.fromfile(vb, dtype=np.float32).reshape(-1, 1, 256)})
+        have[voice] = np.fromfile(vb, dtype=np.float32).reshape(-1, 1, 256)
+        np.savez(voices, **have)
     k = Kokoro(str(model), str(voices))
     for l in todo:
         s, sr = k.create(l["text"], voice=voice, speed=speed, lang="en-us")

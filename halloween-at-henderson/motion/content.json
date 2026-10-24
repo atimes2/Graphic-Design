@@ -247,6 +247,199 @@
         "Who can ever be sure what's behind the mask?",
         "Are you afraid now?"
       ]
+    },
+    "e": {
+      "guide": "A FIELD GUIDE TO HALLOWEEN",
+      "cover": {
+        "kicker": "A FIELD GUIDE TO",
+        "title": "THE CREATURES\nOF HALLOWEEN",
+        "sub": "OBSERVED AT HENDERSON · SATURDAY, OCTOBER 31"
+      },
+      "plates": [
+        {
+          "name": "THE VAMPIRE",
+          "latin": "NOSFERATU NOCTURNUS",
+          "fig": "PHOTOGRAPHED IN THE WILD, 1922",
+          "notes": [
+            [
+              "ACTIVE",
+              "10PM – 2AM"
+            ],
+            [
+              "HABITAT",
+              "HENDERSON BREWING CO."
+            ],
+            [
+              "AGE",
+              "19+"
+            ]
+          ],
+          "stamp": "NOCTURNAL"
+        },
+        {
+          "name": "THE PHANTOM",
+          "latin": "PHANTASMA SALTATOR",
+          "fig": "PHOTOGRAPHED IN THE WILD, 1925",
+          "notes": [
+            [
+              "CALL",
+              "BASS · TECHNO · POP REMIXES"
+            ],
+            [
+              "FOUND",
+              "ON THE DANCE FLOOR"
+            ],
+            [
+              "ACTIVE",
+              "ALL NIGHT"
+            ]
+          ],
+          "stamp": "DANCES ALL NIGHT"
+        },
+        {
+          "name": "THE WITCH",
+          "latin": "STRIGA GREGARIA",
+          "fig": "PHOTOGRAPHED IN THE WILD, 1922",
+          "notes": [
+            [
+              "TRAVELS",
+              "IN COVENS"
+            ],
+            [
+              "DRESS",
+              "FULL COSTUME"
+            ],
+            [
+              "NOTE",
+              "BEST GROUP COSTUME WINS"
+            ]
+          ],
+          "stamp": "TRAVELS IN PACKS"
+        },
+        {
+          "name": "THE EARLY BIRD",
+          "latin": "AVIS PRAECOX",
+          "fig": "PHOTOGRAPHED IN THE WILD, C. 1952",
+          "notes": [
+            [
+              "ARRIVES",
+              "FIRST"
+            ],
+            [
+              "REWARD",
+              "A FREE DRINK"
+            ],
+            [
+              "LIMIT",
+              "FIRST 100 GUESTS"
+            ]
+          ],
+          "stamp": "REWARDED"
+        },
+        {
+          "name": "THE PROCRASTINATOR",
+          "latin": "HOMO TARDUS",
+          "fig": "PHOTOGRAPHED IN THE WILD, 1949",
+          "notes": [
+            [
+              "ARRIVES",
+              "LAST"
+            ],
+            [
+              "BUYS",
+              "AT THE LAST MINUTE"
+            ],
+            [
+              "PAYS",
+              "MORE"
+            ]
+          ],
+          "stamp": "PAYS MORE"
+        }
+      ]
+    },
+    "g": {
+      "ornament": "HALLOWEEN AT HENDERSON",
+      "cards": [
+        {
+          "h": "YOU ARE CORDIALLY\nINVITED"
+        },
+        {
+          "k": "TO AN EVENING OF COSTUME AND DANCING",
+          "h": "HALLOWEEN AT\nHENDERSON"
+        },
+        {
+          "k": "SATURDAY",
+          "h": "THE 31ST OF\nOCTOBER",
+          "s": "FROM TEN IN THE EVENING UNTIL TWO · 19+"
+        },
+        {
+          "k": "DRESS CODE",
+          "h": "COSTUME IS\nREQUIRED"
+        },
+        {
+          "k": "THERE WILL BE DANCING",
+          "h": "BASS. TECHNO.\nPOP REMIXES.",
+          "s": "DJS ALL NIGHT"
+        },
+        {
+          "k": "THE FIRST 100 GUESTS",
+          "h": "SHALL BE GREETED\nWITH A DRINK"
+        },
+        {
+          "k": "DO BRING YOUR FRIENDS",
+          "h": "THE FINEST GROUP\nCOSTUME WINS"
+        },
+        {
+          "k": "KINDLY REPLY EARLY",
+          "h": "THE SOONER YOU DO,\nTHE LESS YOU PAY"
+        }
+      ]
+    },
+    "f": {
+      "head": [
+        "HALLOWEEN AT HENDERSON",
+        "SAT 31 OCT"
+      ],
+      "foot": [
+        "10PM – 2AM · 19+",
+        "TICKETS · LINK IN BIO"
+      ],
+      "hook": [
+        "HALLOWEEN",
+        "AT",
+        "HENDERSON"
+      ],
+      "date": {
+        "k": "SATURDAY",
+        "n": "10.31",
+        "s": "10PM – 2AM"
+      },
+      "djs": "DJS ALL NIGHT",
+      "genres": [
+        "BASS",
+        "TECHNO",
+        "POP REMIXES"
+      ],
+      "costume": [
+        "COME IN",
+        "COSTUME"
+      ],
+      "group": [
+        "BEST GROUP",
+        "COSTUME WINS"
+      ],
+      "drink": {
+        "k": "THE FIRST",
+        "n": "100",
+        "s": "GUESTS GET A FREE DRINK"
+      },
+      "early": [
+        "THE EARLIER",
+        "YOU BUY,",
+        "THE LESS",
+        "YOU PAY."
+      ]
     }
   }
 }

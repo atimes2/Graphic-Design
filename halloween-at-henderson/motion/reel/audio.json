@@ -128,5 +128,150 @@
         "fadeOut": 2.2
       }
     ]
+  },
+  "reel-e-field-guide": {
+    "duration": 44,
+    "voice": "bm_george",
+    "speed": 1.08,
+    "vo": [
+      {
+        "key": "title",
+        "t": 0.35,
+        "text": "A field guide to the creatures of Halloween."
+      },
+      {
+        "key": "vampire",
+        "t": 3.75,
+        "text": "The vampire. Strictly nocturnal. Emerges at ten P M, and is rarely seen after two."
+      },
+      {
+        "key": "phantom",
+        "t": 10.4,
+        "text": "The phantom. Drawn to the dance floor by bass, techno, and pop remixes."
+      },
+      {
+        "key": "witch",
+        "t": 15.75,
+        "text": "The witch. Never travels alone. The coven with the best group costume, wins."
+      },
+      {
+        "key": "early",
+        "t": 21.1,
+        "text": "The early bird. The first one hundred to arrive are rewarded with a free drink."
+      },
+      {
+        "key": "late",
+        "t": 26.85,
+        "text": "And the procrastinator. Waits until the last minute, and pays for it. Tickets cost more, the longer you wait."
+      },
+      {
+        "key": "end",
+        "t": 34.7,
+        "text": "Halloween at Henderson. Saturday, October thirty-first. Observe them in their natural habitat. Tickets, link in bio."
+      }
+    ],
+    "music": [
+      {
+        "src": "loc-jukebox-187843-peer-gynt-suite-no-1-arranged",
+        "from": 29.0,
+        "at": 0.0,
+        "dur": 34.3,
+        "fadeIn": 0.4,
+        "fadeOut": 0.15
+      },
+      {
+        "src": "loc-jukebox-187843-peer-gynt-suite-no-1-arranged",
+        "from": 95.0,
+        "at": 34.0,
+        "dur": 10.0,
+        "fadeIn": 0.03,
+        "fadeOut": 2.5
+      }
+    ],
+    "musicLevel": 0.5
+  },
+  "reel-g-the-invitation": {
+    "duration": 40,
+    "voice": "bf_emma",
+    "speed": 0.95,
+    "vo": [
+      {
+        "key": "g1",
+        "t": 0.3,
+        "text": "You are cordially invited..."
+      },
+      {
+        "key": "g2",
+        "t": 2.05,
+        "text": "to Halloween at Henderson."
+      },
+      {
+        "key": "g3",
+        "t": 5.8,
+        "text": "Saturday, the thirty-first of October. From ten in the evening, until two."
+      },
+      {
+        "key": "g4",
+        "t": 10.6,
+        "text": "Costume, of course, is required."
+      },
+      {
+        "key": "g5",
+        "t": 13.1,
+        "text": "There will be dancing. Bass, techno, and pop remixes, until the small hours."
+      },
+      {
+        "key": "g6",
+        "t": 18.1,
+        "text": "The first one hundred guests shall be greeted with a drink."
+      },
+      {
+        "key": "g7",
+        "t": 21.4,
+        "text": "Do bring your friends. The finest group costume will be rewarded."
+      },
+      {
+        "key": "g8",
+        "t": 25.4,
+        "text": "And kindly reply early. The sooner you do, the less you pay."
+      },
+      {
+        "key": "g9",
+        "t": 31.4,
+        "text": "Tickets, link in bio. We'll be expecting you."
+      }
+    ],
+    "music": [
+      {
+        "src": "loc-jukebox-12029-valse-triste",
+        "from": 0.0,
+        "at": 0.0,
+        "dur": 30.4,
+        "fadeIn": 0.3,
+        "fadeOut": 0.3
+      },
+      {
+        "src": "loc-jukebox-12029-valse-triste",
+        "from": 139.0,
+        "at": 30.2,
+        "dur": 9.8,
+        "fadeIn": 0.2,
+        "fadeOut": 2.5
+      }
+    ],
+    "musicLevel": 0.5
+  },
+  "reel-f-the-grid": {
+    "duration": 30,
+    "music": [
+      {
+        "src": "loc-jukebox-28585-skeleton-jangle",
+        "from": 0.064,
+        "at": 0.0,
+        "dur": 30.0,
+        "fadeIn": 0.02,
+        "fadeOut": 2.5
+      }
+    ]
   }
 }

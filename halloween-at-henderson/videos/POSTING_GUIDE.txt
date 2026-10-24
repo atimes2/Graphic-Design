@@ -49,10 +49,25 @@ VENUE TV
                                       utm_source=hendersontv) stays on screen the whole time.
 
 COLLAB REEL (Adam x Henderson Brewing Co.; pick one)
-  1080x1920, ~42s, silent (add a track in Instagram). Text stays inside the 4:5
-  centre so the feed and grid crops hold. Ticket CTA: link in Adam's bio.
-  reel-a-feature-presentation.mp4   1950s movie trailer
-  reel-b-rules-of-the-night.mp4     1950s classroom etiquette film, five rules
-  reel-c-special-bulletin.mp4       vintage TV news interruption, black-and-white
-  Archival footage: Prelinger Archives (archive.org), public domain;
-  see motion/reel/SOURCES.md.
+  1080x1920, 30-44s. Key text stays inside the 4:5 centre so the feed and grid
+  crops hold. Ticket CTA: link in Adam's bio. Henderson branding only, no handles.
+  Use each Reel's first frame as the cover (the *-cover.jpg files).
+  reel-a-feature-presentation.mp4   38s  silent   1950s movie trailer
+  reel-b-rules-of-the-night.mp4     44s  sound    classroom etiquette film, five rules;
+                                                  narrator + Funeral March of a Marionette
+  reel-c-special-bulletin.mp4       42s  silent   vintage TV news interruption, black-and-white
+  reel-d-is-it-halloween.mp4        35s  sound    full-screen silent horror (Nosferatu,
+                                                  Phantom, Häxan), the films' own lines, subtitled;
+                                                  Danse Macabre
+  reel-e-field-guide.mp4            44s  sound    nature-documentary parody: specimen plates;
+                                                  British narrator + Hall of the Mountain King
+  reel-f-the-grid.mp4               30s  sound    editorial grid cut to the beat of Skeleton
+                                                  Jangle (1918 jazz); no voice
+  reel-g-the-invitation.mp4         40s  sound    engraved invitation, oval cameo; narrator
+                                                  + Valse triste
+  "sound" Reels have their soundtrack baked in. When posting them, leave
+  Instagram's music off. The silent ones need a track added in Instagram.
+  Footage, dialogue and music are all public domain in the US and Canada; the
+  narrators are synthetic (Kokoro TTS). Sources and rights notes:
+  motion/reel/SOURCES.md. If Instagram mutes a Reel for a rights match on an old
+  recording, re-post it silent or with an Instagram track.

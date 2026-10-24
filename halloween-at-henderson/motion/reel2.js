@@ -1,0 +1,608 @@
+/* Collab Reels E-G (1080x1920): three more concepts on the same engine.
+ *
+ *   E · A FIELD GUIDE TO HALLOWEEN   nature-documentary parody: specimen plates
+ *       of silent-era monsters and party-goers, field notes typed in, rubber
+ *       stamps; British narrator over Grieg's In the Hall of the Mountain King
+ *   F · THE GRID    Swiss editorial grid cut to the beat of Skeleton Jangle
+ *       (1918): film strips, footage inside giant type, a running beat ruler
+ *   G · THE INVITATION   an engraved invitation read by a British narrator,
+ *       ballroom footage in an oval cameo, Sibelius' Valse triste
+ *
+ * Footage comes from prep_footage.py like the other Reels; soundtracks from
+ * reel_audio.py (reel/audio.json). Shared helpers live in reel.js (HH_REEL).
+ */
+(function () {
+  const {
+    W, H, clamp, lerp, prog, ease, flicker, neon, hash, vnoise, A, setFont, fit,
+    emberText, label, kicker, revealText, register,
+  } = window.HH;
+  const R = window.HH_REEL;
+  const { BONE, footIndex, getImg, frameURL, dust, endCard } = R;
+  const EMBER = '#E0301E', PUMPKIN = '#FF8A4C';
+
+  // ------------------------------------------------------------- helpers
+  // a footage frame drawn into any rectangle (cover-fit), with weave and a slow push
+  const CAPTURE = { on: null };   // when set, filmRect only lists the frames it would draw
+  function filmRect(ctx, t, r, shot, grade, o = {}) {
+    if (CAPTURE.on) { if (shot) CAPTURE.on.push(frameURL(shot, grade, t - shot.t0)); return; }
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    ctx.fillStyle = '#070404';
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    if (shot) {
+      const e = getImg(frameURL(shot, grade, t - shot.t0));
+      if (e.ok) {
+        const im = e.im;
+        const s = Math.max(r.w / im.width, r.h / im.height) * (1.03 + 0.025 * (t - shot.t0) + (o.zoom ?? 0));
+        const ex = (o.exposure ?? 1) * (shot.exposure ?? 1);
+        const wx = (vnoise(t * 7.3) - 0.5) * 3, wy = (vnoise(t * 5.1 + 30) - 0.5) * 4;
+        ctx.filter = `brightness(${(ex * (0.94 + 0.08 * vnoise(t * 21 + 3))).toFixed(3)})`;
+        ctx.drawImage(im, r.x + (r.w - im.width * s) / 2 + wx, r.y + (r.h - im.height * s) / 2 + wy, im.width * s, im.height * s);
+        ctx.filter = 'none';
+      }
+    }
+    dust(ctx, t, r, o.dust ?? 1);
+    const v = ctx.createRadialGradient(r.x + r.w / 2, r.y + r.h / 2, Math.min(r.w, r.h) * 0.3, r.x + r.w / 2, r.y + r.h / 2, Math.max(r.w, r.h) * 0.72);
+    v.addColorStop(0, 'rgba(5,3,3,0)');
+    v.addColorStop(1, `rgba(5,3,3,${o.vignette ?? 0.55})`);
+    ctx.fillStyle = v;
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.restore();
+  }
+  const shotIn = (shots, t) => {
+    for (let i = shots.length - 1; i >= 0; i--) if (t >= shots[i].t0) return shots[i];
+    return shots[0];
+  };
+  // type a string on, character by character
+  function typed(str, t, t0, cps = 38) {
+    const n = Math.floor(clamp((t - t0) * cps, 0, str.length));
+    return str.slice(0, n);
+  }
+  function hair(ctx, x0, y, x1, a, color = BONE) {
+    ctx.save();
+    ctx.globalAlpha *= a;
+    ctx.fillStyle = color;
+    ctx.fillRect(x0, y, x1 - x0, 1.5);
+    ctx.restore();
+  }
+
+  // ======================================================================
+  // E · A FIELD GUIDE TO HALLOWEEN
+  // ======================================================================
+  const E = (() => {
+    const id = 'reel-e-field-guide';
+    const grade = 'mono';
+    const PLATE = { x: 120, y: 560, w: 840, h: 630 };
+    const COVER = { x: 120, y: 690, w: 840, h: 630 };
+    const HY = 250;   // header baseline (below Instagram's top bar)
+    const END = 34.0, SLIDE = 0.5;
+    // page start times (cover + five plates); each page's shots in absolute time
+    const pages = [
+      { t0: 0.0, shots: [['e_skull', 0]] },
+      { t0: 3.5, shots: [['e_orlok_win', 3.5], ['e_orlok', 6.1], ['e_orlok_win', 8.3, 0.8]] },
+      { t0: 10.15, shots: [['e_stairs', 10.15], ['e_ball', 12.35], ['e_ball_b', 13.55], ['e_red_death', 14.75]] },
+      { t0: 15.5, shots: [['e_devil', 15.5], ['e_cauldron', 16.7, 0, 1.5], ['mask_group', 18.3], ['mask_group2', 19.6]] },
+      { t0: 20.85, shots: [['tap_pour', 20.85], ['bar_toast', 22.85], ['bar_smile', 25.05]] },
+      { t0: 26.6, shots: [['phone_boy', 26.6], ['news_phones', 28.8], ['phone_girl', 31.2]] },
+    ];
+    pages.forEach((p, i) => {
+      p.t1 = i + 1 < pages.length ? pages[i + 1].t0 : END;
+      p.shots = p.shots.map(([clip, t0, at, exposure]) => ({ clip, t0, at: at || 0, exposure: exposure || 1 }));
+      p.shots.forEach((s, j) => { s.t1 = j + 1 < p.shots.length ? p.shots[j + 1].t0 : p.t1 + SLIDE; });
+    });
+    const C = () => A.content.reel.e;
+
+    function grid(ctx, a) {
+      if (a <= 0) return;
+      ctx.save();
+      ctx.fillStyle = BONE;
+      for (let x = 30; x < W; x += 60) { ctx.globalAlpha = a * (x % 300 === 30 ? 0.06 : 0.028); ctx.fillRect(x, 0, 1, H); }
+      for (let y = 0; y < H; y += 60) { ctx.globalAlpha = a * (y % 300 === 0 ? 0.06 : 0.028); ctx.fillRect(0, y, W, 1); }
+      ctx.restore();
+    }
+    // registration ticks at the plate's corners
+    function ticks(ctx, r, a) {
+      ctx.save();
+      ctx.globalAlpha *= a;
+      ctx.strokeStyle = BONE;
+      ctx.lineWidth = 2;
+      const L = 26, g = 12;
+      [[r.x, r.y, -1, -1], [r.x + r.w, r.y, 1, -1], [r.x, r.y + r.h, -1, 1], [r.x + r.w, r.y + r.h, 1, 1]].forEach(([x, y, sx, sy]) => {
+        ctx.beginPath();
+        ctx.moveTo(x + sx * g, y + sy * (g + L)); ctx.lineTo(x + sx * g, y + sy * g); ctx.lineTo(x + sx * (g + L), y + sy * g);
+        ctx.stroke();
+      });
+      ctx.globalAlpha *= 0.35;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
+      ctx.restore();
+    }
+    // a rubber stamp pressed onto the plate (gentle: it fades and settles)
+    function stamp(ctx, str, x, y, t, t0) {
+      if (t < t0) return;
+      const p = ease.out3(prog(t, t0, t0 + 0.35));
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-0.16);
+      ctx.scale(1.12 - 0.12 * p, 1.12 - 0.12 * p);
+      ctx.globalAlpha *= 0.92 * p;
+      const size = fit(ctx, str, 44, 420, 'Figtree', 6, '800');
+      setFont(ctx, 'Figtree', size, '800');
+      ctx.letterSpacing = '6px';
+      const w = ctx.measureText(str).width + 50, h = size + 40;
+      ctx.strokeStyle = EMBER;
+      ctx.lineWidth = 5;
+      ctx.strokeRect(-w / 2, -h / 2, w, h);
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-w / 2 + 9, -h / 2 + 9, w - 18, h - 18);
+      ctx.fillStyle = EMBER;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(str, 3, 3);
+      // worn ink: knock holes out of the stamp
+      ctx.globalCompositeOperation = 'destination-out';
+      for (let i = 0; i < 70; i++) {
+        const hx = (hash(i * 3.1 + str.length) - 0.5) * w, hy = (hash(i * 7.7 + 2) - 0.5) * h;
+        ctx.globalAlpha = 0.5 * hash(i * 1.9);
+        ctx.beginPath();
+        ctx.arc(hx, hy, 1 + 3 * hash(i * 5.3), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    function header(ctx, t, i) {
+      const a = 0.85;
+      label(ctx, C().guide, PLATE.x, HY, 20, { tracking: 7, align: 'left', alpha: a * 0.75 });
+      const no = i === 0 ? 'COVER' : `PLATE ${String(i).padStart(2, '0')} / 05`;
+      label(ctx, no, PLATE.x + PLATE.w, HY, 20, { tracking: 7, align: 'right', color: PUMPKIN, alpha: a });
+      hair(ctx, PLATE.x, HY + 24, PLATE.x + PLATE.w, 0.35);
+    }
+    function cover(ctx, t) {
+      const c = C().cover;
+      kicker(ctx, c.kicker, 400, 1, { size: 40, tracking: 14, glow: 20 });
+      const lines = c.title.split('\n');
+      const size = Math.min(...lines.map((l) => fit(ctx, l, 120, 860)));
+      lines.forEach((l, k) => emberText(ctx, l, W / 2, 520 + k * size * 1.04, size, { glow: 0.9 + 0.1 * flicker(t, 3 + k) }));
+      filmRect(ctx, t, COVER, shotIn(pages[0].shots, t), grade);
+      ticks(ctx, COVER, 1);
+      label(ctx, 'FIG. 00', COVER.x, COVER.y + COVER.h + 44, 22, { tracking: 8, align: 'left', alpha: 0.6 });
+      kicker(ctx, c.sub, COVER.y + COVER.h + 110, ease.out2(prog(t, 0.6, 1.2)), { size: 30, tracking: 8, glow: 0, color: BONE });
+    }
+    function plate(ctx, t, i) {
+      const pg = pages[i], c = C().plates[i - 1], lt = t - pg.t0;
+      const size = fit(ctx, c.name, 124, 860);
+      revealText(ctx, c.name, W / 2, 448, size, t, pg.t0 + 0.2, 'burn', { step: 0.035, seed: i });
+      label(ctx, c.latin, W / 2, 506, 28, { tracking: 12, color: PUMPKIN, alpha: ease.out2(prog(lt, 0.6, 1.1)), weight: '700' });
+      filmRect(ctx, t, PLATE, shotIn(pg.shots, t), grade);
+      ticks(ctx, PLATE, 1);
+      const fy = PLATE.y + PLATE.h + 44;
+      label(ctx, `FIG. ${String(i).padStart(2, '0')}`, PLATE.x, fy, 22, { tracking: 8, align: 'left', alpha: 0.6 });
+      label(ctx, c.fig, PLATE.x + PLATE.w, fy, 22, { tracking: 6, align: 'right', alpha: 0.6 });
+      // field notes, typed in row by row
+      c.notes.forEach(([k, v], r) => {
+        const y = 1318 + r * 76, r0 = 0.9 + r * 0.5;
+        const a = ease.out2(prog(lt, r0, r0 + 0.3));
+        hair(ctx, PLATE.x, y + 26, PLATE.x + PLATE.w, 0.22 * a);
+        label(ctx, k, PLATE.x, y, 24, { tracking: 8, align: 'left', color: PUMPKIN, alpha: a });
+        const vs = fit(ctx, v, 38, 600, 'Figtree', 3, '800');
+        label(ctx, typed(v, lt, r0 + 0.1), PLATE.x + 230, y, vs, { tracking: 3, align: 'left', alpha: a });
+      });
+      stamp(ctx, c.stamp, PLATE.x + PLATE.w - 200, PLATE.y + PLATE.h - 110, lt, 2.6);
+    }
+    function page(ctx, t, i) {
+      if (i === 0) cover(ctx, t); else plate(ctx, t, i);
+    }
+    return {
+      id,
+      duration: 44,
+      audio: 'reel/audio/reel-e-field-guide.wav',
+      silent: true,
+      cues: [],
+      async prepare(t) {
+        await footIndex();
+        const ps = pages.filter((p) => t >= p.t0 - 0.01 && t < p.t1 + SLIDE);
+        await Promise.all(ps.map((p) => { const s = shotIn(p.shots, t); return getImg(frameURL(s, grade, t - s.t0)).p; }));
+      },
+      draw(ctx, t) {
+        const out = ease.inOut2(prog(t, END, END + 0.6));
+        grid(ctx, 1 - out);
+        if (t < END + SLIDE) {
+          const cur = pages.findIndex((p) => t >= p.t0 && t < p.t1);
+          ctx.save();
+          ctx.globalAlpha = 1 - prog(t, END, END + 0.4);
+          header(ctx, t, Math.max(cur, 0));
+          ctx.restore();
+          pages.forEach((p, i) => {
+            // pages slide in from the right and off to the left, like turning a plate
+            const inP = i === 0 ? 1 : ease.inOut2(prog(t, p.t0, p.t0 + SLIDE));
+            const outP = ease.inOut2(prog(t, p.t1, p.t1 + SLIDE));
+            if (inP <= 0 || outP >= 1) return;
+            const dx = (1 - inP) * W * 0.6 - outP * W * 0.6;
+            ctx.save();
+            ctx.translate(dx, 0);
+            ctx.globalAlpha = Math.min(inP, 1 - outP);
+            page(ctx, t, i);
+            ctx.restore();
+          });
+        }
+        endCard(ctx, t, END);
+      },
+    };
+  })();
+
+  // ======================================================================
+  // G · THE INVITATION
+  // ======================================================================
+  const G = (() => {
+    const id = 'reel-g-the-invitation';
+    const grade = 'ember';
+    const END = 30.2, XF = 0.45;   // end card; cross-dissolve between cameo shots
+    const CAM = { cx: 540, cy: 760, rx: 300, ry: 410 };
+    const cardT = [0, 2.0, 5.6, 10.4, 12.9, 17.9, 21.2, 25.2, END];
+    const shots = [
+      ['e_stairs', 0], ['gown', 2.0], ['dance_curtain', 4.3], ['car_night', 5.9], ['mask_red', 8.3], ['mask_man', 10.4],
+      ['e_ball', 12.9], ['dance_twirl', 14.0], ['e_ball_b', 15.4], ['jive_a', 16.5], ['bar_smile', 17.9], ['bar_toast', 19.6],
+      ['mask_group', 21.2], ['arrive_group', 23.2], ['phone_girl', 25.2], ['e_unmask', 27.6],
+    ].map(([clip, t0], i, a) => ({ clip, t0, t1: i + 1 < a.length ? a[i + 1][1] : END + 0.6 }));
+    const C = () => A.content.reel.g;
+
+    function ovalPath(ctx, k = 0) {
+      ctx.beginPath();
+      ctx.ellipse(CAM.cx, CAM.cy, CAM.rx + k, CAM.ry + k, 0, 0, Math.PI * 2);
+    }
+    function shotFrame(ctx, t, s, a) {
+      const e = getImg(frameURL(s, grade, t - s.t0));
+      if (!e.ok || a <= 0) return;
+      const im = e.im, bw = CAM.rx * 2, bh = CAM.ry * 2;
+      const z = Math.max(bw / im.width, bh / im.height) * (1.04 + 0.02 * (t - s.t0));
+      ctx.save();
+      ctx.globalAlpha *= a;
+      ctx.filter = `brightness(${(0.95 + 0.08 * flicker(t, 6)).toFixed(3)})`;   // candlelight
+      ctx.drawImage(im, CAM.cx - im.width * z / 2, CAM.cy - im.height * z / 2, im.width * z, im.height * z);
+      ctx.restore();
+    }
+    function cameo(ctx, t, a) {
+      if (a <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ovalPath(ctx);
+      ctx.save();
+      ctx.clip();
+      ctx.fillStyle = '#070404';
+      ctx.fillRect(0, 0, W, H);
+      // current shot, dissolving in over the previous one
+      const i = shots.findIndex((s) => t >= s.t0 && t < s.t1);
+      if (i >= 0) {
+        if (i > 0 && t < shots[i].t0 + XF) shotFrame(ctx, t, shots[i - 1], 1);
+        shotFrame(ctx, t, shots[i], i === 0 ? 1 : ease.inOut2(prog(t, shots[i].t0, shots[i].t0 + XF)));
+      }
+      dust(ctx, t, { x: CAM.cx - CAM.rx, y: CAM.cy - CAM.ry, w: CAM.rx * 2, h: CAM.ry * 2 }, 0.8);
+      const v = ctx.createRadialGradient(CAM.cx, CAM.cy, CAM.rx * 0.55, CAM.cx, CAM.cy, CAM.ry * 1.02);
+      v.addColorStop(0, 'rgba(5,3,3,0)');
+      v.addColorStop(1, 'rgba(5,3,3,0.85)');
+      ctx.fillStyle = v;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+      // a double rule around the cameo: hairline bone, ember outside
+      ctx.strokeStyle = BONE;
+      ctx.globalAlpha = a * 0.55;
+      ctx.lineWidth = 1.5;
+      ovalPath(ctx, 10);
+      ctx.stroke();
+      ctx.strokeStyle = EMBER;
+      ctx.globalAlpha = a * 0.5;
+      ctx.shadowColor = 'rgba(224,48,30,0.9)';
+      ctx.shadowBlur = 16;
+      ovalPath(ctx, 22);
+      ctx.stroke();
+      ctx.restore();
+    }
+    // the invitation's border: a double rule with diamond corners
+    function border(ctx, t) {
+      const a = ease.out2(prog(t, 0, 0.01)) * (0.9 + 0.1 * flicker(t, 2));
+      ctx.save();
+      ctx.strokeStyle = BONE;
+      ctx.globalAlpha = 0.32 * a;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(56, 56, W - 112, H - 112);
+      ctx.globalAlpha = 0.5 * a;
+      ctx.strokeStyle = EMBER;
+      ctx.strokeRect(70, 70, W - 140, H - 140);
+      ctx.fillStyle = PUMPKIN;
+      [[70, 70], [W - 70, 70], [70, H - 70], [W - 70, H - 70]].forEach(([x, y]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.PI / 4);
+        ctx.globalAlpha = 0.8 * a;
+        ctx.fillRect(-7, -7, 14, 14);
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+    // engraved-feeling type: bone with a soft ember halo, focusing in from a blur
+    function engraved(ctx, str, y, size, t, t0, t1, o = {}) {
+      const a = ease.out3(prog(t, t0, t0 + 0.8)) * (1 - ease.in2(prog(t, t1 - 0.3, t1)));
+      if (a <= 0.001) return;
+      ctx.save();
+      if (a < 1) ctx.filter = `blur(${((1 - ease.out3(prog(t, t0, t0 + 0.8))) * 10).toFixed(2)}px)`;
+      label(ctx, str, W / 2, y, size, {
+        family: o.family || 'Copperplate', weight: o.weight || '', tracking: (o.tracking ?? 3) + (1 - a) * 6,
+        color: o.color || BONE, alpha: a, glow: o.glow ?? 18, glowColor: 'rgba(224,48,30,0.55)',
+      });
+      ctx.restore();
+    }
+    function card(ctx, t, i) {
+      const c = C().cards[i], t0 = cardT[i], t1 = cardT[i + 1];
+      const lines = c.h.split('\n');
+      const size = Math.min(...lines.map((l) => fit(ctx, l, 84, 860, 'Copperplate', 3)));
+      const y0 = 1300;
+      if (c.k) engraved(ctx, c.k, y0 - size * 1.15, fit(ctx, c.k, 30, 760, 'Figtree', 10, '800'), t, t0 + 0.05, t1, { family: 'Figtree', weight: '800', tracking: 10, color: PUMPKIN, glow: 10 });
+      lines.forEach((l, k) => {
+        // frame 0 shows the hook fully: no fade on the first card
+        if (i === 0) label(ctx, l, W / 2, y0 + k * size * 1.08, size, { family: 'Copperplate', weight: '', tracking: 3, glow: 18, glowColor: 'rgba(224,48,30,0.55)', alpha: 1 - ease.in2(prog(t, t1 - 0.3, t1)) });
+        else engraved(ctx, l, y0 + k * size * 1.08, size, t, t0 + 0.2 + k * 0.25, t1);
+      });
+      if (c.s) engraved(ctx, c.s, y0 + lines.length * size * 1.08 + 30, 28, t, t0 + 0.8, t1, { family: 'Figtree', weight: '800', tracking: 8, glow: 0 });
+    }
+    // embers drifting up past the cameo
+    function motes(ctx, t, a) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 26; i++) {
+        const sp = 40 + 60 * hash(i * 2.3), x = 120 + hash(i * 9.1) * 840 + Math.sin(t * 0.8 + i) * 20;
+        const y = H - ((t * sp + hash(i * 4.7) * H) % H);
+        const r = 1.2 + 2.2 * hash(i * 1.7);
+        ctx.globalAlpha = a * 0.5 * (0.4 + 0.6 * flicker(t, i));
+        ctx.fillStyle = i % 3 ? PUMPKIN : '#FFD2A8';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    return {
+      id,
+      duration: 40,
+      audio: 'reel/audio/reel-g-the-invitation.wav',
+      silent: true,
+      cues: [],
+      async prepare(t) {
+        await footIndex();
+        const i = shots.findIndex((s) => t >= s.t0 && t < s.t1);
+        if (i < 0) return;
+        const need = [shots[i]];
+        if (i > 0 && t < shots[i].t0 + XF) need.push(shots[i - 1]);
+        await Promise.all(need.map((s) => getImg(frameURL(s, grade, t - s.t0)).p));
+      },
+      draw(ctx, t) {
+        border(ctx, t);
+        const out = 1 - ease.inOut2(prog(t, END, END + 0.6));
+        motes(ctx, t, out);
+        if (t < END + 0.6) {
+          cameo(ctx, t, out);
+          ctx.save();
+          ctx.globalAlpha = out;
+          label(ctx, C().ornament, W / 2, 250, 22, { tracking: 12, color: BONE, alpha: 0.6 });
+          ctx.restore();
+          for (let i = 0; i < cardT.length - 1; i++) if (t >= cardT[i] && t < cardT[i + 1]) card(ctx, t, i);
+        }
+        endCard(ctx, t, END);
+      },
+    };
+  })();
+
+  // ======================================================================
+  // F · THE GRID
+  // ======================================================================
+  const F = (() => {
+    const id = 'reel-f-the-grid';
+    const BOX = { x: 40, y: 200, w: 1000, h: 1400 }, GUT = 14;
+    const BEATS = { list: null };
+    const beatsReady = fetch('reel/beats-f.json').then((r) => r.json()).then((j) => { BEATS.list = j.beats; });
+    const b = (n) => BEATS.list[n];
+    const beatAt = (t) => { const L = BEATS.list; let i = 0; while (i + 1 < L.length && L[i + 1] <= t) i++; return i; };
+    const END_BEAT = 64;
+    const C = () => A.content.reel.f;
+    const buf = window.HH.canvas(W, H);
+
+    // a cell's footage at time t: pool rotates every `every` beats from beat n0
+    function pick(pool, t, n0, every = 2, off = 0) {
+      const bi = beatAt(t);
+      const k = Math.max(0, Math.floor((bi - n0) / every));
+      const [clip, grade] = pool[(k + off) % pool.length];
+      return { shot: { clip, t0: b(n0 + k * every), at: 0.2 }, grade };
+    }
+    function cell(ctx, t, r, pool, n0, o = {}) {
+      const f = pick(pool, t, n0, o.every ?? 2, o.off ?? 0);
+      filmRect(ctx, t, r, f.shot, f.grade, { vignette: o.vignette ?? 0.45, dust: 0.7, exposure: o.exposure });
+      return f;
+    }
+    const rows = (n, r = BOX) => [...Array(n)].map((_, i) => ({ x: r.x, y: r.y + i * (r.h - GUT * (n - 1)) / n + i * GUT, w: r.w, h: (r.h - GUT * (n - 1)) / n }));
+    const grid4 = (r = BOX) => {
+      const w = (r.w - GUT) / 2, h = (r.h - GUT) / 2;
+      return [[0, 0], [1, 0], [0, 1], [1, 1]].map(([i, j]) => ({ x: r.x + i * (w + GUT), y: r.y + j * (h + GUT), w, h }));
+    };
+    // heavy grotesk words, a soft rise on entry (no slams)
+    function word(ctx, str, x, y, size, t, t0, o = {}) {
+      if (t < t0) return;
+      const p = o.instant ? 1 : ease.out3(prog(t, t0, t0 + 0.18));
+      label(ctx, str, x, y + (1 - p) * 18, size, { tracking: o.tracking ?? -2, align: o.align || 'left', color: o.color || BONE, alpha: p * (o.alpha ?? 1), weight: '800', glow: o.glow ?? 0 });
+    }
+    // footage seen through the letters of a huge word
+    function filmType(ctx, t, str, cx, base, maxW, pool, n0) {
+      const size = fit(ctx, str, 520, maxW, 'Figtree', -8, '800');
+      const g = buf.getContext('2d');
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, W, H);
+      const top = base - size * 0.74;
+      cell(g, t, { x: 0, y: top - 20, w: W, h: size * 0.78 + 40 }, pool, n0, { vignette: 0.15, exposure: 1.25 });
+      g.globalCompositeOperation = 'destination-in';
+      setFont(g, 'Figtree', size, '800');
+      g.letterSpacing = '-8px';
+      g.textAlign = 'center';
+      g.fillStyle = '#000';
+      g.fillText(str, cx, base);
+      // a thin ember keyline under the film so the letters hold their shape on dark frames
+      ctx.save();
+      setFont(ctx, 'Figtree', size, '800');
+      ctx.letterSpacing = '-8px';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = EMBER;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(224,48,30,0.8)';
+      ctx.shadowBlur = 24;
+      ctx.strokeText(str, cx, base);
+      ctx.restore();
+      ctx.drawImage(buf, 0, 0);
+      return size;
+    }
+    const block = (ctx, r, color) => { ctx.fillStyle = color; ctx.fillRect(r.x, r.y, r.w, r.h); };
+    // darken the foot of a strip so its word reads over any frame
+    function foot(ctx, r) {
+      const g = ctx.createLinearGradient(0, r.y + r.h * 0.35, 0, r.y + r.h);
+      g.addColorStop(0, 'rgba(5,3,3,0)');
+      g.addColorStop(1, 'rgba(5,3,3,0.78)');
+      ctx.fillStyle = g;
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+    }
+
+    const P = {
+      hook: [['e_ball', 'ember'], ['jive_a', 'ember'], ['mask_red', 'ember'], ['e_stairs', 'ember'], ['dance_twirl', 'ember'], ['coney_sunburst', 'ember']],
+      date: [['fair_fountain', 'ember'], ['coney_lights', 'ember'], ['horns', 'ember'], ['jive_b', 'ember']],
+      dance: [['dance_band', 'mono'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['dance_smile', 'ember'], ['e_sabbath', 'ember'], ['dance_twirl', 'mono']],
+      genres: [['horns', 'ember'], ['jive_a', 'mono'], ['coney_sunburst', 'ember']],
+      masks: [['mask_red', 'ember'], ['mask_man', 'mono'], ['e_unmask', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['mask_group2', 'ember']],
+      group: [['mask_group', 'ember'], ['mask_group2', 'mono'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
+      drink: [['bar_toast', 'ember'], ['tap_pour', 'ember'], ['pour_spot', 'ember'], ['bar_smile', 'ember']],
+    };
+
+    // one section per eight beats
+    const S = [
+      (ctx, t, n0) => {   // HALLOWEEN / AT / HENDERSON on three strips of film; on screen at frame 0
+        const rs = rows(3);
+        C().hook.forEach((w, i) => {
+          cell(ctx, t, rs[i], P.hook, n0, { off: i * 2 });
+          foot(ctx, rs[i]);
+          const size = fit(ctx, w, 240, rs[i].w - 60, 'Figtree', -2, '800');
+          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, size, t, 0, { instant: true });
+        });
+      },
+      (ctx, t, n0) => {   // 10.31 in film
+        const d = C().date;
+        word(ctx, d.k, W / 2, 600, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN });
+        filmType(ctx, t, d.n, W / 2, 1060, 1000, P.date, n0);
+        word(ctx, d.s, W / 2, 1270, 96, t, b(n0 + 2), { align: 'center', tracking: 0 });
+      },
+      (ctx, t, n0) => {   // four dance cells cutting on alternate beats, DJS ALL NIGHT across them
+        grid4().forEach((r, i) => cell(ctx, t, r, P.dance, n0 + (i % 2), { off: i * 2 }));
+        const bar = { x: BOX.x, y: BOX.y + BOX.h / 2 - 95, w: BOX.w, h: 190 };
+        if (t >= b(n0 + 1)) {
+          block(ctx, bar, EMBER);
+          const s = fit(ctx, C().djs, 150, 940, 'Figtree', -2, '800');
+          word(ctx, C().djs, W / 2, bar.y + bar.h / 2 + s * 0.36, s, t, b(n0 + 1), { align: 'center', color: '#0A0505' });
+        }
+      },
+      (ctx, t, n0) => {   // BASS / TECHNO / POP REMIXES, one strip per two beats
+        rows(3).forEach((r, i) => {
+          const t0 = b(n0 + i * 2);
+          if (t < t0) { ctx.save(); ctx.strokeStyle = BONE; ctx.globalAlpha = 0.2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); return; }
+          cell(ctx, t, r, P.genres, n0 + i * 2, { every: 99, off: i });
+          foot(ctx, r);
+          const w = C().genres[i], size = fit(ctx, w, 230, r.w - 60, 'Figtree', -2, '800');
+          word(ctx, w, r.x + 28, r.y + r.h - 34, size, t, t0);
+        });
+      },
+      (ctx, t, n0) => {   // masks grid, COME IN / COSTUME on a bone band
+        grid4().forEach((r, i) => cell(ctx, t, r, P.masks, n0 + (i % 2), { off: i }));
+        const band = { x: BOX.x, y: BOX.y + BOX.h / 2 - 190, w: BOX.w, h: 380 };
+        if (t >= b(n0 + 2)) {
+          block(ctx, band, BONE);
+          C().costume.forEach((w, i) => {
+            const s = fit(ctx, C().costume[1], 170, 920, 'Figtree', -2, '800');
+            word(ctx, w, W / 2, band.y + 170 + i * s * 0.98, s, t, b(n0 + 2 + i), { align: 'center', color: '#0A0505' });
+          });
+        }
+      },
+      (ctx, t, n0) => {   // one big frame, BEST GROUP / COSTUME WINS
+        cell(ctx, t, BOX, P.group, n0, { vignette: 0.6 });
+        const sh = ctx.createLinearGradient(0, BOX.y, 0, BOX.y + 520);
+        sh.addColorStop(0, 'rgba(5,3,3,0.8)');
+        sh.addColorStop(1, 'rgba(5,3,3,0)');
+        ctx.fillStyle = sh;
+        ctx.fillRect(BOX.x, BOX.y, BOX.w, 520);
+        C().group.forEach((w, i) => {
+          const s = fit(ctx, C().group[1], 150, 920, 'Figtree', -2, '800');
+          word(ctx, w, BOX.x + 36, BOX.y + 40 + s * (0.8 + i * 0.98), s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
+        });
+      },
+      (ctx, t, n0) => {   // 100 in film
+        const d = C().drink;
+        word(ctx, d.k, W / 2, 560, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN });
+        filmType(ctx, t, d.n, W / 2, 1090, 1000, P.drink, n0);
+        const s = fit(ctx, d.s, 70, 980, 'Figtree', 0, '800');
+        word(ctx, d.s, W / 2, 1280, s, t, b(n0 + 2), { align: 'center', tracking: 0 });
+      },
+      (ctx, t, n0) => {   // THE EARLIER / YOU BUY, / THE LESS / YOU PAY. on blocks, a line per two beats
+        rows(4).forEach((r, i) => {
+          const t0 = b(n0 + i * 2);
+          if (t < t0) return;
+          const col = [EMBER, BONE, EMBER, BONE][i];
+          ctx.save();
+          ctx.globalAlpha = ease.out3(prog(t, t0, t0 + 0.12));
+          block(ctx, r, col);
+          ctx.restore();
+          const w = C().early[i], s = fit(ctx, w, 220, r.w - 60, 'Figtree', -2, '800');
+          word(ctx, w, r.x + 28, r.y + r.h / 2 + s * 0.36, s, t, t0, { color: '#0A0505' });
+        });
+      },
+    ];
+
+    function chrome(ctx, t, a) {
+      if (a <= 0) return;
+      const [h1, h2] = C().head, [f1, f2] = C().foot;
+      label(ctx, h1, BOX.x, 160, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
+      label(ctx, h2, BOX.x + BOX.w, 160, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
+      label(ctx, f1, BOX.x, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
+      label(ctx, f2, BOX.x + BOX.w, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
+      // the beat counter: a ruler of ticks that fills bar by bar
+      const bi = Math.min(beatAt(t), END_BEAT - 1);
+      for (let i = 0; i < 16; i++) {
+        ctx.fillStyle = i <= bi % 16 ? PUMPKIN : 'rgba(255,241,224,0.2)';
+        ctx.globalAlpha = a;
+        ctx.fillRect(BOX.x + i * (BOX.w / 16), BOX.y - 26, BOX.w / 16 - 6, 4);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    return {
+      id,
+      duration: 30,
+      audio: 'reel/audio/reel-f-the-grid.wav',
+      silent: true,
+      cues: [],
+      async prepare(t) {
+        await Promise.all([footIndex(), beatsReady]);
+        // draw once off-screen to learn which frames this moment needs, then wait for them
+        const want = [];
+        const sec = Math.floor(beatAt(t) / 8);
+        if (sec < S.length) {
+          try { CAPTURE.on = want; S[sec](window.HH.canvas(8, 8).getContext('2d'), t, sec * 8); } finally { CAPTURE.on = null; }
+        }
+        await Promise.all(want.map((u) => getImg(u).p));
+      },
+      draw(ctx, t) {
+        const bi = beatAt(t), sec = Math.floor(bi / 8);
+        const endT = b(END_BEAT);
+        const out = 1 - prog(t, endT, endT + 0.3);
+        chrome(ctx, t, out);
+        if (sec < S.length) S[sec](ctx, t, sec * 8);
+        endCard(ctx, t, endT);
+      },
+    };
+  })();
+
+  [E, F, G].forEach(register);
+})();
