@@ -780,7 +780,7 @@
     ]
   },
   "v_pinkwall": {
-    "src": "wa0",
+    "src": "whatsapp-2026-10-24_17-10-59",
     "in": 2.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -790,7 +790,7 @@
     ]
   },
   "v_lasercrowd": {
-    "src": "wa1",
+    "src": "whatsapp-2026-10-24_17-11-34",
     "in": 4.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -800,7 +800,7 @@
     ]
   },
   "v_laserpink": {
-    "src": "wa3",
+    "src": "whatsapp-2026-10-24_17-12-20",
     "in": 19.0,
     "dur": 2.0,
     "speed": 1.0,
@@ -810,7 +810,7 @@
     ]
   },
   "v_pinkhaze": {
-    "src": "wa3",
+    "src": "whatsapp-2026-10-24_17-12-20",
     "in": 31.5,
     "dur": 2.0,
     "speed": 1.0,
@@ -820,7 +820,7 @@
     ]
   },
   "v_octagon": {
-    "src": "wa4",
+    "src": "whatsapp-2026-10-24_17-12-27-1",
     "in": 31.0,
     "dur": 2.0,
     "speed": 1.0,
@@ -830,7 +830,7 @@
     ]
   },
   "v_dj": {
-    "src": "wa4",
+    "src": "whatsapp-2026-10-24_17-12-27-1",
     "in": 50.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -840,7 +840,7 @@
     ]
   },
   "v_dj2": {
-    "src": "wa4",
+    "src": "whatsapp-2026-10-24_17-12-27-1",
     "in": 55.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -850,7 +850,7 @@
     ]
   },
   "v_laserfan": {
-    "src": "wa5",
+    "src": "whatsapp-2026-10-24_17-12-27",
     "in": 59.5,
     "dur": 2.0,
     "speed": 1.0,
@@ -860,7 +860,7 @@
     ]
   },
   "v_beams": {
-    "src": "wa6",
+    "src": "whatsapp-2026-10-24_17-12-58-1",
     "in": 1.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -870,7 +870,7 @@
     ]
   },
   "v_booth": {
-    "src": "wa7",
+    "src": "whatsapp-2026-10-24_17-13-01",
     "in": 2.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -880,7 +880,7 @@
     ]
   },
   "v_crowdbeams": {
-    "src": "wa9",
+    "src": "whatsapp-2026-10-24_17-13-05-3",
     "in": 0.2,
     "dur": 2.4,
     "speed": 1.0,
@@ -890,7 +890,7 @@
     ]
   },
   "v_crowdbeams2": {
-    "src": "wa9",
+    "src": "whatsapp-2026-10-24_17-13-05-3",
     "in": 6.5,
     "dur": 2.4,
     "speed": 1.0,
@@ -900,7 +900,7 @@
     ]
   },
   "v_fog": {
-    "src": "wa10",
+    "src": "whatsapp-2026-10-24_17-13-05",
     "in": 2.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -910,7 +910,7 @@
     ]
   },
   "v_costume": {
-    "src": "wa10",
+    "src": "whatsapp-2026-10-24_17-13-05",
     "in": 15.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -920,7 +920,7 @@
     ]
   },
   "v_warehouse": {
-    "src": "wa2",
+    "src": "whatsapp-2026-10-24_17-11-36",
     "in": 5.0,
     "dur": 2.4,
     "speed": 1.0,
@@ -929,6 +929,16 @@
       "fy": 0.5,
       "zoom": 1.0
     },
+    "grades": [
+      "color"
+    ]
+  },
+  "v_warehouse2": {
+    "src": "whatsapp-2026-10-24_17-11-35",
+    "in": 3.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "crop": "crop=ih*4/3:ih",
     "grades": [
       "color"
     ]

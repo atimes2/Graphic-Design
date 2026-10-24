@@ -510,7 +510,7 @@
       dance: [['dance_band', 'mono'], ['sk_pairs', 'ember'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['sk_solo', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['sk_line', 'ember'], ['dance_smile', 'ember'], ['dance_twirl', 'mono']],
       genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],
       // Holographic Realms' own event footage, in its own colour
-      light: [['v_dj', 'color'], ['v_crowdbeams', 'color'], ['v_pinkwall', 'color'], ['v_laserfan', 'color']],
+      light: [['v_warehouse2', 'color'], ['v_dj', 'color'], ['v_crowdbeams', 'color'], ['v_pinkwall', 'color']],
       lightStrips: [['v_beams', 'color'], ['v_octagon', 'color'], ['v_booth', 'color'], ['v_crowdbeams2', 'color'], ['v_dj2', 'color'], ['v_lasercrowd', 'color']],
       over: ['v_laserfan', 'v_beams', 'v_crowdbeams2', 'v_octagon', 'v_laserpink', 'v_booth'],
       masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['v_costume', 'color'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
