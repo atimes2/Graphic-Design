@@ -439,6 +439,22 @@
         "YOU BUY,",
         "THE LESS",
         "YOU PAY."
+      ],
+      "dead": [
+        "THE DEAD",
+        "WILL DANCE"
+      ],
+      "light": {
+        "k": "VISUALS BY HOLOGRAPHIC REALMS",
+        "h": [
+          "A HUGE WAREHOUSE",
+          "FULL OF LIGHT"
+        ]
+      },
+      "lights": [
+        "VISUALS",
+        "LIGHTS",
+        "ALL NIGHT"
       ]
     }
   }

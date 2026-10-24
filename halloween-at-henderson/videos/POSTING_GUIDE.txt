@@ -61,8 +61,11 @@ COLLAB REEL (Adam x Henderson Brewing Co.; pick one)
                                                   Danse Macabre
   reel-e-field-guide.mp4            44s  sound    nature-documentary parody: specimen plates;
                                                   British narrator + Hall of the Mountain King
-  reel-f-the-grid.mp4               30s  sound    editorial grid cut to the beat of Skeleton
-                                                  Jangle (1918 jazz); no voice
+  reel-f-the-grid.mp4               31s  sound    THE MAIN POST. Editorial grid cut to the beat of
+                                                  Skeleton Jangle (1918 jazz), Skeleton Dance (1929)
+                                                  skeletons, Holographic Realms' visuals; no voice
+  reel-f-the-grid-long.mp4          37s  sound    longer cut of F, big words in the poster's
+                                                  Copperplate, extra skeleton + visuals sections
   reel-g-the-invitation.mp4         40s  sound    engraved invitation, oval cameo; narrator
                                                   + Valse triste
   "sound" Reels have their soundtrack baked in. When posting them, leave

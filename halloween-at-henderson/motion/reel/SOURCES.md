@@ -62,3 +62,7 @@ Instagram's rights matching can still flag an old recording, because some labels
 ## Narration (Reels B, E, G)
 
 The narration is synthetic: [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0), run locally through kokoro-onnx. Voices: `am_michael` (B), `bm_george` (E), `bf_emma` (G). No real person's voice was cloned.
+
+## Event visuals (Reel F)
+
+The photos in `reel/hr/` are Holographic Realms' own promotional images, taken from their PsyHibit 2027 deck. Holographic Realms is the visuals team for the night. F credits them on screen as "VISUALS BY HOLOGRAPHIC REALMS". Their WhatsApp promo video can replace these photos once it's in the repo.

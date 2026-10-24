@@ -262,13 +262,26 @@
     "musicLevel": 0.5
   },
   "reel-f-the-grid": {
-    "duration": 28,
+    "duration": 31,
     "music": [
       {
         "src": "loc-jukebox-28585-skeleton-jangle",
         "from": 0.064,
         "at": 0.0,
-        "dur": 28.0,
+        "dur": 31.0,
+        "fadeIn": 0.02,
+        "fadeOut": 2.5
+      }
+    ]
+  },
+  "reel-f-the-grid-long": {
+    "duration": 37,
+    "music": [
+      {
+        "src": "loc-jukebox-28585-skeleton-jangle",
+        "from": 0.064,
+        "at": 0.0,
+        "dur": 37.0,
         "fadeIn": 0.02,
         "fadeOut": 2.5
       }

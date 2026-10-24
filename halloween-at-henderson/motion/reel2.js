@@ -24,7 +24,8 @@
   // a footage frame drawn into any rectangle (cover-fit), with weave and a slow push
   const CAPTURE = { on: null };   // when set, filmRect only lists the frames it would draw
   function filmRect(ctx, t, r, shot, grade, o = {}) {
-    if (CAPTURE.on) { if (shot) CAPTURE.on.push(frameURL(shot, grade, t - shot.t0)); return; }
+    const url = shot && (shot.still || frameURL(shot, grade, t - shot.t0));
+    if (CAPTURE.on) { if (shot) CAPTURE.on.push(url); return; }
     ctx.save();
     ctx.beginPath();
     ctx.rect(r.x, r.y, r.w, r.h);
@@ -32,7 +33,7 @@
     ctx.fillStyle = '#070404';
     ctx.fillRect(r.x, r.y, r.w, r.h);
     if (shot) {
-      const e = getImg(frameURL(shot, grade, t - shot.t0));
+      const e = getImg(url);
       if (e.ok) {
         const im = e.im;
         const s = Math.max(r.w / im.width, r.h / im.height) * (1.03 + 0.025 * (t - shot.t0) + (o.zoom ?? 0));
@@ -396,59 +397,91 @@
   // ======================================================================
   // F · THE GRID
   // ======================================================================
-  const F = (() => {
-    const id = 'reel-f-the-grid';
+  // the grid Reels share one system; each cut is a list of sections, eight beats apiece
+  function makeGrid(cfg) {
     const BOX = { x: 40, y: 200, w: 1000, h: 1400 }, GUT = 14;
     const BEATS = { list: null };
     const beatsReady = fetch('reel/beats-f.json').then((r) => r.json()).then((j) => { BEATS.list = j.beats; });
     const b = (n) => BEATS.list[n];
     const beatAt = (t) => { const L = BEATS.list; let i = 0; while (i + 1 < L.length && L[i + 1] <= t) i++; return i; };
-    const END_BEAT = 64;
+    const END_BEAT = cfg.sections.length * 8;
     const C = () => A.content.reel.f;
     const buf = window.HH.canvas(W, H);
+    // big type: the heavy grotesk, or the poster's Copperplate
+    const COPPER = cfg.font === 'copperplate';
+    const FONT = COPPER ? 'Copperplate' : 'Figtree', WEIGHT = COPPER ? '' : '800', TRACK = COPPER ? 1 : -2;
+    const big = (ctx, str, size, maxW) => fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT);
 
-    // a cell's footage at time t: pool rotates every `every` beats from beat n0
+    // a cell's footage at time t: pool rotates every `every` beats from beat n0;
+    // grade 'hr' = a Holographic Realms photo (reel/hr/), shown in its own colour
     function pick(pool, t, n0, every = 2, off = 0) {
       const bi = beatAt(t);
       const k = Math.max(0, Math.floor((bi - n0) / every));
       const [clip, grade] = pool[(k + off) % pool.length];
-      return { shot: { clip, t0: b(n0 + k * every), at: 0.2 }, grade };
+      const t0 = b(n0 + k * every);
+      return grade === 'hr' ? { shot: { still: `reel/hr/${clip}.jpg`, t0 }, grade } : { shot: { clip, t0, at: 0.2 }, grade };
     }
     function cell(ctx, t, r, pool, n0, o = {}) {
       const f = pick(pool, t, n0, o.every ?? 2, o.off ?? 0);
-      filmRect(ctx, t, r, f.shot, f.grade, { vignette: o.vignette ?? 0.45, dust: 0.7, exposure: o.exposure });
+      filmRect(ctx, t, r, f.shot, f.grade, { vignette: o.vignette ?? 0.45, dust: f.grade === 'hr' ? 0.3 : 0.7, exposure: o.exposure });
       return f;
+    }
+    // light from the visuals laid over the film (screen blend), kicking on each beat
+    function lights(ctx, t, r, n0, amt = 0.6) {
+      const bi = beatAt(t);
+      const name = P.over[Math.floor((bi - n0) / 2 + n0) % P.over.length];
+      const url = `reel/hr/${name}.jpg`;
+      if (CAPTURE.on) { CAPTURE.on.push(url); return; }
+      const e = getImg(url);
+      if (!e.ok) return;
+      const kick = Math.exp(-(t - b(bi)) * 5);
+      const im = e.im, z = Math.max(r.w / im.width, r.h / im.height) * (1.08 + 0.04 * kick);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(r.x, r.y, r.w, r.h);
+      ctx.clip();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = amt * (0.55 + 0.45 * kick);
+      ctx.drawImage(im, r.x + (r.w - im.width * z) / 2, r.y + (r.h - im.height * z) / 2, im.width * z, im.height * z);
+      ctx.restore();
     }
     const rows = (n, r = BOX) => [...Array(n)].map((_, i) => ({ x: r.x, y: r.y + i * (r.h - GUT * (n - 1)) / n + i * GUT, w: r.w, h: (r.h - GUT * (n - 1)) / n }));
     const grid4 = (r = BOX) => {
       const w = (r.w - GUT) / 2, h = (r.h - GUT) / 2;
       return [[0, 0], [1, 0], [0, 1], [1, 1]].map(([i, j]) => ({ x: r.x + i * (w + GUT), y: r.y + j * (h + GUT), w, h }));
     };
-    // heavy grotesk words, a soft rise on entry (no slams)
+    // big words, a soft rise on entry (no slams)
     function word(ctx, str, x, y, size, t, t0, o = {}) {
       if (t < t0) return;
       const p = o.instant ? 1 : ease.out3(prog(t, t0, t0 + 0.18));
-      label(ctx, str, x, y + (1 - p) * 18, size, { tracking: o.tracking ?? -2, align: o.align || 'left', color: o.color || BONE, alpha: p * (o.alpha ?? 1), weight: '800', glow: o.glow ?? 0 });
+      const small = o.small;   // kickers and info lines stay in Figtree
+      label(ctx, str, x, y + (1 - p) * 18, size, {
+        family: small ? 'Figtree' : FONT, weight: small ? '800' : WEIGHT, tracking: o.tracking ?? (small ? 0 : TRACK),
+        align: o.align || 'left', color: o.color || BONE, alpha: p * (o.alpha ?? 1), glow: o.glow ?? 0,
+      });
     }
     // footage seen through the letters of a huge word
     function filmType(ctx, t, str, cx, base, maxW, pool, n0) {
-      const size = fit(ctx, str, 520, maxW, 'Figtree', -8, '800');
+      const tr = COPPER ? 2 : -8;
+      const size = fit(ctx, str, 520, maxW, FONT, tr, WEIGHT);
+      const top = base - size * 0.74;
+      const r = { x: 0, y: top - 20, w: W, h: size * 0.78 + 40 };
+      if (CAPTURE.on) { cell(ctx, t, r, pool, n0); return size; }
       const g = buf.getContext('2d');
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = 'source-over';
       g.clearRect(0, 0, W, H);
-      const top = base - size * 0.74;
-      cell(g, t, { x: 0, y: top - 20, w: W, h: size * 0.78 + 40 }, pool, n0, { vignette: 0.15, exposure: 1.25 });
+      cell(g, t, r, pool, n0, { vignette: 0.15, exposure: 1.25 });
       g.globalCompositeOperation = 'destination-in';
-      setFont(g, 'Figtree', size, '800');
-      g.letterSpacing = '-8px';
+      setFont(g, FONT, size, WEIGHT);
+      g.letterSpacing = `${tr}px`;
       g.textAlign = 'center';
       g.fillStyle = '#000';
       g.fillText(str, cx, base);
       // a thin ember keyline under the film so the letters hold their shape on dark frames
       ctx.save();
-      setFont(ctx, 'Figtree', size, '800');
-      ctx.letterSpacing = '-8px';
+      setFont(ctx, FONT, size, WEIGHT);
+      ctx.letterSpacing = `${tr}px`;
       ctx.textAlign = 'center';
       ctx.strokeStyle = EMBER;
       ctx.lineWidth = 3;
@@ -472,61 +505,95 @@
     const P = {
       hook: [['sk_line', 'ember'], ['jive_a', 'ember'], ['e_ball', 'ember'], ['dance_twirl', 'ember'], ['sk_pairs', 'ember'], ['mask_red', 'ember'], ['sk_solo', 'ember'], ['e_stairs', 'ember']],
       date: [['fair_fountain', 'ember'], ['coney_lights', 'ember'], ['horns', 'ember'], ['jive_b', 'ember']],
+      dead: [['sk_rise', 'ember'], ['sk_line', 'ember'], ['sk_pairs', 'ember'], ['sk_solo', 'ember']],
       dance: [['dance_band', 'mono'], ['sk_pairs', 'ember'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['sk_solo', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['sk_line', 'ember'], ['dance_smile', 'ember'], ['dance_twirl', 'mono']],
       genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],
+      // Holographic Realms: rooms full of projection and light
+      light: [['p09_23', 'hr'], ['p10_28', 'hr'], ['p03_07', 'hr'], ['p10_27', 'hr']],
+      lightStrips: [['p09_24', 'hr'], ['p03_09', 'hr'], ['p11_34', 'hr'], ['p09_26', 'hr'], ['p02_06', 'hr'], ['p09_25', 'hr']],
+      over: ['p07_17', 'p08_21', 'p11_32', 'p06_15', 'p08_22', 'p07_18'],
       masks: [['mask_red', 'ember'], ['cal_wake', 'mono'], ['e_unmask', 'ember'], ['mask_man', 'mono'], ['jek_face', 'ember'], ['mask_crowd', 'mono'], ['h_devil', 'blood'], ['cal_jane', 'ember'], ['mask_group2', 'ember'], ['jek_claw', 'mono']],
       group: [['mask_group', 'ember'], ['sk_line', 'ember'], ['mask_crowd', 'ember'], ['e_ball', 'mono']],
       drink: [['bar_toast', 'ember'], ['tap_pour', 'ember'], ['pour_spot', 'ember'], ['bar_smile', 'ember']],
     };
 
-    // one section per eight beats
-    const S = [
-      (ctx, t, n0) => {   // HALLOWEEN / AT / HENDERSON on three strips of film; on screen at frame 0
+    const SEC = {
+      hook(ctx, t, n0) {   // HALLOWEEN / AT / HENDERSON on three strips of film; on screen at frame 0
         const rs = rows(3);
         C().hook.forEach((w, i) => {
           cell(ctx, t, rs[i], P.hook, n0, { off: i * 2 });
           foot(ctx, rs[i]);
-          const size = fit(ctx, w, 240, rs[i].w - 60, 'Figtree', -2, '800');
-          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, size, t, 0, { instant: true });
+          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, big(ctx, w, 240, rs[i].w - 60), t, 0, { instant: true });
         });
       },
-      (ctx, t, n0) => {   // 10.31 in film
+      date(ctx, t, n0) {   // 10.31 in film
         const d = C().date;
-        word(ctx, d.k, W / 2, 600, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN });
+        word(ctx, d.k, W / 2, 600, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN, small: true });
         filmType(ctx, t, d.n, W / 2, 1060, 1000, P.date, n0);
-        word(ctx, d.s, W / 2, 1270, 96, t, b(n0 + 2), { align: 'center', tracking: 0 });
+        word(ctx, d.s, W / 2, 1270, 96, t, b(n0 + 2), { align: 'center', small: true });
       },
-      (ctx, t, n0) => {   // four dance cells cutting on alternate beats, DJS ALL NIGHT across them
+      dead(ctx, t, n0) {   // THE DEAD / WILL DANCE over the skeletons, light from the visuals on top
+        cell(ctx, t, BOX, P.dead, n0, { vignette: 0.55 });
+        lights(ctx, t, BOX, n0, 0.45);
+        foot(ctx, BOX);
+        C().dead.forEach((w, i) => {
+          const s = big(ctx, C().dead[1], 210, 930);
+          word(ctx, w, BOX.x + 36, BOX.y + BOX.h - 60 - (1 - i) * s * 0.98, s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
+        });
+      },
+      dance(ctx, t, n0) {   // four dance cells cutting on alternate beats, the visuals' light over them, DJS ALL NIGHT across
         grid4().forEach((r, i) => cell(ctx, t, r, P.dance, n0 + (i % 2), { off: i * 2 }));
+        lights(ctx, t, BOX, n0, 0.42);
         const bar = { x: BOX.x, y: BOX.y + BOX.h / 2 - 95, w: BOX.w, h: 190 };
         if (t >= b(n0 + 1)) {
           block(ctx, bar, EMBER);
-          const s = fit(ctx, C().djs, 150, 940, 'Figtree', -2, '800');
+          const s = big(ctx, C().djs, 150, 940);
           word(ctx, C().djs, W / 2, bar.y + bar.h / 2 + s * 0.36, s, t, b(n0 + 1), { align: 'center', color: '#0A0505' });
         }
       },
-      (ctx, t, n0) => {   // BASS / TECHNO / POP REMIXES, one strip per two beats
+      genres(ctx, t, n0) {   // BASS / TECHNO / POP REMIXES, one strip per two beats
         rows(3).forEach((r, i) => {
           const t0 = b(n0 + i * 2);
           if (t < t0) { ctx.save(); ctx.strokeStyle = BONE; ctx.globalAlpha = 0.2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); return; }
           cell(ctx, t, r, P.genres, n0 + i * 2, { every: 99, off: i });
+          lights(ctx, t, r, n0 + i, 0.4);
           foot(ctx, r);
-          const w = C().genres[i], size = fit(ctx, w, 230, r.w - 60, 'Figtree', -2, '800');
-          word(ctx, w, r.x + 28, r.y + r.h - 34, size, t, t0);
+          const w = C().genres[i];
+          word(ctx, w, r.x + 28, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
         });
       },
-      (ctx, t, n0) => {   // masks grid, COME IN / COSTUME on a bone band
+      light(ctx, t, n0) {   // the room: Holographic Realms' visuals full frame, in colour
+        const c = C().light;
+        cell(ctx, t, BOX, P.light, n0, { vignette: 0.35 });
+        foot(ctx, BOX);
+        word(ctx, c.k, BOX.x + 36, BOX.y + 70, 26, t, b(n0), { tracking: 8, color: BONE, alpha: 0.85, small: true });
+        const s = Math.min(...c.h.map((w) => big(ctx, w, 190, 930)));
+        c.h.forEach((w, i) => {
+          word(ctx, w, BOX.x + 36, BOX.y + BOX.h - 60 - (c.h.length - 1 - i) * s * 0.98, s, t, b(n0 + 1 + i * 2), { color: i ? PUMPKIN : BONE });
+        });
+      },
+      lightStrips(ctx, t, n0) {   // VISUALS / LIGHTS / ALL NIGHT on three strips of the visuals
+        rows(3).forEach((r, i) => {
+          const t0 = b(n0 + i * 2);
+          if (t < t0) { ctx.save(); ctx.strokeStyle = BONE; ctx.globalAlpha = 0.2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); return; }
+          cell(ctx, t, r, P.lightStrips, n0 + i * 2, { off: i * 2 });
+          foot(ctx, r);
+          const w = C().lights[i];
+          word(ctx, w, r.x + 28, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
+        });
+      },
+      costume(ctx, t, n0) {   // masks grid, COME IN / COSTUME on a bone band
         grid4().forEach((r, i) => cell(ctx, t, r, P.masks, n0 + (i % 2), { off: i * 2 }));
         const band = { x: BOX.x, y: BOX.y + BOX.h / 2 - 190, w: BOX.w, h: 380 };
         if (t >= b(n0 + 2)) {
           block(ctx, band, BONE);
           C().costume.forEach((w, i) => {
-            const s = fit(ctx, C().costume[1], 170, 920, 'Figtree', -2, '800');
+            const s = big(ctx, C().costume[1], 170, 920);
             word(ctx, w, W / 2, band.y + 170 + i * s * 0.98, s, t, b(n0 + 2 + i), { align: 'center', color: '#0A0505' });
           });
         }
       },
-      (ctx, t, n0) => {   // one big frame, BEST GROUP / COSTUME WINS
+      group(ctx, t, n0) {   // one big frame, BEST GROUP / COSTUME WINS
         cell(ctx, t, BOX, P.group, n0, { vignette: 0.6 });
         const sh = ctx.createLinearGradient(0, BOX.y, 0, BOX.y + 520);
         sh.addColorStop(0, 'rgba(5,3,3,0.8)');
@@ -534,18 +601,18 @@
         ctx.fillStyle = sh;
         ctx.fillRect(BOX.x, BOX.y, BOX.w, 520);
         C().group.forEach((w, i) => {
-          const s = fit(ctx, C().group[1], 200, 930, 'Figtree', -2, '800');
+          const s = big(ctx, C().group[1], 200, 930);
           word(ctx, w, BOX.x + 36, BOX.y + 40 + s * (0.8 + i * 0.98), s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
         });
       },
-      (ctx, t, n0) => {   // 100 in film
+      drink(ctx, t, n0) {   // 100 in film
         const d = C().drink;
-        word(ctx, d.k, W / 2, 560, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN });
+        word(ctx, d.k, W / 2, 560, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN, small: true });
         filmType(ctx, t, d.n, W / 2, 1090, 1000, P.drink, n0);
         const s = fit(ctx, d.s, 70, 980, 'Figtree', 0, '800');
-        word(ctx, d.s, W / 2, 1280, s, t, b(n0 + 2), { align: 'center', tracking: 0 });
+        word(ctx, d.s, W / 2, 1280, s, t, b(n0 + 2), { align: 'center', small: true });
       },
-      (ctx, t, n0) => {   // THE EARLIER / YOU BUY, / THE LESS / YOU PAY. on blocks, a line per two beats
+      early(ctx, t, n0) {   // THE EARLIER / YOU BUY, / THE LESS / YOU PAY. on blocks, a line per two beats
         rows(4).forEach((r, i) => {
           const t0 = b(n0 + i * 2);
           if (t < t0) return;
@@ -554,11 +621,11 @@
           ctx.globalAlpha = ease.out3(prog(t, t0, t0 + 0.12));
           block(ctx, r, col);
           ctx.restore();
-          const w = C().early[i], s = fit(ctx, w, 220, r.w - 60, 'Figtree', -2, '800');
+          const w = C().early[i], s = big(ctx, w, 220, r.w - 60);
           word(ctx, w, r.x + 28, r.y + r.h / 2 + s * 0.36, s, t, t0, { color: '#0A0505' });
         });
       },
-    ];
+    };
 
     function chrome(ctx, t, a) {
       if (a <= 0) return;
@@ -569,33 +636,39 @@
       label(ctx, f2, BOX.x + BOX.w, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
       hair(ctx, BOX.x, 184, BOX.x + BOX.w, 0.3 * a);
     }
+    const section = (t) => Math.floor(beatAt(t) / 8);
 
     return {
-      id,
-      duration: 28,
-      audio: 'reel/audio/reel-f-the-grid.wav',
+      id: cfg.id,
+      duration: cfg.duration,
+      audio: `reel/audio/${cfg.id}.wav`,
       silent: true,
       cues: [],
       async prepare(t) {
         await Promise.all([footIndex(), beatsReady]);
         // draw once off-screen to learn which frames this moment needs, then wait for them
         const want = [];
-        const sec = Math.floor(beatAt(t) / 8);
-        if (sec < S.length) {
-          try { CAPTURE.on = want; S[sec](window.HH.canvas(8, 8).getContext('2d'), t, sec * 8); } finally { CAPTURE.on = null; }
+        const k = section(t);
+        if (k < cfg.sections.length) {
+          try { CAPTURE.on = want; SEC[cfg.sections[k]](window.HH.canvas(8, 8).getContext('2d'), t, k * 8); } finally { CAPTURE.on = null; }
         }
         await Promise.all(want.map((u) => getImg(u).p));
       },
       draw(ctx, t) {
-        const bi = beatAt(t), sec = Math.floor(bi / 8);
+        const k = section(t);
         const endT = b(END_BEAT);
-        const out = 1 - prog(t, endT, endT + 0.3);
-        chrome(ctx, t, out);
-        if (sec < S.length) S[sec](ctx, t, sec * 8);
+        chrome(ctx, t, 1 - prog(t, endT, endT + 0.3));
+        if (k < cfg.sections.length) SEC[cfg.sections[k]](ctx, t, k * 8);
         endCard(ctx, t, endT);
       },
     };
-  })();
+  }
+  // F: the main collab post. F-long: the extended cut, with the poster's Copperplate for the big words
+  const F = makeGrid({ id: 'reel-f-the-grid', duration: 31, sections: ['hook', 'date', 'dance', 'genres', 'light', 'costume', 'group', 'drink', 'early'] });
+  const FL = makeGrid({
+    id: 'reel-f-the-grid-long', duration: 37, font: 'copperplate',
+    sections: ['hook', 'date', 'dead', 'dance', 'genres', 'light', 'lightStrips', 'costume', 'group', 'drink', 'early'],
+  });
 
-  [E, F, G].forEach(register);
+  [E, F, FL, G].forEach(register);
 })();
