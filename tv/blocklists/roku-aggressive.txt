@@ -1,0 +1,28 @@
+# Roku aggressive blocklist (logging + telemetry)
+# Add this ON TOP of roku-starter.txt only after the starter list has run a few days with no problems.
+# Higher risk: one Pi-hole user reported that blocking the *.logs.roku.com family also killed the
+# Live TV (antenna) channel guide. If you use an antenna and the guide goes blank, remove this list first.
+
+# Logging
+logs.roku.com
+scribe.logs.roku.com
+midland.logs.roku.com
+austin.logs.roku.com
+cooper.logs.roku.com
+liberty.logs.roku.com
+mobile.logs.roku.com
+
+# Telemetry / tracing
+logs.sr.roku.com
+traces.sr.roku.com
+track.sr.roku.com
+userdata.sr.roku.com
+amarillo.sb.roku.com
+
+# Trick-play thumbnails. Blocking this removes the little preview pictures when you
+# fast-forward in some apps. Delete this line if you miss them.
+bif.sr.roku.com
+
+# Deliberately NOT included (they appear in some public lists but are likely to break things):
+#   wwwimg.roku.com, assets.sr.roku.com  -> likely to blank out home-screen artwork / app icons
+#   cloudservices.roku.com               -> account and app-store features may fail
