@@ -457,5 +457,74 @@
         "ALL NIGHT"
       ]
     }
+  },
+  "tv2": {
+    "head": [
+      "HALLOWEEN AT HENDERSON",
+      "VISUALS BY HOLOGRAPHIC REALMS"
+    ],
+    "foot": [
+      "SATURDAY · OCTOBER 31 · 10PM – 2AM · 19+",
+      "SCAN THE CODE FOR TICKETS →"
+    ],
+    "scan": "SCAN FOR TICKETS",
+    "date": "SAT · OCT 31",
+    "time": "10PM – 2AM · 19+",
+    "cheaper": "CHEAPER THE EARLIER YOU BUY",
+    "hook": [
+      "HALLOWEEN",
+      "AT",
+      "HENDERSON"
+    ],
+    "date2": {
+      "k": "SATURDAY",
+      "n": "10.31",
+      "s": "10PM – 2AM · 19+"
+    },
+    "titles": [
+      "IS IT\nHALLOWEEN?",
+      "WHO CAN EVER BE SURE\nWHAT'S BEHIND THE MASK?",
+      "ARE YOU\nAFRAID NOW?"
+    ],
+    "dead": [
+      "THE DEAD",
+      "WILL DANCE"
+    ],
+    "djs": "DJS ALL NIGHT",
+    "genres": [
+      "BASS",
+      "TECHNO",
+      "POP REMIXES"
+    ],
+    "light": {
+      "k": "VISUALS BY HOLOGRAPHIC REALMS",
+      "h": [
+        "A HUGE WAREHOUSE",
+        "FULL OF LIGHT"
+      ]
+    },
+    "lights": [
+      "VISUALS",
+      "LIGHTS",
+      "ALL NIGHT"
+    ],
+    "costume": [
+      "COME IN",
+      "COSTUME"
+    ],
+    "group": [
+      "BEST GROUP",
+      "COSTUME WINS"
+    ],
+    "early": [
+      "THE EARLIER",
+      "YOU BUY,",
+      "THE LESS",
+      "YOU PAY."
+    ],
+    "scanArrow": "SCAN THE CODE",
+    "posterDate": "SATURDAY · OCTOBER 31",
+    "posterTime": "10PM – 2AM · 19+",
+    "posterCta": "SCAN FOR TICKETS"
   }
 }

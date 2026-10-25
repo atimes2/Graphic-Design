@@ -11,6 +11,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `cards.js` | The 19 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
 | `reel.js` + `reel/` | Collab Reels A–D (archival film, 1080×1920): timelines and copy in `reel.js` / `content.json` → `reel`, clip list in `reel/footage.json`, rights in `reel/SOURCES.md` |
+| `tv2.html` + `tv2.js` | Venue TV loop v2 (1920×1080, 66s, silent, seamless): the grid Reel's sections on a 120 BPM grid, QR column fixed; copy in `content.json` → `tv2`. Render with `node render.mjs --tv2` |
 | `reel2.js` | Collab Reels E (field guide), F (beat-cut grid; beats in `reel/beats-f.json`) and G (invitation), using the helpers `reel.js` shares as `HH_REEL` |
 | `reel_audio.py` | Reel soundtracks → `reel/audio/<id>.wav` from `reel/audio.json`: Kokoro TTS narration, film-dialogue clips, public-domain 78s (downloaded to `music-src/`), ducking, −14 LUFS |
 | `prep_footage.py` | Downloads the archive.org films (if missing) and cuts + grades the Reel clips into `footage/` (ember and mono grades; not committed, about 600 MB) |

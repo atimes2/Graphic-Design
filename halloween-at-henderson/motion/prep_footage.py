@@ -87,6 +87,10 @@ def main(keys):
             crop = (f"crop=w='min(iw,ih*9/16)/{f['zoom']}':h='ih/{f['zoom']}'"
                     f":x='(iw-ow)*{f['fx']}':y='(ih-oh)*{f.get('fy', 0.5)}'")
             vf = f"setpts=PTS/{speed},fps=30,{crop},scale={w}:{h}:flags=lanczos,unsharp=5:5:0.8"
+        elif "wide" in c:   # 16:9 for the venue TV; a string = crop applied first
+            w, h = 1280, 720
+            crop = f"{c['wide']}," if isinstance(c["wide"], str) else ""
+            vf = f"setpts=PTS/{speed},fps=30,{crop}scale={w}:{h}:flags=lanczos,unsharp=5:5:0.6"
         else:
             w, h = W, H
             crop = f"{c['crop']}," if "crop" in c else ""   # e.g. 16:9 phone video cut to the panel's 4:3

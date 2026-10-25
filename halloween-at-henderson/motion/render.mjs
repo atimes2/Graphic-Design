@@ -7,6 +7,7 @@
 //   AUDIO=1 node render.mjs              # add the synthesized SFX track (default: silent)
 //   node render.mjs --tv                 # the 60s venue TV loop (1920x1080, silent) from tv.html
 //   node render.mjs --tv --stills tv 0,12  # TV review stills
+//   node render.mjs --tv2                # TV loop v2 (1920x1080, silent) from tv2.html
 //
 import http from 'node:http';
 import fs from 'node:fs';
@@ -39,7 +40,8 @@ function serve() {
 }
 
 const TV = process.argv.includes('--tv');
-const PAGE = TV ? 'tv.html' : 'index.html';
+const TV2 = process.argv.includes('--tv2');
+const PAGE = TV2 ? 'tv2.html' : TV ? 'tv.html' : 'index.html';
 
 async function openPage(browser, port) {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1920 } });
@@ -110,7 +112,7 @@ async function renderCard(page, card) {
 }
 
 async function main() {
-  const args = process.argv.slice(2).filter((a) => a !== '--tv');
+  const args = process.argv.slice(2).filter((a) => a !== '--tv' && a !== '--tv2');
   const srv = await serve();
   const port = srv.address().port;
   const browser = await chromium.launch({

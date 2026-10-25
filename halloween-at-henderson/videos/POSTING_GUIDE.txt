@@ -44,6 +44,11 @@ DAY OF
   "Get yours before they're gone" (13) are placeholder lines.
 
 VENUE TV
+  tv-loop-v2.mp4                66s   1920x1080, silent, loops seamlessly. THE NEW ONE: the
+                                      collab Reel's grid look (skeletons, horror intertitles,
+                                      Holographic Realms' footage, the poster) with the same
+                                      QR code (luma.com/gj1waa12, utm_source=hendersontv)
+                                      fixed in the right column. No free-drink mention.
   tv-loop.mp4                   70s   1920x1080, silent, loops seamlessly. Set the TV
                                       player to repeat. The QR code (luma.com/gj1waa12,
                                       utm_source=hendersontv) stays on screen the whole time.

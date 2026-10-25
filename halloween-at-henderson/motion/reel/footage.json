@@ -982,5 +982,225 @@
     "grades": [
       "color"
     ]
+  },
+  "w_warehouse2": {
+    "src": "whatsapp-2026-10-24_17-11-35",
+    "in": 3.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_warehouse3": {
+    "src": "whatsapp-2026-10-24_17-11-35",
+    "in": 8.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_dj": {
+    "src": "whatsapp-2026-10-24_17-12-27-1",
+    "in": 50.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_dj2": {
+    "src": "whatsapp-2026-10-24_17-12-27-1",
+    "in": 55.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_crowdbeams": {
+    "src": "whatsapp-2026-10-24_17-13-05-3",
+    "in": 0.2,
+    "dur": 2.0,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_crowdbeams2": {
+    "src": "whatsapp-2026-10-24_17-13-05-3",
+    "in": 6.5,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_beams": {
+    "src": "whatsapp-2026-10-24_17-12-58-1",
+    "in": 1.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_beams3": {
+    "src": "whatsapp-2026-10-24_17-12-58",
+    "in": 8.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_beams4": {
+    "src": "whatsapp-2026-10-24_17-13-05-1",
+    "in": 4.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_booth": {
+    "src": "whatsapp-2026-10-24_17-13-01",
+    "in": 2.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_lasercrowd": {
+    "src": "whatsapp-2026-10-24_17-11-34",
+    "in": 4.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_pinkwall": {
+    "src": "whatsapp-2026-10-24_17-10-59",
+    "in": 2.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_octagon": {
+    "src": "whatsapp-2026-10-24_17-12-27-1",
+    "in": 31.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_fog": {
+    "src": "whatsapp-2026-10-24_17-13-05",
+    "in": 2.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_costume": {
+    "src": "whatsapp-2026-10-24_17-13-05",
+    "in": 15.0,
+    "dur": 2.4,
+    "speed": 1.0,
+    "wide": true,
+    "grades": [
+      "color"
+    ]
+  },
+  "w_laserfan": {
+    "src": "whatsapp-2026-10-24_17-12-27",
+    "in": 59.5,
+    "dur": 2.0,
+    "speed": 1.0,
+    "wide": "crop=iw*0.84:iw*0.84*9/16:iw*0.08:ih*0.2",
+    "grades": [
+      "color"
+    ]
+  },
+  "w_sk_line": {
+    "src": "skeleton",
+    "in": 161.5,
+    "dur": 2.4,
+    "speed": 1,
+    "wide": "crop=iw:iw*9/16",
+    "grades": [
+      "ember"
+    ]
+  },
+  "w_sk_moon": {
+    "src": "skeleton",
+    "in": 24.0,
+    "dur": 2.0,
+    "speed": 1,
+    "wide": "crop=iw:iw*9/16",
+    "grades": [
+      "ember"
+    ]
+  },
+  "w_orlok_win": {
+    "src": "nosferatu4",
+    "in": 1052.3,
+    "dur": 2.6,
+    "speed": 0.85,
+    "wide": "crop=iw:iw*8/9*9/16",
+    "grades": [
+      "mono"
+    ]
+  },
+  "w_cal_wake": {
+    "src": "caligari",
+    "in": 700.5,
+    "dur": 3.0,
+    "speed": 0.8,
+    "wide": "crop=iw:iw*9/16",
+    "grades": [
+      "mono"
+    ]
+  },
+  "w_sk_pairs": {
+    "src": "skeleton",
+    "in": 182.0,
+    "dur": 1.6,
+    "speed": 1,
+    "wide": "crop=iw:iw*9/16",
+    "grades": [
+      "ember"
+    ]
+  },
+  "w_sk_rise": {
+    "src": "skeleton",
+    "in": 91.0,
+    "dur": 2.0,
+    "speed": 1,
+    "wide": "crop=iw:iw*9/16",
+    "grades": [
+      "ember"
+    ]
   }
 }
