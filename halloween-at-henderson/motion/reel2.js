@@ -399,7 +399,12 @@
   // ======================================================================
   // the grid Reels share one system; each cut is a list of sections, eight beats apiece by default
   function makeGrid(cfg) {
-    const BOX = { x: 40, y: 200, w: 1000, h: 1400 }, GUT = 14;
+    // Footage runs edge to edge; all type stays inside what a phone actually shows:
+    // Instagram crops ~100px off each side on tall screens, its header covers the
+    // top ~240px, the caption block the bottom ~360px, and the like/comment/share
+    // column sits over the lower right (x > 880 below y 1150).
+    const BOX = { x: 0, y: 262, w: 1080, h: 1150 }, GUT = 14;
+    const SAFE = { l: 140, r: 940 }, TXT = 700;   // left edge, right edge, widest big word
     const BEATS = { list: null };
     const beatsReady = fetch('reel/beats-f.json').then((r) => r.json()).then((j) => { BEATS.list = j.beats; });
     const b = (n) => BEATS.list[n];
@@ -413,7 +418,7 @@
     // big type: the heavy grotesk, or the poster's Copperplate
     const COPPER = cfg.font === 'copperplate';
     const FONT = COPPER ? 'Copperplate' : 'Figtree', WEIGHT = COPPER ? '' : '800', TRACK = COPPER ? 1 : -2;
-    const big = (ctx, str, size, maxW, plain) => (plain ? fit(ctx, str, size, maxW, 'Figtree', -2, '800') : fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT));
+    const big = (ctx, str, size, maxW, plain) => { maxW = Math.min(maxW, TXT); return plain ? fit(ctx, str, size, maxW, 'Figtree', -2, '800') : fit(ctx, str, size, maxW, FONT, TRACK, WEIGHT); };
 
     // a cell's footage at time t: pool rotates every `every` beats from beat n0;
     // grade 'hr' = a still photo from reel/hr/, shown in its own colour
@@ -531,14 +536,15 @@
         C().hook.forEach((w, i) => {
           cell(ctx, t, rs[i], P.hook, n0, { off: i * 2 });
           foot(ctx, rs[i]);
-          word(ctx, w, rs[i].x + 28, rs[i].y + rs[i].h - 34, big(ctx, w, 240, rs[i].w - 60, true), t, 0, { instant: true, plain: true });
+          word(ctx, w, SAFE.l, rs[i].y + rs[i].h - 34, big(ctx, w, 240, rs[i].w - 60, true), t, 0, { instant: true, plain: true });
         });
       },
       date(ctx, t, n0) {   // 10.31 in film
         const d = C().date;
-        word(ctx, d.k, W / 2, 600, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN, small: true });
-        filmType(ctx, t, d.n, W / 2, 1060, 1000, P.date, n0);
-        word(ctx, d.s, W / 2, 1270, 96, t, b(n0 + 2), { align: 'center', small: true });
+        const cy = BOX.y + BOX.h / 2;
+        word(ctx, d.k, W / 2, cy - 230, 64, t, b(n0), { align: 'center', tracking: 14, color: PUMPKIN, small: true });
+        filmType(ctx, t, d.n, W / 2, cy + 160, 860, P.date, n0);
+        word(ctx, d.s, W / 2, cy + 320, 96, t, b(n0 + 2), { align: 'center', small: true });
       },
       dead(ctx, t, n0) {   // THE DEAD / WILL DANCE over the skeletons, light from the visuals on top
         cell(ctx, t, BOX, P.dead, n0, { vignette: 0.55 });
@@ -546,7 +552,7 @@
         foot(ctx, BOX);
         C().dead.forEach((w, i) => {
           const s = big(ctx, C().dead[1], 210, 930);
-          word(ctx, w, BOX.x + 36, BOX.y + BOX.h - 60 - (1 - i) * s * 0.98, s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
+          word(ctx, w, SAFE.l, BOX.y + BOX.h - 60 - (1 - i) * s * 0.98, s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
         });
       },
       dance(ctx, t, n0) {   // four dance cells cutting on alternate beats, the visuals' light over them, DJS ALL NIGHT across
@@ -568,17 +574,17 @@
           lights(ctx, t, r, n0 + i, 0.4);
           foot(ctx, r);
           const w = C().genres[i];
-          word(ctx, w, r.x + 28, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
+          word(ctx, w, SAFE.l, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
         });
       },
       light(ctx, t, n0) {   // the room: Holographic Realms' visuals full frame, in colour
         const c = C().light;
         cell(ctx, t, BOX, P.light, n0, { vignette: 0.35 });
         foot(ctx, BOX);
-        word(ctx, c.k, BOX.x + 36, BOX.y + 70, 26, t, b(n0), { tracking: 8, color: BONE, alpha: 0.85, small: true });
+        word(ctx, c.k, SAFE.l, BOX.y + 70, 26, t, b(n0), { tracking: 8, color: BONE, alpha: 0.85, small: true });
         const s = Math.min(...c.h.map((w) => big(ctx, w, 190, 930)));
         c.h.forEach((w, i) => {
-          word(ctx, w, BOX.x + 36, BOX.y + BOX.h - 60 - (c.h.length - 1 - i) * s * 0.98, s, t, b(n0 + 1 + i * 2), { color: i ? PUMPKIN : BONE });
+          word(ctx, w, SAFE.l, BOX.y + BOX.h - 60 - (c.h.length - 1 - i) * s * 0.98, s, t, b(n0 + 1 + i * 2), { color: i ? PUMPKIN : BONE });
         });
       },
       lightStrips(ctx, t, n0) {   // VISUALS / LIGHTS / ALL NIGHT on three strips of the visuals
@@ -588,7 +594,7 @@
           cell(ctx, t, r, P.lightStrips, n0 + i * 2, { off: i * 4 });
           foot(ctx, r);
           const w = C().lights[i];
-          word(ctx, w, r.x + 28, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
+          word(ctx, w, SAFE.l, r.y + r.h - 34, big(ctx, w, 230, r.w - 60), t, t0);
         });
       },
       costume(ctx, t, n0) {   // masks grid, COME IN / COSTUME on a bone band
@@ -611,7 +617,7 @@
         ctx.fillRect(BOX.x, BOX.y, BOX.w, 520);
         C().group.forEach((w, i) => {
           const s = big(ctx, C().group[1], 200, 930);
-          word(ctx, w, BOX.x + 36, BOX.y + 40 + s * (0.8 + i * 0.98), s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
+          word(ctx, w, SAFE.l, BOX.y + 40 + s * (0.8 + i * 0.98), s, t, b(n0 + i * 2), { color: i ? PUMPKIN : BONE });
         });
       },
       drink(ctx, t, n0) {   // 100 in film
@@ -631,7 +637,7 @@
           block(ctx, r, col);
           ctx.restore();
           const w = C().early[i], s = big(ctx, w, 220, r.w - 60);
-          word(ctx, w, r.x + 28, r.y + r.h / 2 + s * 0.36, s, t, t0, { color: '#0A0505' });
+          word(ctx, w, SAFE.l, r.y + r.h / 2 + s * 0.36, s, t, t0, { color: '#0A0505' });
         });
       },
     };
@@ -639,11 +645,12 @@
     function chrome(ctx, t, a) {
       if (a <= 0) return;
       const [h1, h2] = C().head, [f1, f2] = C().foot;
-      label(ctx, h1, BOX.x, 160, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
-      label(ctx, h2, BOX.x + BOX.w, 160, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
-      label(ctx, f1, BOX.x, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
-      label(ctx, f2, BOX.x + BOX.w, BOX.y + BOX.h + 56, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
-      hair(ctx, BOX.x, 184, BOX.x + BOX.w, 0.3 * a);
+      label(ctx, h1, SAFE.l, BOX.y - 36, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
+      label(ctx, h2, SAFE.r, BOX.y - 36, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
+      hair(ctx, SAFE.l, BOX.y - 16, SAFE.r, 0.3 * a);
+      // the footer ends short of the like/comment/share column
+      label(ctx, f1, SAFE.l, BOX.y + BOX.h + 52, 22, { tracking: 8, align: 'left', alpha: 0.75 * a });
+      label(ctx, f2, 860, BOX.y + BOX.h + 52, 22, { tracking: 8, align: 'right', color: PUMPKIN, alpha: a });
     }
     const section = (t) => { const bi = beatAt(t); let k = 0; while (k + 1 < SECS.length && SECS[k + 1].n0 <= bi) k++; return bi < END_BEAT ? k : SECS.length; };
 
@@ -668,7 +675,7 @@
         const endT = b(END_BEAT);
         chrome(ctx, t, 1 - prog(t, endT, endT + 0.3));
         if (k < SECS.length) SEC[SECS[k].name](ctx, t, SECS[k].n0);
-        endCard(ctx, t, endT);
+        endCard(ctx, t, endT, { safe: true });
       },
     };
   }

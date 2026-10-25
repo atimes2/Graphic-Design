@@ -267,8 +267,18 @@
 
   // ------------------------------------------------------------ end card
   // knife stabs in, pumpkin ignites, title burns, lasers fire, the details land
-  const END = { title: { y: 290, s: 0.92 }, art: { x: 540 - 272 * 0.74, y: 520, s: 0.74 } };
-  function endCard(ctx, t, t0) {
+  const END = {
+    title: { y: 290, s: 0.92 }, art: { x: 540 - 272 * 0.74, y: 520, s: 0.74 },
+    cx: W / 2, date: 1200, dateW: 960, time: 1268, tickets: 1365, ticketsW: 960, logo: 1490, logoW: 290,
+  };
+  // o.safe: everything inside Instagram's visible area on a phone (the sides crop
+  // ~100px each; the like/comment/share column covers the lower right)
+  const END_SAFE = {
+    title: { y: 262, s: 0.8 }, art: { x: 540 - 272 * 0.64, y: 470, s: 0.64 },
+    cx: 490, date: 1100, dateW: 720, time: 1160, tickets: 1245, ticketsW: 680, logo: 1352, logoW: 240,
+  };
+  function endCard(ctx, t, t0, o = {}) {
+    const L = o.safe ? END_SAFE : END;
     const { stab, ignite, titleBurn, lasers } = P();
     const lt = t - t0;
     if (lt < 0) return;
@@ -276,7 +286,7 @@
     const [dx, dy] = shakeAt(lt, [hit], 10);
     ctx.save();
     ctx.translate(dx, dy);
-    const Ar = END.art;
+    const Ar = L.art;
     const off = stab(lt, hit - 0.22, hit, 800);
     const glow = ctx.createRadialGradient(540, 820, 40, 540, 820, 760);
     glow.addColorStop(0, `rgba(226,74,22,${0.22 * ease.out2(prog(lt, hit, hit + 0.6)) * flicker(lt, 4)})`);
@@ -301,13 +311,13 @@
     ctx.fillStyle = sh;
     ctx.fillRect(-W, -1400, W * 2, 2800);
     ctx.restore();
-    titleBurn(ctx, W / 2 - 433 * END.title.s, END.title.y, END.title.s, lt, 0.6, 0.03);
+    titleBurn(ctx, W / 2 - 433 * L.title.s, L.title.y, L.title.s, lt, 0.6, 0.03);
     const c = A.content.reel.end;
-    revealText(ctx, c.date, W / 2, 1200, fit(ctx, c.date, 100, 960), lt, 1.7, 'burn', { step: 0.045 });
-    kicker(ctx, c.time, 1268, ease.out2(prog(lt, 2.3, 2.9)), { size: 34, tracking: 12 });
-    neonLabel(ctx, c.tickets, 1365, lt, 2.8, { size: 54, tracking: 14 });
+    revealText(ctx, c.date, L.cx, L.date, fit(ctx, c.date, 100, L.dateW), lt, 1.7, 'burn', { step: 0.045 });
+    kicker(ctx, c.time, L.time, ease.out2(prog(lt, 2.3, 2.9)), { size: 34, tracking: 12, x: L.cx, maxW: L.dateW });
+    neonLabel(ctx, c.tickets, L.tickets, lt, 2.8, { size: 54, tracking: 14, x: L.cx, maxW: L.ticketsW });
     const la = ease.out2(prog(lt, 3.3, 4.1));
-    logo(ctx, W / 2, 1490, 290, la, 0.12 + 0.05 * flicker(lt, 2));
+    logo(ctx, L.cx, L.logo, L.logoW, la, 0.12 + 0.05 * flicker(lt, 2));
     ctx.restore();
     flash(ctx, lt, hit, 0.16);
   }
