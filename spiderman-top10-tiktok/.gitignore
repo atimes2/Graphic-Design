@@ -1,0 +1,3 @@
+__pycache__/
+build/audio/mix_pre.wav
+build/vo/*.mp3

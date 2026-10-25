@@ -1,0 +1,83 @@
+{
+  "title": "Top 10 Most Powerful Spider-Men",
+  "voice": "en-US-GuyNeural",
+  "rate": "+18%",
+  "pitch": "-4Hz",
+  "segments": [
+    {
+      "id": "hook",
+      "vo": "Ranking the ten most powerful Spider-Men ever. Number one can rewrite reality.",
+      "emphasis": ["ten", "powerful", "one", "rewrite", "reality"]
+    },
+    {
+      "id": "r10", "rank": 10, "name": "KAINE PARKER", "sub": "THE SCARLET SPIDER", "color": "#FF7A1A", "power": 62,
+      "tags": ["HEALING FACTOR", "PAIN TOLERANCE"],
+      "vo": "Ten. Kaine, the Scarlet Spider. Peter's clone, with a brutal healing factor.",
+      "emphasis": ["Kaine", "clone", "brutal"]
+    },
+    {
+      "id": "r9", "rank": 9, "name": "SILK", "sub": "CINDY MOON", "color": "#FF3DB4", "power": 66,
+      "tags": ["SUPER SPIDER-SENSE", "ORGANIC WEBS"],
+      "vo": "Nine. Silk. Same spider bite as Peter, but an even stronger spider-sense.",
+      "emphasis": ["Silk", "same", "stronger"]
+    },
+    {
+      "id": "r8", "rank": 8, "name": "MILES MORALES", "sub": "EARTH-1610", "color": "#22D3EE", "power": 71,
+      "tags": ["VENOM BLAST", "CAMOUFLAGE"],
+      "vo": "Eight. Miles Morales. Venom blasts. Invisibility. Only number eight? Fight me in the comments.",
+      "emphasis": ["Miles", "eight?", "Fight", "comments."]
+    },
+    {
+      "id": "r7", "rank": 7, "name": "SPIDER-MAN 2099", "sub": "MIGUEL O'HARA", "color": "#FF2D55", "power": 75,
+      "tags": ["TALONS + FANGS", "GENIUS"],
+      "vo": "Seven. Spider-Man twenty ninety-nine. Talons, fangs, and a genius from the future.",
+      "emphasis": ["Talons,", "fangs,", "future."]
+    },
+    {
+      "id": "r6", "rank": 6, "name": "SUPERIOR SPIDER-MAN", "sub": "OTTO OCTAVIUS", "color": "#3B9BFF", "power": 79,
+      "tags": ["GENIUS INTELLECT", "SPIDER-ARMY"],
+      "vo": "Six. The Superior Spider-Man. Doc Ock in Peter's body, with his own army.",
+      "emphasis": ["Superior", "Doc", "Ock", "army."]
+    },
+    {
+      "id": "r5", "rank": 5, "name": "SPIDERS-MAN", "sub": "EARTH-11580", "color": "#FF1E1E", "power": 84,
+      "tags": ["HIVE MIND", "MADE OF SPIDERS"],
+      "vo": "Five. Spiders-Man. He wasn't bitten by a spider. He is spiders.",
+      "emphasis": ["wasn't", "is", "spiders."]
+    },
+    {
+      "id": "bridge",
+      "vo": "But the top four? Whole different level.",
+      "emphasis": ["four?", "different", "level."]
+    },
+    {
+      "id": "r4", "rank": 4, "name": "BEYONDER SPIDER-MAN", "sub": "THE BEYONDER", "color": "#FFC23D", "power": 92,
+      "tags": ["REALITY WARPING", "BEYOND TIME"],
+      "vo": "Four. Beyonder Spider-Man. Near-omnipotent. Creates and destroys entire realities.",
+      "emphasis": ["Beyonder", "omnipotent.", "destroys", "realities."]
+    },
+    {
+      "id": "r3", "rank": 3, "name": "ZOMBIE SPIDER-MAN", "sub": "WITH THE POWER COSMIC", "color": "#B44CFF", "power": 95,
+      "tags": ["UNDEAD", "POWER COSMIC"],
+      "vo": "Three. Zombie Spider-Man. He ate the Power Cosmic, and he's still hungry.",
+      "emphasis": ["Zombie", "ate", "Cosmic,", "hungry."]
+    },
+    {
+      "id": "r2", "rank": 2, "name": "SPIDER-HULK", "sub": "SPIDER-MAN + HULK", "color": "#4BE34B", "power": 98,
+      "tags": ["HULK RAGE", "LIFTS MOUNTAINS"],
+      "vo": "Two. Spider-Hulk. Spider-sense, plus Hulk rage. Good luck.",
+      "emphasis": ["Hulk.", "Hulk", "rage.", "luck."]
+    },
+    {
+      "id": "r1", "rank": 1, "name": "COSMIC SPIDER-MAN", "sub": "CAPTAIN UNIVERSE", "color": "#FFD23D", "power": 100,
+      "tags": ["UNI-POWER", "REALITY CONTROL"],
+      "vo": "And number one. Cosmic Spider-Man. Peter Parker, with the power of the entire universe.",
+      "emphasis": ["one.", "Cosmic", "entire", "universe."]
+    },
+    {
+      "id": "cta",
+      "vo": "Who's your number one? Comment below, and follow for part two.",
+      "emphasis": ["your", "one?", "Comment", "follow", "two."]
+    }
+  ]
+}
