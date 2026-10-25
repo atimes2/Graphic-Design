@@ -1,0 +1,33 @@
+# Roku starter blocklist (ads + ad measurement + ACR)
+# For Pi-hole / AdGuard Home / NextDNS / router DNS. One domain per line.
+# Low-risk tier: these serve ads, ad measurement and ACR ("what's on screen") reporting.
+# Built from HaGeZi native.roku, Perflyst SmartTV.txt and hkamran80 smart-tv.txt (Oct 2026).
+# If something breaks, see ../02-network-blocking.md "If something breaks".
+
+# Ads
+ads.roku.com
+p.ads.roku.com
+adservices.roku.com
+advertising.roku.com
+advertising-v3.roku.com
+advertising.us-east-1.msc.roku.com
+advertising-v3.us-east-1.msc.roku.com
+ads.rokuapi.net
+ads.gcp.roku.com
+ads-us-east-1.delivery.roku.com
+ads-us-east-2.delivery.roku.com
+ads-us-west-2.delivery.roku.com
+ads-aka-us-east-1.delivery.roku.com
+ads-aka-us-west-2.delivery.roku.com
+ads-cf-us-east-1.delivery.roku.com
+ads-cf-us-west-2.delivery.roku.com
+
+# Ad measurement
+roku.adsmeasurement.com
+ravm.tv
+display.ravm.tv
+pixel.web.roku.com
+
+# ACR / analytics
+acr.roku.com
+analytics.roku.com
