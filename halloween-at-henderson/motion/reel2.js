@@ -509,7 +509,8 @@
 
     const P = {
       hook: [['sk_line', 'ember'], ['jive_a', 'ember'], ['e_ball', 'ember'], ['dance_twirl', 'ember'], ['sk_pairs', 'ember'], ['mask_red', 'ember'], ['sk_solo', 'ember'], ['e_stairs', 'ember']],
-      date: [['fair_fountain', 'ember'], ['coney_lights', 'ember'], ['horns', 'ember'], ['jive_b', 'ember']],
+      // the visuals team's lasers and mapped walls inside the 10.31
+      date: [['v_laserfan', 'color'], ['v_pinkwall', 'color'], ['v_octagon', 'color'], ['v_beams4', 'color']],
       dead: [['sk_rise', 'ember'], ['sk_line', 'ember'], ['sk_pairs', 'ember'], ['sk_solo', 'ember']],
       dance: [['dance_band', 'mono'], ['sk_pairs', 'ember'], ['jive_c', 'ember'], ['e_ball_b', 'mono'], ['sk_solo', 'mono'], ['dance_close', 'ember'], ['jive_d', 'mono'], ['sk_line', 'ember'], ['dance_smile', 'ember'], ['dance_twirl', 'mono']],
       genres: [['horns', 'ember'], ['sk_line', 'mono'], ['coney_sunburst', 'ember']],

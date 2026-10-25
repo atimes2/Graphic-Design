@@ -3,7 +3,8 @@
  * The collab Reel's editorial grid, rebuilt for a landscape screen. A stage on
  * the left (48..1400) runs fourteen sections on a steady 120 BPM grid (cuts on
  * the beat): film strips spelling HALLOWEEN AT HENDERSON, 10.31 with footage
- * inside the numerals, silent-film intertitles before Nosferatu and Caligari,
+ * inside the numerals, silent-film title cards (ON THE LAST NIGHT OF OCTOBER...,
+ * MONSTERS WELCOME., DON'T SLEEP ON IT.) before Nosferatu, the costume grid and Caligari,
  * Skeleton Dance (1929) skeletons, Holographic Realms' own event footage, the
  * horror-icon costume grid, and the knife-and-pumpkin poster.
  *
