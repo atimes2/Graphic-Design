@@ -399,12 +399,12 @@
   // ======================================================================
   // the grid Reels share one system; each cut is a list of sections, eight beats apiece by default
   function makeGrid(cfg) {
-    // Footage runs edge to edge; all type stays inside what a phone actually shows:
-    // Instagram crops ~100px off each side on tall screens, its header covers the
-    // top ~240px, the caption block the bottom ~360px, and the like/comment/share
-    // column sits over the lower right (x > 880 below y 1150).
-    const BOX = { x: 0, y: 262, w: 1080, h: 1150 }, GUT = 14;
-    const SAFE = { l: 140, r: 940 }, TXT = 700;   // left edge, right edge, widest big word
+    // Footage runs edge to edge; all type stays inside what a phone actually shows
+    // (measured from an iPhone upload preview): Instagram crops ~45px off each
+    // side, its header covers the top ~255px, the username and caption start
+    // near y 1740, and the like/comment/share column covers x > 930 below y 1290.
+    const BOX = { x: 0, y: 350, w: 1080, h: 1270 }, GUT = 14;
+    const SAFE = { l: 140, r: 940 }, TXT = 740;   // left edge, right edge, widest big word
     const BEATS = { list: null };
     const beatsReady = fetch('reel/beats-f.json').then((r) => r.json()).then((j) => { BEATS.list = j.beats; });
     const b = (n) => BEATS.list[n];

@@ -271,11 +271,11 @@
     title: { y: 290, s: 0.92 }, art: { x: 540 - 272 * 0.74, y: 520, s: 0.74 },
     cx: W / 2, date: 1200, dateW: 960, time: 1268, tickets: 1365, ticketsW: 960, logo: 1490, logoW: 290,
   };
-  // o.safe: everything inside Instagram's visible area on a phone (the sides crop
-  // ~100px each; the like/comment/share column covers the lower right)
+  // o.safe: everything centred inside Instagram's visible area on a phone (below
+  // its header, above the caption, narrow enough to clear the action column)
   const END_SAFE = {
-    title: { y: 262, s: 0.8 }, art: { x: 540 - 272 * 0.64, y: 470, s: 0.64 },
-    cx: 490, date: 1100, dateW: 720, time: 1160, tickets: 1245, ticketsW: 680, logo: 1352, logoW: 240,
+    title: { y: 330, s: 0.82 }, art: { x: 540 - 272 * 0.7, y: 575, s: 0.7 },
+    cx: W / 2, date: 1265, dateW: 740, time: 1328, tickets: 1418, ticketsW: 700, logo: 1540, logoW: 260,
   };
   function endCard(ctx, t, t0, o = {}) {
     const L = o.safe ? END_SAFE : END;
