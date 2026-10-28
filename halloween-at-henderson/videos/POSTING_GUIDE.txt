@@ -27,9 +27,10 @@ COLLAB (your story, Henderson reposts)
   19-this-halloween.mp4         12s   This Halloween + Henderson wordmark -> knife
                                       slash -> pumpkin, title, lasers, date, DJs.
                                       Dashed box = ticket link sticker
-  20-extra-hour.mp4             13s   TURN BACK THE CLOCKS: a 1921 tower clock ticks to
+  20-extra-hour.mp4             11s   TURN BACK THE CLOCKS: a 1921 tower clock strikes
                                       2:00 and winds back to 1:00, then the 1925 ballroom
-                                      under EXTRA HOUR of Halloween + PRICES GO UP TOMORROW.
+                                      under EXTRA HOUR of Halloween + PRICES GO UP TOMORROW
+                                      (all in by ~3.5s, then holds ~7s for the sticker).
                                       Post the day before prices go up. Dashed box =
                                       ticket link sticker. Clocks fall back at 2am Sun Nov 1.
 

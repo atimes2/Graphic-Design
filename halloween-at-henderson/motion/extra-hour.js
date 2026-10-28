@@ -1,13 +1,14 @@
 /* Story 20 · EXTRA HOUR (13s, 1080x1920): the clocks fall back at 2am on
  * Halloween night, so the party gets an hour twice.
  *
- *   0.0-3.7  the midnight tower clock from The Phantom Carriage (1921), its
+ *   0.0-2.35 the midnight tower clock from The Phantom Carriage (1921), its
  *            painted hands replaced by drawn ones (prep_clock.py): it jumps
- *            1:58, 1:59, strikes 2:00, then the film slips in the gate and the
+ *            to 1:59, strikes 2:00, then the film slips in the gate and the
  *            hands wind back a full hour to 1:00
- *   3.7-13   the ballroom of The Merry Widow (1925) in black and white, under
- *            EXTRA HOUR of Halloween, the details, PRICES GO UP TOMORROW and
- *            the ticket-link sticker slot (on screen from the first frame)
+ *   2.35-11  the ballroom of The Merry Widow (1925) in black and white, under
+ *            EXTRA HOUR of Halloween, the details and PRICES GO UP TOMORROW,
+ *            all in by ~3.6s so the final screen holds ~7s for the ticket-link
+ *            sticker slot (on screen from the first frame)
  *
  * Footage is cut and graded by prep_footage.py (clips xh_*), copy lives in
  * content.json -> extraHour. Rights notes: reel/SOURCES.md.
@@ -23,20 +24,20 @@
   const C = () => A.content.extraHour;
 
   const XH = {
-    dur: 13,
-    panel: { x: 40, y: 545, w: 1000, h: 750, r: 14 },
-    ticks: [0.55, 1.05, 1.55],       // the minute hand jumps 1:58 -> 1:59 -> 2:00
-    rw0: 1.95, rw1: 3.3,             // winds back to 1:00
-    cut: 3.7,                        // into the ballroom
-    slot: 1455,
+    dur: 11,
+    panel: { x: 90, y: 540, w: 900, h: 675, r: 14 },
+    ticks: [0.35, 0.75],             // the minute hand jumps 1:58 -> 1:59 -> 2:00
+    rw0: 1.0, rw1: 2.0,              // winds back to 1:00
+    cut: 2.35,                       // into the ballroom; everything is on screen by ~3.6s
+    slot: 1440,
   };
+  const STRIKE = XH.ticks[XH.ticks.length - 1];
   // ballroom shots (t0..t1 in story time)
   const SHOTS = [
-    { clip: 'xh_hall', t0: 3.7, t1: 5.5 },
-    { clip: 'xh_waltz', t0: 5.5, t1: 7.6 },
-    { clip: 'xh_floor', t0: 7.6, t1: 9.2 },
-    { clip: 'xh_crowd', t0: 9.2, t1: 10.6 },
-    { clip: 'xh_waltz2', t0: 10.6, t1: 13.0 },
+    { clip: 'xh_hall', t0: 2.35, t1: 3.95 },
+    { clip: 'xh_waltz', t0: 3.95, t1: 6.3 },
+    { clip: 'xh_floor', t0: 6.3, t1: 7.9 },
+    { clip: 'xh_waltz2', t0: 7.9, t1: 11.0 },
   ];
   const shotAt = (t) => SHOTS.find((s) => t >= s.t0 && t < s.t1) || null;
 
@@ -44,7 +45,7 @@
   // minutes past midnight at story time t
   function clockT(t) {
     if (t >= XH.rw0) return 120 - 60 * ease.inOut3(prog(t, XH.rw0, XH.rw1));
-    return 117 + XH.ticks.reduce((m, k) => m + ease.outSoft(prog(t, k, k + 0.12)), 0);
+    return 118 + XH.ticks.reduce((m, k) => m + ease.outSoft(prog(t, k, k + 0.12)), 0);
   }
 
   // the film's hand: its measured half-width profile, smoothed, then tapered to a point
@@ -94,11 +95,11 @@
     c.fillStyle = '#050303';
     c.fillRect(0, 0, P.w, P.h);
     // the clock looms closer, as in the film
-    const s = lerp(0.6, 0.7, ease.inOut2(prog(t, 0, XH.cut)));
+    const s = lerp(0.54, 0.62, ease.inOut2(prog(t, 0, XH.cut)));
     // the film slips in the gate while the hands wind back: the frame rolls
     const slip = prog(t, XH.rw0 - 0.05, XH.rw1 + 0.05);
     const roll = slip > 0 && slip < 1 ? ((ease.inOut2(slip) * 3.0) % 1) * P.h : 0;
-    const shake = Math.exp(-Math.max(0, t - XH.ticks[2]) * 12) * (t >= XH.ticks[2] ? 6 : 0);
+    const shake = Math.exp(-Math.max(0, t - STRIKE) * 12) * (t >= STRIKE ? 6 : 0);
     const draw = (oy) => {
       c.save();
       c.translate(P.w / 2 + (vnoise(t * 31) - 0.5) * shake, P.h / 2 + oy + (vnoise(t * 29 + 7) - 0.5) * shake);
@@ -113,7 +114,7 @@
       const winding = t > XH.rw0 && t < XH.rw1;
       const ghosts = winding ? 7 : 1;
       for (let g = ghosts - 1; g >= 0; g--) {
-        const Tg = clockT(t - g * 0.012);
+        const Tg = clockT(t - g * 0.01);
         const a = g ? 0.16 : 1;
         hand(c, (Tg / 720) * Math.PI * 2, 0.52 * rx, 0.78 * rx, a);
         hand(c, (Tg / 60) * Math.PI * 2, 0.84 * rx, 0.72 * rx, a);
@@ -186,7 +187,7 @@
     const T = Math.round(clockT(t) * 1000) / 1000;
     const hh = Math.floor(T / 60) % 12 || 12, mm = Math.floor(T % 60);
     const str = `${hh}:${String(mm).padStart(2, '0')}`;
-    const y = 1405, size = 92, adv = size * 0.62;
+    const y = 1325, size = 92, adv = size * 0.62;
     ctx.save();
     ctx.globalAlpha = a;
     // fixed advances so the digits don't jitter as they roll; the colon is narrower
@@ -210,7 +211,7 @@
     ctx.letterSpacing = '2px';
     const tw = ctx.measureText(str).width;
     ctx.restore();
-    const bw = tw + 56, bh = 70, bx = W / 2 - bw / 2, by = 1368;
+    const bw = tw + 56, bh = 70, bx = W / 2 - bw / 2, by = 1325;
     const pulse = 0.5 + 0.5 * Math.sin((t - t0) * 4.2);
     ctx.save();
     ctx.beginPath();
@@ -237,14 +238,14 @@
     },
     draw(ctx, t) {
       const c = C();
-      stickerSlot(ctx, t, XH.slot, 1, { h: 125 });   // ticket link sits here from the first frame
+      stickerSlot(ctx, t, XH.slot, 1, { h: 130 });   // ticket link sits here from the first frame
 
       // ---- the panel: clock, then the ballroom
       const on = ease.out2(prog(t, 0.05, 0.35)) * (t < 0.35 ? 0.6 + 0.4 * hash(Math.round(t * FPS)) : 1);
       ctx.save();
       ctx.globalAlpha = on;
       if (t < XH.cut) {
-        drawPanel(ctx, t, clockScene(t), { exposure: 1.05 + 0.25 * Math.exp(-Math.max(0, t - XH.ticks[2]) * 6) * (t >= XH.ticks[2] ? 1 : 0), dust: t > XH.rw0 && t < XH.rw1 ? 2.2 : 1 });
+        drawPanel(ctx, t, clockScene(t), { exposure: 1.05 + 0.25 * Math.exp(-Math.max(0, t - STRIKE) * 6) * (t >= STRIKE ? 1 : 0), dust: t > XH.rw0 && t < XH.rw1 ? 2.2 : 1 });
       } else {
         const s = shotAt(t);
         const e = s ? getImg(frameURL(s, 'mono', t - s.t0)) : null;
@@ -252,35 +253,34 @@
         SHOTS.forEach((sh) => panelFlash(ctx, t, sh.t0, sh.t0 === XH.cut ? 0.45 : 0.18));
       }
       ctx.restore();
-      panelFlash(ctx, t, XH.ticks[2], 0.32);                       // 2:00 strikes
+      panelFlash(ctx, t, STRIKE, 0.32);                       // 2:00 strikes
       panelFlash(ctx, t, XH.rw1, 0.38);                            // ... and it's 1:00 again
       if (t > XH.rw1 - 0.05 && t < XH.cut) {                       // the knife-tip glint on the minute hand
         const M = A.meta.clock, P = XH.panel;
-        const s = lerp(0.6, 0.7, ease.inOut2(prog(t, 0, XH.cut)));
+        const s = lerp(0.54, 0.62, ease.inOut2(prog(t, 0, XH.cut)));
         const tipY = P.y + P.h / 2 - 0.86 * M.radius[1] * s;
         glint(ctx, P.x + P.w / 2, tipY, 300, Math.exp(-Math.max(0, t - XH.rw1) * 3.5), { spin: 0.6 });
       }
 
       // ---- scene A type: TURN BACK THE CLOCKS + the reading
-      const outA = 1 - ease.in2(prog(t, XH.cut - 0.25, XH.cut));
+      const outA = 1 - ease.in2(prog(t, XH.cut - 0.2, XH.cut));
       if (outA > 0) {
         ctx.save();
         ctx.globalAlpha = outA;
         const [l1, l2] = [c.kicker.split(' ').slice(0, 2).join(' '), c.kicker.split(' ').slice(2).join(' ')];
         const size = Math.min(fit(ctx, l1, 140, 960), fit(ctx, l2, 140, 960));
-        revealText(ctx, l1, W / 2, 380, size, t, 0.25, 'burn', { step: 0.05 });
-        revealText(ctx, l2, W / 2, 512, size, t, 0.55, 'burn', { step: 0.05 });
-        readout(ctx, t, ease.out2(prog(t, 0.4, 0.8)));
+        revealText(ctx, l1, W / 2, 370, size, t, 0.0, 'burn', { step: 0.025 });
+        revealText(ctx, l2, W / 2, 500, size, t, 0.12, 'burn', { step: 0.025 });
+        readout(ctx, t, ease.out2(prog(t, 0.05, 0.3)));
         ctx.restore();
       }
 
       // ---- scene B type: EXTRA HOUR of Halloween, details, prices
       if (t >= XH.cut) {
-        kicker(ctx, c.kicker, 300, ease.out2(prog(t, XH.cut, XH.cut + 0.5)), { size: 34, tracking: 14 });
-        revealText(ctx, c.big, W / 2, 448, fit(ctx, c.big, 168, 960), t, XH.cut + 0.1, 'burn', { step: 0.06 });
-        neonLabel(ctx, c.sub, 516, t, XH.cut + 0.85, { size: 50, tracking: 18 });
-        kicker(ctx, c.details, 1340, ease.out2(prog(t, 5.6, 6.2)), { size: 30, tracking: 5, color: BONE, glow: 0, maxW: 960 });
-        priceBar(ctx, t, 6.3);
+        revealText(ctx, c.big, W / 2, 420, fit(ctx, c.big, 172, 960), t, XH.cut + 0.05, 'burn', { step: 0.035 });
+        neonLabel(ctx, c.sub, 494, t, XH.cut + 0.45, { size: 50, tracking: 18 });
+        kicker(ctx, c.details, 1285, ease.out2(prog(t, XH.cut + 0.7, XH.cut + 1.1)), { size: 33, tracking: 5, color: BONE, glow: 0, maxW: 880 });
+        priceBar(ctx, t, XH.cut + 0.95);
       }
     },
   });

@@ -32,7 +32,7 @@ Public domain in the US (published before 1931) **and** in Canada (director and 
 | Frankenstein (Edison; dir. J. Searle Dawley, d. 1949) | 1910 | [frankenstein-1910-1080p-hd-2017-restoration](https://archive.org/details/frankenstein-1910-1080p-hd-2017-restoration) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/) | `frank_rise`, `h_frank_rise` |
 
 | The Phantom Carriage (dir. Victor Sjöström, d. 1960) | 1921 | [the-phantom-carriage-1921-tmdb58129](https://archive.org/details/the-phantom-carriage-1921-tmdb58129) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | the midnight tower clock (story 20; hands redrawn by `prep_clock.py`) |
-| The Merry Widow (dir. Erich von Stroheim, d. 1957) | 1925 | [the-merry-widow-1925_202507](https://archive.org/details/the-merry-widow-1925_202507) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | `xh_hall`, `xh_waltz`, `xh_floor`, `xh_crowd`, `xh_waltz2` (story 20, the embassy ball) |
+| The Merry Widow (dir. Erich von Stroheim, d. 1957) | 1925 | [the-merry-widow-1925_202507](https://archive.org/details/the-merry-widow-1925_202507) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | `xh_hall`, `xh_waltz`, `xh_floor`, `xh_waltz2` (story 20, the embassy ball) |
 
 *The Skeleton Dance* entered the US public domain on 1 January 2025. Only its picture is used, never Disney's name or characters. Universal's *Dracula* and *Frankenstein* (1931) are still under US copyright until 1 January 2027, so they are not used.
 
