@@ -1202,5 +1202,70 @@
     "grades": [
       "ember"
     ]
+  },
+  "_segments": {
+    "_note": "Long films cut to just the part used (prep_footage.py fetches the segment instead of the whole film).",
+    "mw_ball": {
+      "id": "the-merry-widow-1925_202507",
+      "file": "The Merry Widow (1925) V. 2.mp4",
+      "ss": 5280,
+      "t": 800
+    },
+    "pc_clock": {
+      "id": "the-phantom-carriage-1921-tmdb58129",
+      "file": "The Phantom Carriage (1921).mp4",
+      "ss": 1650,
+      "t": 140
+    }
+  },
+  "xh_hall": {
+    "src": "mw_ball",
+    "in": 97.0,
+    "dur": 1.9,
+    "speed": 1.0,
+    "crop": "crop=944:708:168:6",
+    "grades": [
+      "mono"
+    ]
+  },
+  "xh_waltz": {
+    "src": "mw_ball",
+    "in": 581.0,
+    "dur": 2.2,
+    "speed": 1.0,
+    "crop": "crop=944:708:168:6",
+    "grades": [
+      "mono"
+    ]
+  },
+  "xh_floor": {
+    "src": "mw_ball",
+    "in": 567.4,
+    "dur": 1.7,
+    "speed": 1.0,
+    "crop": "crop=944:708:168:6",
+    "grades": [
+      "mono"
+    ]
+  },
+  "xh_crowd": {
+    "src": "mw_ball",
+    "in": 327.0,
+    "dur": 1.5,
+    "speed": 1.0,
+    "crop": "crop=944:708:168:6",
+    "grades": [
+      "mono"
+    ]
+  },
+  "xh_waltz2": {
+    "src": "mw_ball",
+    "in": 588.0,
+    "dur": 2.5,
+    "speed": 1.0,
+    "crop": "crop=944:708:168:6",
+    "grades": [
+      "mono"
+    ]
   }
 }

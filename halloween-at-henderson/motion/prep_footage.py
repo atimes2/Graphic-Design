@@ -10,7 +10,7 @@ scaled to the Reel's film panel (1000x750) and graded two ways:
   color  the clip's own colour, lightly lifted (Holographic Realms' event footage)
 Output: footage/<key>/<grade>/NNNN.jpg + footage/index.json (frame counts).
 """
-import json, os, subprocess, sys
+import json, os, subprocess, sys, urllib.parse
 from pathlib import Path
 
 import numpy as np
@@ -61,21 +61,29 @@ def grade(frame, kind):
     return np.clip(toned, 0, 255).astype(np.uint8)
 
 
-def fetch(ident):
-    """Download a film from archive.org if it isn't in SRC yet."""
+def fetch(ident, segments):
+    """Download a film from archive.org if it isn't in SRC yet. A film listed in
+    footage.json's _segments is cut to just that stretch (ss, t in seconds)."""
     dst = SRC / f"{ident}.mp4"
     if dst.exists():
         return
     SRC.mkdir(parents=True, exist_ok=True)
+    seg = segments.get(ident)
+    if seg:
+        print(f"cutting {ident} from {seg['id']} ...")
+        url = f"https://archive.org/download/{seg['id']}/{urllib.parse.quote(seg['file'])}"
+        subprocess.run([FF, "-loglevel", "error", "-ss", str(seg["ss"]), "-i", url, "-t", str(seg["t"]), "-c", "copy", str(dst)], check=True)
+        return
     print(f"downloading {ident} ...")
     subprocess.run(["curl", "-sSL", "--retry", "3", "-o", str(dst), f"https://archive.org/download/{ident}/{ident}.mp4"], check=True)
 
 
 def main(keys):
     clips = json.loads((ROOT / "reel" / "footage.json").read_text())
-    for c in clips.values():
-        if isinstance(c, dict):
-            fetch(c["src"])
+    segments = clips.get("_segments", {})
+    for k, c in clips.items():
+        if not k.startswith("_") and (not keys or k in keys):
+            fetch(c["src"], segments)
     for key, c in clips.items():
         if key.startswith("_") or (keys and key not in keys):
             continue

@@ -144,6 +144,14 @@
     "djs": "DJS ALL NIGHT",
     "genres": "BASS · TECHNO · POP REMIXES"
   },
+  "extraHour": {
+    "kicker": "TURN BACK THE CLOCKS",
+    "big": "EXTRA HOUR",
+    "sub": "OF HALLOWEEN",
+    "details": "HALLOWEEN AT HENDERSON · SAT OCT 31 · 10PM · 19+",
+    "urgent": "PRICES GO UP TOMORROW",
+    "am": "AM"
+  },
   "tv": {
     "scan": "SCAN FOR TICKETS",
     "date": "SAT · OCT 31",

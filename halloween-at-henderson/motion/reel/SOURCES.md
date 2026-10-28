@@ -17,7 +17,7 @@ Every clip in the collab Reels comes from the [Prelinger Archives](https://archi
 
 Clip in/out points: `footage.json`. `prep_footage.py` downloads any missing film into `footage-src/` and grades the clips into `footage/`.
 
-## Silent horror and animation (Reels D, E, F, G)
+## Silent horror, animation and drama (Reels D, E, F, G; story 20)
 
 Public domain in the US (published before 1931) **and** in Canada (director and principal authors died before 1972, so life + 50 years has run out). Checked 2026-10-24.
 
@@ -30,6 +30,9 @@ Public domain in the US (published before 1931) **and** in Canada (director and 
 | The Cabinet of Dr. Caligari (dir. Robert Wiene, d. 1938) | 1920 | [DasKabinettdesDoktorCaligari…](https://archive.org/details/DasKabinettdesDoktorCaligariTheCabinetofDrCaligari) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `cal_wake`, `cal_jane`, `h_cal_*` |
 | Dr. Jekyll and Mr. Hyde (dir. John S. Robertson, d. 1964) | 1920 | [Dr.JekyllAndMr.Hyde1920…](https://archive.org/details/Dr.JekyllAndMr.Hyde1920DirectorJohnS.Robertson) | none on the record; the film is public domain (US: published 1920; Canada: director died 1964) | `jek_*`, `h_jek_*` |
 | Frankenstein (Edison; dir. J. Searle Dawley, d. 1949) | 1910 | [frankenstein-1910-1080p-hd-2017-restoration](https://archive.org/details/frankenstein-1910-1080p-hd-2017-restoration) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/) | `frank_rise`, `h_frank_rise` |
+
+| The Phantom Carriage (dir. Victor Sjöström, d. 1960) | 1921 | [the-phantom-carriage-1921-tmdb58129](https://archive.org/details/the-phantom-carriage-1921-tmdb58129) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | the midnight tower clock (story 20; hands redrawn by `prep_clock.py`) |
+| The Merry Widow (dir. Erich von Stroheim, d. 1957) | 1925 | [the-merry-widow-1925_202507](https://archive.org/details/the-merry-widow-1925_202507) | [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/) | `xh_hall`, `xh_waltz`, `xh_floor`, `xh_crowd`, `xh_waltz2` (story 20, the embassy ball) |
 
 *The Skeleton Dance* entered the US public domain on 1 January 2025. Only its picture is used, never Disney's name or characters. Universal's *Dracula* and *Frankenstein* (1931) are still under US copyright until 1 January 2027, so they are not used.
 

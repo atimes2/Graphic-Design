@@ -16,6 +16,8 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `reel_audio.py` | Reel soundtracks → `reel/audio/<id>.wav` from `reel/audio.json`: Kokoro TTS narration, film-dialogue clips, public-domain 78s (downloaded to `music-src/`), ducking, −14 LUFS |
 | `prep_footage.py` | Downloads the archive.org films (if missing) and cuts + grades the Reel clips into `footage/` (ember and mono grades; not committed, about 600 MB) |
 | `prep_export.py` | Exports the pumpkin + knife art as transparent PNGs to `../exports/`, both with a crisp drawn knife-tip star: clean (evenly lit, any background), glow (poster shading as solid darkening + ember halo) and poster (left side fades away completely, as on the poster) |
+| `prep_clock.py` | Story 20's tower clock: the midnight close-up from *The Phantom Carriage* (1921), median-stacked and graded, its painted hands removed by cloning the dial onto itself (XII rebuilt from the dial's own X and I) → `layers/clock_dial.png`, plus the hand silhouette's profile in `meta["clock"]` |
+| `extra-hour.js` | Story 20 · Extra Hour (13s): the clock ticks to 2:00 and winds back to 1:00, then *The Merry Widow*'s ballroom (clips `xh_*`); copy in `content.json` → `extraHour` |
 | `prep_qr.py` | Turns `../reference/tv-qr.png` into a module grid (`layers/qr.json`) so the TV draws the QR pixel-sharp, and checks it still decodes |
 | `content.json` | **All the copy.** Edit here, then re-render |
 | `audio.py` | Optional synthesized SFX per card (off by default; `AUDIO=1`), −16 LUFS |
@@ -33,6 +35,7 @@ node render.mjs 05-countdown      # just the countdowns
 node render.mjs --stills 01 0,4,8 # review frames -> review/
 node render.mjs --sheet           # contact sheets of rendered videos -> review/
 python3 prep_footage.py && python3 reel_audio.py && node render.mjs reel   # the collab Reels (needs archive.org + huggingface access)
+python3 prep_footage.py xh_hall xh_waltz xh_floor xh_crowd xh_waltz2 && python3 prep_clock.py && node render.mjs 20   # story 20 (archive.org)
 node render.mjs --tv              # the venue TV loop -> ../videos/tv-loop.mp4 (silent)
 npm run preview                   # open http://localhost:8080 to scrub cards live
 ```
