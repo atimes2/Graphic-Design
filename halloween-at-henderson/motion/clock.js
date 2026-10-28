@@ -4,11 +4,11 @@
  * Halloween gets an extra hour. Told like the collab Reels, as an old movie:
  *   0.0  Harold Lloyd hanging off the clock in Safety Last! (1923), ember grade,
  *        TURN BACK / THE CLOCKS on the foot of the film from frame 0
- *   3.4  a silent-film intertitle: a drawn dial at 2:00 winds back to 1:00,
+ *   1.8  a silent-film intertitle: a drawn dial at 2:00 winds back to 1:00,
  *        EXTRA HOUR / OF HALLOWEEN burns in
- *   7.6  Lloyd dangling from the hands as the face pulls out of the wall,
+ *   4.6  Lloyd dangling from the hands as the face pulls out of the wall,
  *        PRICES GO UP / TOMORROW.
- *  10.4  the poster: knife, pumpkin ignites, title burns, lasers, date, the
+ *   6.4  the poster (held to the end): knife, pumpkin ignites, title burns, lasers, date, the
  *        Henderson wordmark. The ticket-link sticker slot sits under the film
  *        the whole time.
  * Footage: reel/footage.json → clock_hang, clock_face (prep_footage.py).
@@ -27,8 +27,8 @@
 
   const BOX = { x: 0, y: 300, w: 1080, h: 1060 };   // the film, below Instagram's header
   const ML = 70;                                     // left margin for the big words
-  const SLOT_Y = 1400;                               // ticket-link sticker slot (inside the bottom safe zone)
-  const T = { cut1: 3.4, wind: 4.0, cut2: 7.6, end: 10.4, dur: 14 };
+  const SLOT_Y = 1430, SLOT_H = 130;                 // ticket-link sticker slot (inside the bottom safe zone)
+  const T = { cut1: 1.8, wind: 2.05, cut2: 4.6, end: 6.4, dur: 14 };   // fast: the message lands by 3s, the poster holds 7.6s
   const GRADE = 'ember';
   const SHOTS = [
     { t0: 0, t1: T.cut1, clip: 'clock_hang', at: 0 },
@@ -167,7 +167,7 @@
   // hands at 2:00, winding back to 1:00 from T.wind; the old position stays as an ember ghost
   function hands(ctx, t, a) {
     if (a <= 0.001) return;
-    const p = ease.inOut3(prog(t, T.wind, T.wind + 1.3));
+    const p = ease.inOut3(prog(t, T.wind, T.wind + 0.9));
     const h2 = (2 / 12) * Math.PI * 2, h1 = (1 / 12) * Math.PI * 2;
     const hourA = lerp(h2, h1, p), minA = -p * Math.PI * 2;
     ctx.save();
@@ -193,7 +193,7 @@
       glint(ctx, tipX, tipY, 170, Math.sin(p * Math.PI), { spin: 1.4 });
     }
     // and settles with a flare at one o'clock
-    sparkle(ctx, DIAL.cx + Math.sin(h1) * DIAL.r * 0.52, DIAL.cy - Math.cos(h1) * DIAL.r * 0.52, 220, t, T.wind + 1.3, { hold: 0.15 });
+    sparkle(ctx, DIAL.cx + Math.sin(h1) * DIAL.r * 0.52, DIAL.cy - Math.cos(h1) * DIAL.r * 0.52, 220, t, T.wind + 0.9, { hold: 0.15 });
   }
   // the intertitle: a double hairline frame, the dial, the words
   function intertitle(ctx, t) {
@@ -211,15 +211,15 @@
     hands(ctx, t, a);
     const c = C().extra;
     const size = Math.min(...c.map((w) => fit(ctx, w, 150, 900, 'Copperplate', 1)));
-    revealText(ctx, c[0], W / 2, 1190, size, t, T.wind + 1.0, 'burn', { family: 'Copperplate', step: 0.05, tracking: 1 });
-    const a2 = ease.out2(prog(t, T.wind + 1.7, T.wind + 2.3));
+    revealText(ctx, c[0], W / 2, 1190, size, t, T.wind + 0.5, 'burn', { family: 'Copperplate', step: 0.035, tracking: 1 });
+    const a2 = ease.out2(prog(t, T.wind + 1.0, T.wind + 1.4));
     label(ctx, c[1], W / 2, 1190 + size * 0.92, size * 0.78, { family: 'Copperplate', weight: '', tracking: 2, color: PUMPKIN, alpha: a2 });
   }
 
   // ------------------------------------------------------------ end card
   const E = {
-    title: { y: 232, s: 0.86 }, art: { x: 540 - 272 * 0.76, y: 450, s: 0.76 },
-    date: 1205, urgency: 1282, logo: { y: 1350, w: 280 },
+    title: { y: 225, s: 0.82 }, art: { x: 540 - 272 * 0.7, y: 430, s: 0.7 },
+    date: 1168, urgency: 1258, logo: { y: 1352, w: 260 },
   };
   function endCard(ctx, t) {
     const { stab, ignite, titleBurn, lasers } = P();
@@ -239,10 +239,10 @@
     art(ctx, Ar.x, Ar.y, Ar.s, { pumpkin: ignite(lt, hit + 0.05), h: ignite(lt, hit + 0.05, 3) * 1.05, knifeAlpha: lt >= hit - 0.22 ? 1 : 0, knifeOffset: off });
     const [gx, gy] = artTip(Ar.x, Ar.y, Ar.s, off);
     sparkle(ctx, gx, gy, 300, lt, hit, { hold: 0.2 });
-    sparkle(ctx, gx, gy, 300, lt, 2.8, { hold: 0.2 });
+    [2.8, 5.6].forEach((s0) => sparkle(ctx, gx, gy, 300, lt, s0, { hold: 0.2 }));
     const [hx, hy] = artH(Ar.x, Ar.y, Ar.s);
-    const on = ease.out2(prog(lt, 1.1, 1.4));
-    if (on > 0) lasers(ctx, lt, on, { origin: [hx, hy], t0: 1.1, spread: 1.15, n: 7, haze: 0.08 });
+    const on = ease.out2(prog(lt, 0.9, 1.2));
+    if (on > 0) lasers(ctx, lt, on, { origin: [hx, hy], t0: 0.9, spread: 1.15, n: 7, haze: 0.08 });
     ctx.save();   // shade so the title reads over the beams
     ctx.translate(W / 2, 330);
     ctx.scale(1, 0.42);
@@ -253,12 +253,12 @@
     ctx.fillStyle = sh;
     ctx.fillRect(-W, -1400, W * 2, 2800);
     ctx.restore();
-    titleBurn(ctx, W / 2 - 433 * E.title.s, E.title.y, E.title.s, lt, 0.6, 0.03);
+    titleBurn(ctx, W / 2 - 433 * E.title.s, E.title.y, E.title.s, lt, 0.5, 0.025);
     const c = C();
-    revealText(ctx, c.date, W / 2, E.date, fit(ctx, c.date, 96, 940), lt, 1.6, 'burn', { step: 0.04 });
-    if (c.already) kicker(ctx, c.already, E.urgency - 58, ease.out2(prog(lt, 2.1, 2.6)), { size: 28, tracking: 10, color: BONE, glow: 0 });
-    neonLabel(ctx, c.urgency, E.urgency, lt, 2.3, { size: 52, tracking: 12 });
-    logo(ctx, W / 2, E.logo.y, E.logo.w, ease.out2(prog(lt, 2.9, 3.6)), 0.12 + 0.05 * flicker(lt, 2));
+    revealText(ctx, c.date, W / 2, E.date, fit(ctx, c.date, 96, 940), lt, 1.3, 'burn', { step: 0.035 });
+    if (c.already) kicker(ctx, c.already, E.urgency - 60, ease.out2(prog(lt, 1.8, 2.3)), { size: 28, tracking: 10, color: BONE, glow: 0 });
+    neonLabel(ctx, c.urgency, E.urgency, lt, 1.9, { size: 52, tracking: 12 });
+    logo(ctx, W / 2, E.logo.y, E.logo.w, ease.out2(prog(lt, 2.4, 3.0)), 0.12 + 0.05 * flicker(lt, 2));
     ctx.restore();
     flash(ctx, lt, hit, 0.16);
   }
@@ -273,7 +273,7 @@
       if (s) await getImg(frameURL(s, GRADE, t - s.t0)).p;
     },
     draw(ctx, t) {
-      stickerSlot(ctx, t, SLOT_Y, 1);   // the ticket link goes here, from the first frame
+      stickerSlot(ctx, t, SLOT_Y, 1, { h: SLOT_H });   // the ticket link goes here, from the first frame
       if (t >= T.end) { endCard(ctx, t); return; }
       chrome(ctx, 1 - prog(t, T.end - 0.3, T.end));
       const s = shotAt(t);
