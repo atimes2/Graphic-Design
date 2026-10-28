@@ -528,11 +528,7 @@
     "posterCta": "SCAN FOR TICKETS"
   },
   "clocks": {
-    "_note": "Story 20. 'already' is optional: fill it in (e.g. A COUPLE HUNDRED ALREADY IN) to show it above the price line on the end card.",
-    "head": [
-      "HALLOWEEN AT HENDERSON",
-      "SAT 31 OCT"
-    ],
+    "_note": "Story 20. 'already' is optional: fill it in (e.g. A COUPLE HUNDRED ALREADY IN) to show it on the end card above the date.",
     "turn": [
       "TURN BACK",
       "THE CLOCKS"
@@ -547,6 +543,7 @@
     ],
     "date": "SAT · OCT 31 · 10PM · 19+",
     "urgency": "PRICES GO UP TOMORROW",
-    "already": ""
+    "already": "",
+    "am": "AM"
   }
 }

@@ -9,7 +9,8 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `prep_logo.py` | Builds the Henderson Brewing Company wordmark from `../reference/henderson-wordmark.png` (transparent PNG, rebuilt at 5× with crisp edges, cream with an ember glow) → `layers/logo.png` + `logo_glow.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
 | `cards.js` | The 19 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
-| `clock.js` | Story 20, *Turn Back the Clocks*: the old-movie story (Harold Lloyd's clock from *Safety Last!*, an intertitle dial winding back an hour, the poster end card); copy in `content.json` → `clocks`, clips `clock_hang` / `clock_face` |
+| `clock.js` | Story 20, *Turn Back the Clocks*: the old-movie story (Harold Lloyd's clock from *Safety Last!*, the 1921 tower clock winding back an hour, the poster end card); copy in `content.json` → `clocks`, clip `clock_hang` |
+| `prep_clock.py` | Builds `layers/clock_dial.png` + `meta.json → clock` from *The Phantom Carriage*'s midnight clock: a few frames median-stacked, graded, the painted hands removed (and their shape measured) so `clock.js` can draw hands that wind back |
 | `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
 | `reel.js` + `reel/` | Collab Reels A–D (archival film, 1080×1920): timelines and copy in `reel.js` / `content.json` → `reel`, clip list in `reel/footage.json`, rights in `reel/SOURCES.md` |
 | `tv2.html` + `tv2.js` | Venue TV loop v2 (1920×1080, 66s, silent, seamless): the grid Reel's sections on a 120 BPM grid, QR column fixed; copy in `content.json` → `tv2`. Render with `node render.mjs --tv2` |
@@ -31,7 +32,7 @@ npm install                       # playwright (uses the preinstalled Chromium)
 python3 prep_layers.py && python3 prep_title.py && python3 prep_logo.py && python3 prep_qr.py   # only if the source art changes
 node render.mjs                   # all cards  -> ../videos/*.mp4 + *-cover.jpg
 node render.mjs 05-countdown      # just the countdowns
-python3 prep_footage.py clock_hang clock_face && node render.mjs 20   # story 20 (needs its two Safety Last! clips; ~35 MB from archive.org)
+python3 prep_footage.py clock_hang && node render.mjs 20   # story 20 (needs its Safety Last! clip, ~35 MB from archive.org; python3 prep_clock.py only if the dial changes)
 node render.mjs --stills 01 0,4,8 # review frames -> review/
 node render.mjs --sheet           # contact sheets of rendered videos -> review/
 python3 prep_footage.py && python3 reel_audio.py && node render.mjs reel   # the collab Reels (needs archive.org + huggingface access)

@@ -1209,31 +1209,23 @@
       "file": "safety last 1923.mp4",
       "ss": 3838,
       "t": 64
+    },
+    "pc_clock": {
+      "id": "the-phantom-carriage-1921-tmdb58129",
+      "file": "The Phantom Carriage (1921).mp4",
+      "ss": 1650,
+      "t": 140
     }
   },
   "clock_hang": {
     "src": "safety-last-1923-clock",
-    "in": 6.4,
-    "dur": 3.5,
-    "speed": 0.85,
+    "in": 11.8,
+    "dur": 5.0,
     "box": {
-      "fx": 0.33
+      "fx": 0.37
     },
     "grades": [
-      "ember",
-      "mono"
-    ]
-  },
-  "clock_face": {
-    "src": "safety-last-1923-clock",
-    "in": 53.5,
-    "dur": 3.2,
-    "box": {
-      "fx": 0.5
-    },
-    "grades": [
-      "ember",
-      "mono"
+      "ember"
     ]
   }
 }

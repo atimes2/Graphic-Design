@@ -27,13 +27,15 @@ COLLAB (your story, Henderson reposts)
   19-this-halloween.mp4         12s   This Halloween + Henderson wordmark -> knife
                                       slash -> pumpkin, title, lasers, date, DJs.
                                       Dashed box = ticket link sticker
-  20-turn-back-the-clocks.mp4   14s   Old-movie cut, like the Reels, fast: Harold Lloyd
-                                      hanging off the clock (Safety Last!, 1923),
-                                      TURN BACK THE CLOCKS -> a dial winds back
-                                      2:00 to 1:00, EXTRA HOUR OF HALLOWEEN ->
-                                      PRICES GO UP TOMORROW -> the poster, date,
-                                      Henderson wordmark (held from 6.4s). Dashed box = ticket link
-                                      sticker. Silent: add a track in Instagram.
+  20-turn-back-the-clocks.mp4   14s   Old-movie cut, like the Reels: one take of Harold
+                                      Lloyd on the clock (Safety Last!, 1923) under TURN
+                                      BACK THE CLOCKS, then EXTRA HOUR OF HALLOWEEN as
+                                      the clock face gives way under him; a 1921 tower
+                                      clock strikes 2:00 and winds back to 1:00; then
+                                      the poster from 7.2s: date, PRICES GO UP TOMORROW
+                                      on an ember bar, Henderson wordmark. Dashed box =
+                                      ticket link sticker. Silent: add a track in
+                                      Instagram. Clocks fall back at 2am Sun Nov 1.
                                       ("A couple hundred already in" is left out;
                                       switch it on in content.json -> clocks.already)
 

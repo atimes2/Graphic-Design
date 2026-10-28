@@ -72,7 +72,7 @@
 
   // ------------------------------------------------------------------- assets
   const A = { img: {}, meta: null, blur: new Map(), content: null };
-  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer', 'logo', 'logo_glow'];
+  const IMAGES = ['knife', 'pumpkin', 'art', 'h_glow', 'title', 'title_fill', 'title_ember', 'footer', 'logo', 'logo_glow', 'clock_dial'];
 
   function loadImage(src) {
     return new Promise((res, rej) => {
