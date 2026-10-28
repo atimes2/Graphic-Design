@@ -10,8 +10,9 @@ scaled to the Reel's film panel (1000x750) and graded two ways:
   color  the clip's own colour, lightly lifted (Holographic Realms' event footage)
 Output: footage/<key>/<grade>/NNNN.jpg + footage/index.json (frame counts).
 """
-import json, os, subprocess, sys
+import json, os, shutil, subprocess, sys
 from pathlib import Path
+from urllib.parse import quote
 
 import numpy as np
 from PIL import Image
@@ -61,21 +62,33 @@ def grade(frame, kind):
     return np.clip(toned, 0, 255).astype(np.uint8)
 
 
-def fetch(ident):
-    """Download a film from archive.org if it isn't in SRC yet."""
+def fetch(ident, excerpts):
+    """Download a film from archive.org if it isn't in SRC yet.
+
+    An entry in footage.json's "_excerpts" ({src: {id, file, ss, t}}) copies only
+    that stretch of a (large) film, by range request, instead of the whole file;
+    clip "in" points are then relative to the excerpt.
+    """
     dst = SRC / f"{ident}.mp4"
     if dst.exists():
         return
     SRC.mkdir(parents=True, exist_ok=True)
     print(f"downloading {ident} ...")
+    ex = excerpts.get(ident)
+    if ex:
+        url = f"https://archive.org/download/{ex['id']}/{quote(ex['file'])}"
+        # the system ffmpeg, when there is one: imageio's build has no https support behind some proxies
+        subprocess.run([shutil.which("ffmpeg") or FF, "-loglevel", "error", "-ss", str(ex["ss"]), "-i", url, "-t", str(ex["t"]), "-c", "copy", str(dst)], check=True)
+        return
     subprocess.run(["curl", "-sSL", "--retry", "3", "-o", str(dst), f"https://archive.org/download/{ident}/{ident}.mp4"], check=True)
 
 
 def main(keys):
     clips = json.loads((ROOT / "reel" / "footage.json").read_text())
-    for c in clips.values():
-        if isinstance(c, dict):
-            fetch(c["src"])
+    excerpts = clips.get("_excerpts", {})
+    for key, c in clips.items():
+        if not key.startswith("_") and not (keys and key not in keys):
+            fetch(c["src"], excerpts)
     for key, c in clips.items():
         if key.startswith("_") or (keys and key not in keys):
             continue
@@ -87,6 +100,11 @@ def main(keys):
             crop = (f"crop=w='min(iw,ih*9/16)/{f['zoom']}':h='ih/{f['zoom']}'"
                     f":x='(iw-ow)*{f['fx']}':y='(ih-oh)*{f.get('fy', 0.5)}'")
             vf = f"setpts=PTS/{speed},fps=30,{crop},scale={w}:{h}:flags=lanczos,unsharp=5:5:0.8"
+        elif "box" in c:   # the story's film box (1080x1100): full-height crop, fx = horizontal centre
+            f = c["box"]
+            w, h = 1080, 1100
+            crop = f"crop=w='min(iw,ih*{w}/{h})/{f.get('zoom', 1)}':h='ih/{f.get('zoom', 1)}':x='(iw-ow)*{f['fx']}':y='(ih-oh)*{f.get('fy', 0.5)}'"
+            vf = f"setpts=PTS/{speed},fps=30,{crop},scale={w}:{h}:flags=lanczos,unsharp=5:5:0.6"
         elif "wide" in c:   # 16:9 for the venue TV; a string = crop applied first
             w, h = 1280, 720
             crop = f"{c['wide']}," if isinstance(c["wide"], str) else ""

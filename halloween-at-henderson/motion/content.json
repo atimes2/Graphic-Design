@@ -526,5 +526,27 @@
     "posterDate": "SATURDAY · OCTOBER 31",
     "posterTime": "10PM – 2AM · 19+",
     "posterCta": "SCAN FOR TICKETS"
+  },
+  "clocks": {
+    "_note": "Story 20. 'already' is optional: fill it in (e.g. A COUPLE HUNDRED ALREADY IN) to show it above the price line on the end card.",
+    "head": [
+      "HALLOWEEN AT HENDERSON",
+      "SAT 31 OCT"
+    ],
+    "turn": [
+      "TURN BACK",
+      "THE CLOCKS"
+    ],
+    "extra": [
+      "EXTRA HOUR",
+      "OF HALLOWEEN"
+    ],
+    "prices": [
+      "PRICES GO UP",
+      "TOMORROW."
+    ],
+    "date": "SAT · OCT 31 · 10PM · 19+",
+    "urgency": "PRICES GO UP TOMORROW",
+    "already": ""
   }
 }

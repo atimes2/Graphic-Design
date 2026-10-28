@@ -935,7 +935,7 @@
   },
   "v_warehouse2": {
     "src": "whatsapp-2026-10-24_17-11-35",
-    "in": 3.0,
+    "in": 4.5,
     "dur": 2.4,
     "speed": 1.0,
     "crop": "crop=ih*4/3:ih",
@@ -985,7 +985,7 @@
   },
   "w_warehouse2": {
     "src": "whatsapp-2026-10-24_17-11-35",
-    "in": 3.0,
+    "in": 4.5,
     "dur": 2.4,
     "speed": 1.0,
     "wide": true,
@@ -1201,6 +1201,39 @@
     "wide": "crop=iw:iw*9/16",
     "grades": [
       "ember"
+    ]
+  },
+  "_excerpts": {
+    "safety-last-1923-clock": {
+      "id": "safety-last-1923",
+      "file": "safety last 1923.mp4",
+      "ss": 3838,
+      "t": 64
+    }
+  },
+  "clock_hang": {
+    "src": "safety-last-1923-clock",
+    "in": 6.4,
+    "dur": 3.5,
+    "speed": 0.85,
+    "box": {
+      "fx": 0.33
+    },
+    "grades": [
+      "ember",
+      "mono"
+    ]
+  },
+  "clock_face": {
+    "src": "safety-last-1923-clock",
+    "in": 53.5,
+    "dur": 3.2,
+    "box": {
+      "fx": 0.5
+    },
+    "grades": [
+      "ember",
+      "mono"
     ]
   }
 }

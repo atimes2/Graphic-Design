@@ -31,6 +31,14 @@ Public domain in the US (published before 1931) **and** in Canada (director and 
 | Dr. Jekyll and Mr. Hyde (dir. John S. Robertson, d. 1964) | 1920 | [Dr.JekyllAndMr.Hyde1920…](https://archive.org/details/Dr.JekyllAndMr.Hyde1920DirectorJohnS.Robertson) | none on the record; the film is public domain (US: published 1920; Canada: director died 1964) | `jek_*`, `h_jek_*` |
 | Frankenstein (Edison; dir. J. Searle Dawley, d. 1949) | 1910 | [frankenstein-1910-1080p-hd-2017-restoration](https://archive.org/details/frankenstein-1910-1080p-hd-2017-restoration) | [CC0](http://creativecommons.org/publicdomain/zero/1.0/) | `frank_rise`, `h_frank_rise` |
 
+### Story 20 (Turn Back the Clocks)
+
+| Film | Year | archive.org | Licence marking | Clips used |
+| --- | --- | --- | --- | --- |
+| Safety Last! (dir. Fred C. Newmeyer, d. 1967, and Sam Taylor, d. 1958; Harold Lloyd, d. 1971) | 1923 | [safety-last-1923](https://archive.org/details/safety-last-1923) (1080p; the same film's [safety-last-1923_202610](https://archive.org/details/safety-last-1923_202610) record carries the [public domain mark](https://creativecommons.org/publicdomain/mark/1.0/)) | none on the 1080p record; the film is public domain in the US (published 1923) | `clock_hang`, `clock_face` (the clock-tower scene, about 64 s pulled by range request as `footage-src/safety-last-1923-clock.mp4`) |
+
+Canada: the directors and Lloyd all died before 1972. Hal Roach (d. 1992) has a story credit, which is the one name on the film that would not clear a strict life + 50 reading; director and screenwriter are the usual authors of a film under Canadian law, so this is noted rather than treated as a block. Checked 2026-10-28.
+
 *The Skeleton Dance* entered the US public domain on 1 January 2025. Only its picture is used, never Disney's name or characters. Universal's *Dracula* and *Frankenstein* (1931) are still under US copyright until 1 January 2027, so they are not used.
 
 Left out: *Night of the Living Dead*, *House on Haunted Hill* and *Carnival of Souls* are public domain in the US but **not** in Canada.

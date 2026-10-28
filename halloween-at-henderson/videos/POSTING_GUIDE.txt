@@ -27,6 +27,15 @@ COLLAB (your story, Henderson reposts)
   19-this-halloween.mp4         12s   This Halloween + Henderson wordmark -> knife
                                       slash -> pumpkin, title, lasers, date, DJs.
                                       Dashed box = ticket link sticker
+  20-turn-back-the-clocks.mp4   14s   Old-movie cut, like the Reels: Harold Lloyd
+                                      hanging off the clock (Safety Last!, 1923),
+                                      TURN BACK THE CLOCKS -> a dial winds back
+                                      2:00 to 1:00, EXTRA HOUR OF HALLOWEEN ->
+                                      PRICES GO UP TOMORROW -> the poster, date,
+                                      Henderson wordmark. Dashed box = ticket link
+                                      sticker. Silent: add a track in Instagram.
+                                      ("A couple hundred already in" is left out;
+                                      switch it on in content.json -> clocks.already)
 
 HYPE / ENGAGEMENT
   06-the-night.mp4              12s   DJs (bass, techno, pop remixes), lasers, full bar
