@@ -154,6 +154,14 @@
     "cta2": "TICKETS",
     "ctaSub": "SCAN THE CODE · THE EARLIER YOU BUY THE LESS YOU PAY"
   },
+  "finalCall": {
+    "kicker": "TONIGHT · SAT OCT 31",
+    "l1": "LESS THAN",
+    "num": "50",
+    "l2": "TICKETS LEFT",
+    "feedCta": "TICKETS · LINK IN BIO",
+    "foot": "DOORS 10PM · HENDERSON BREWING CO."
+  },
   "tonight": {
     "headline": "TONIGHT.",
     "sub": "DOORS 10PM",

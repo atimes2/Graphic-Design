@@ -8,7 +8,7 @@ Every frame is code: HTML canvas, rendered headless in Chromium via Playwright a
 | `prep_title.py` | Builds the title layers from the updated lettering in `../reference/title-updated.webp` (keys out the white, splits cream fill from red outline for the burn-in, keeps its higher resolution via `title_res`); run after `prep_layers.py` |
 | `prep_logo.py` | Builds the Henderson Brewing Company wordmark from `../reference/henderson-wordmark.png` (transparent PNG, rebuilt at 5× with crisp edges, cream with an ember glow) → `layers/logo.png` + `logo_glow.png` (run after `prep_layers.py`) |
 | `engine.js` | Timing and easing, candle flicker, film grain and vignette, knife-tip glint, ember type, knife-slash wipe |
-| `cards.js` | The 19 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
+| `cards.js` | The 21 story designs (the countdown renders once per number; list in `../STORIES_PLAN.md`) |
 | `tv.js` + `tv.html` | The 70s venue TV loop (1920×1080, silent, seamless): nine scenes on the left, the ticket QR, date and wordmark fixed on the right |
 | `reel.js` + `reel/` | Collab Reels A–D (archival film, 1080×1920): timelines and copy in `reel.js` / `content.json` → `reel`, clip list in `reel/footage.json`, rights in `reel/SOURCES.md` |
 | `tv2.html` + `tv2.js` | Venue TV loop v2 (1920×1080, 66s, silent, seamless): the grid Reel's sections on a 120 BPM grid, QR column fixed; copy in `content.json` → `tv2`. Render with `node render.mjs --tv2` |

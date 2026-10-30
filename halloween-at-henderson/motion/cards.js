@@ -1243,6 +1243,43 @@
     },
   });
 
+  // ======================================================= 20 · FINAL CALL (12s)
+  // Day-of push: "50" carves in like the countdown numerals while a quickening
+  // heartbeat lights the edges. Story cut has the ticket-link slot; the feed cut
+  // (for the Henderson collab post) swaps it for "link in bio" and keeps every
+  // line inside the 4:5 centre so the feed and grid crops hold.
+  const FC = {
+    story: { title: 280, kick: 530, l1: 655, base: 1160, l2: 1300, foot: 1365, slot: 1408 },
+    feed: { title: 330, kick: 585, l1: 710, base: 1215, l2: 1355, cta: 1440, foot: 1505 },
+  };
+  // heartbeat that speeds up: a double pulse every 1.5s, easing to every 0.9s
+  const FC_BEATS = (() => {
+    const out = [];
+    for (let t = 0.05, gap = 1.5; t < 12; t += gap, gap = Math.max(0.9, gap * 0.93)) out.push(t, t + 0.26);
+    return out;
+  })();
+  function finalCall(ctx, t, L) {
+    const c = C().finalCall;
+    const beat = (t0) => (t >= t0 ? Math.exp(-(t - t0) * 7) : 0);
+    const pulse = 0.3 * FC_BEATS.reduce((s, b) => s + beat(b), 0);
+    if (L.slot) stickerSlot(ctx, t, L.slot, 1);   // ticket link sits here from the first frame
+    ctx.save();
+    drift(ctx, t, 12, 1000, 0.03);
+    edgeLight(ctx, t, ease.inOut2(prog(t, 0, 0.5)) * 0.7 + pulse);
+    neonLabel(ctx, c.kicker, L.kick, t, 0.15, { size: 50, tracking: 16 });
+    revealText(ctx, c.l1, W / 2, L.l1, fit(ctx, c.l1, 120, 900), t, 0.45, 'burn', { step: 0.07 });
+    const size = Math.min(540, fit(ctx, c.num, 540, 700, 'Lobster'));
+    carved(ctx, t, { key: `fc${L.base}`, str: c.num, size, base: L.base, r0: 0.7, r1: 1.4, ig: 1.5 });
+    revealText(ctx, c.l2, W / 2, L.l2, fit(ctx, c.l2, 140, 900), t, 1.7, 'burn', { step: 0.07, color: '#FF4A2E', stroke: '#FFF1E0' });
+    if (L.cta) neonLabel(ctx, c.feedCta, L.cta, t, 2.5, { size: 50, tracking: 14, color: BONE });
+    kicker(ctx, c.foot, L.foot, fadeA(t, 2.9), { color: BONE, glow: 0, size: 32, tracking: 7 });
+    miniTitle(ctx, t, 2.6, L.title);
+    [4.5, 8.0, 10.6].forEach((s0) => sparkle(ctx, 720, L.base - size * 0.66, 280, t, s0));
+    ctx.restore();
+  }
+  register({ id: '20-final-call', duration: 12, cues: [], draw: (ctx, t) => finalCall(ctx, t, FC.story) });
+  register({ id: '21-final-call-feed', duration: 12, cues: [], draw: (ctx, t) => finalCall(ctx, t, FC.feed) });
+
   // building blocks the TV loop (tv.js) reuses
   window.HH_PARTS = { neonShape, COSTUMES, lasers, ignite, stab, titleLit, titleBurn, hGlowBack, neonA, fadeA, BEAT };
 
