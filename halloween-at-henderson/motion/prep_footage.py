@@ -73,8 +73,8 @@ def fetch(ident):
 
 def main(keys):
     clips = json.loads((ROOT / "reel" / "footage.json").read_text())
-    for c in clips.values():
-        if isinstance(c, dict):
+    for k, c in clips.items():
+        if isinstance(c, dict) and (not keys or k in keys):
             fetch(c["src"])
     for key, c in clips.items():
         if key.startswith("_") or (keys and key not in keys):

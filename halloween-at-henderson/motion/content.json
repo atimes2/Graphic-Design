@@ -534,5 +534,64 @@
     "posterDate": "SATURDAY · OCTOBER 31",
     "posterTime": "10PM – 2AM · 19+",
     "posterCta": "SCAN FOR TICKETS"
+  },
+  "finalTonight": {
+    "headline": "TONIGHT.",
+    "sub": "SAT OCT 31 · DOORS 10PM",
+    "place": "HENDERSON BREWING CO.",
+    "l1": "LESS THAN",
+    "from": 99,
+    "num": 50,
+    "l2": "TICKETS",
+    "l3": "REMAINING",
+    "marquee": "TONIGHT · DOORS 10PM · HENDERSON BREWING CO. · 10PM – 2AM · 19+"
+  },
+  "finalExtra": {
+    "caps": [
+      {
+        "t0": 0.0,
+        "t1": 1.8,
+        "h": "EXTRA!\nEXTRA!",
+        "instant": true,
+        "gap": 0.45,
+        "size": 210,
+        "base": 1330
+      },
+      {
+        "t0": 1.8,
+        "t1": 4.65,
+        "k": "LATE EDITION · OCT 31",
+        "h": "READ ALL\nABOUT IT!",
+        "style": "neon",
+        "size": 170,
+        "base": 1330
+      },
+      {
+        "t0": 4.65,
+        "t1": 6.4,
+        "k": "TONIGHT · DOORS 10PM",
+        "h": "HALLOWEEN AT\nHENDERSON",
+        "style": "burn",
+        "size": 140,
+        "base": 1330
+      }
+    ],
+    "earL": "LATE EDITION",
+    "earR": "FIVE CENTS",
+    "masthead": "THE HENDERSON HERALD",
+    "dateline": "SATURDAY, OCTOBER 31, 2026 · HALLOWEEN EDITION",
+    "h1a": "LESS THAN ",
+    "h1b": "50",
+    "h2": "TICKETS LEFT!",
+    "sub": "LAST TICKETS GOING FAST FOR TONIGHT AT HENDERSON BREWING CO.",
+    "photo": "THE SCENE TONIGHT · 10PM – 2AM · 19+",
+    "items": [
+      "DJS ALL NIGHT",
+      "BASS · TECHNO · POP REMIXES",
+      "LIGHTS · LASERS · VISUALS"
+    ],
+    "foot": "GET YOURS BEFORE THEY'RE GONE",
+    "stamp1": "ALMOST",
+    "stamp2": "SOLD OUT"
   }
 }

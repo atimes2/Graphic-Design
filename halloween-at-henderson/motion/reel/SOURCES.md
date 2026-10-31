@@ -14,6 +14,7 @@ Every clip in the collab Reels comes from the [Prelinger Archives](https://archi
 | What Makes A Good Party? | 1950 | [WhatMake1950](https://archive.org/details/WhatMake1950) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `arrive_door`, `arrive_group` |
 | Dating: Do's and Don'ts | 1949 | [DatingDo1949](https://archive.org/details/DatingDo1949) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `phone_boy`, `phone_girl` |
 | Spot News | 1937 | [SpotNews1937](https://archive.org/details/SpotNews1937) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `news_phones`, `news_desk`, `news_editor`, `news_editor2` |
+| Newspaper Story (Encyclopaedia Britannica Films) | 1950 | [NewspaperSto](https://archive.org/details/NewspaperSto) | [public domain](http://creativecommons.org/licenses/publicdomain/) | `ns_shout`, `ns_shout2`, `ns_wave`, `ns_rollers`, `ns_run`, `ns_fly`, `ns_line`, `ns_stack` (story 23) |
 
 Clip in/out points: `footage.json`. `prep_footage.py` downloads any missing film into `footage-src/` and grades the clips into `footage/`.
 

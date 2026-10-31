@@ -202,6 +202,8 @@ This round's feedback: the hard hits work for the knife but are too aggressive f
 | 19 | `19-this-halloween` (link slot): "This Halloween" over Henderson's wordmark, knife-slash cut to the pumpkin, then lasers + date; for your story and Henderson's repost | 12s |
 | 20 | `20-final-call` (link slot): day-of push, "LESS THAN 50 TICKETS LEFT", the 50 carves in like the countdown while a quickening heartbeat lights the edges | 12s |
 | 21 | `21-final-call-feed`: the same card for the feed / Henderson collab post ("link in bio" instead of the slot, text inside the 4:5 centre); also cut to 1080×1350 as `-4x5.mp4` / `.jpg` | 12s |
+| 22 | `22-final-call-tonight` (link slot): the Tonight opening, a knife-slash cut, then a counter drops from 99 to 50: LESS THAN 50 TICKETS REMAINING, with a quickening heartbeat and a scrolling details marquee | 13s |
+| 23 | `23-final-call-extra` (link slot): archival newsboy and presses from *Newspaper Story* (1950), then a spinning front page, LESS THAN 50 TICKETS LEFT!, stamped ALMOST SOLD OUT | 14s |
 
 **Venue TV loop** (`tv-loop`, 70s, 1920×1080, silent): nine scenes on the left (poster lockup; last year we sold out Halloween at Paros → this year we needed more room → so we're taking over Henderson Brewing Co.; DJs and lasers, first 100, costume contest, details, get your tickets) with the ticket QR, date and wordmark fixed in a right-hand column. It loops with no visible seam; the QR is drawn pixel-sharp above the grain.
 
